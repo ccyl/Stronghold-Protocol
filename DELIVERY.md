@@ -1,4 +1,64 @@
-# 交付说明 · 0.2.1-fusion-20p（20 人房间自制分支）
+# 交付说明 · 0.2.3-fusion-20p（20 人房间 + 官方 v0.2.3 自制分支）
+
+## 这是什么
+
+在 **0.2.1-fusion-20p**（Paper-Yuan fusion + LongQianChen 20 人房间）之上，合并了**官方 v0.2.3**（含 v0.2.2）。
+
+- 分支/提交：`fusion-20p`，合并提交 `6a1644d7`（父提交 `be662a22` + 官方 `1db8e510`）
+- 版本号：`0.2.3-fusion-20p`
+- 工作目录：`/home/ccyl/stronghold/fusion-20p`
+- 测试端口：**3010**（3000 仍为 Paper-Yuan 生产服，未受影响）
+
+## 本次合并带来（官方 v0.2.2 / v0.2.3）
+
+| 类别 | 内容 |
+|---|---|
+| 新内容 | 六星**克莱门莎**；黍 **GUA-Y**、乌尔比安 **CRU-Y** 模组 |
+| 养成 | **潜能 1–6 与练度按干员设置**（默认满潜、精英2 60 级，`room.loadout.ops`） |
+| 语音 | **日文语音**（`audio.voiceJp`）+ 逐干员语音语言、点选干员语音 |
+| 界面 | 四档文字大小、攻击范围显示、场地装置说明卡、本机**统计页** |
+| 对局 | 房主**重发开局**（`room.rerollSetup`/`g.rerollVote`）、**恢复本机对局**（`SESSION_IN_USE`）、AI 队友最后选择（`room.setAiPicksLast`） |
+| 规则 | 一大批官方修正（蕾缪安/死芒/塞雷娅/凯尔希/赤刃明霄陈/远牙/锤击/吟游者/传送门/胶囊计数…） |
+
+## 仍然保留（Paper-Yuan 自有）
+
+20 人房间（`ROOM_CAPACITIES` 4/8/10/16/20，默认 8）+ `room.setCapacity` · 座位分组与分组机变 ·
+干员皮肤系统（`room.skins` / 换装 `SkinSection` / `skinsStore`）· 管理端（`AdminService`、`/api/admin/*`、运维 CLI）·
+房间与局内文字聊天（`room.chat`）· 服务器负载监控（`serverLoad`）· 自动撮合（`Matchmaker`）· 停服维护 · 安卓打包 ·
+**默认日语语音**（`voiceLang='jp'`）
+
+## 关键决策与分歧
+
+1. **机变 skip 语义保留本分支**（`prioritizeDraftOrder` + lone-human 守卫）：官方新测试
+   `test/match/ai-picks-last.test.js` 有 3 处期望与之矛盾（选项恒开、离场真人留在 order、lone human 可跳到末尾），
+   属**有意分歧**；本分支的 `draft.test.js` / `group-drafts.test.js` 明确要求现有语义（20 人固定池分组的地基）。
+2. **默认语音语言 = 日语**（Paper-Yuan 行为）：官方默认中文；已同步修改 `test/feedback7-voices.test.js` 的 3 处断言
+   并在文件里注明原因。
+3. **`data/assets.json` 重新生成**（按项目硬规则「不手工编辑生成数据」）：
+   `node tools/fetch-assets.mjs --offline --allow-shrink` + `node tools/inject-skins-assets.mjs`
+   - 干员 138 → **209**（官方全集）；新增 **`voiceJp` 2674 条**；皮肤 271 套保留
+   - 清理 131 条指向**磁盘上并不存在**文件的 `modules` 陈旧条目
+   - 效果：`docs-consistency` 由 1 失败 → **24/24 通过**；`assets.test.js` 由 7 失败 → 2 失败
+
+## 交付物
+
+| 文件 | 说明 |
+|---|---|
+| `stronghold-v0.2.3-fusion-20p-server-release.tar.gz` | 代码包（19MB） |
+| `stronghold-v0.2.3-fusion-20p-server-release-full.tar.gz` | **完整包（623MB，含 13066 个素材文件）** |
+| `/home/ccyl/stronghold/fusion-20p/` | 完整源码工作区 |
+| 3010 运行中的服务 | 合并后代码，素材软链自生产服 |
+
+## 如何运行
+
+```bash
+bash /tmp/run3010.sh start|stop|status|log
+# 或
+cd /home/ccyl/stronghold/fusion-20p && PORT=3010 node server/index.js
+```
+
+---
+
 
 ## 这是什么
 
