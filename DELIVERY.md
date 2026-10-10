@@ -151,6 +151,32 @@ PORT=3010 HOST=0.0.0.0 ADMIN_SECRET=你的密钥 node server/index.js
 | `test/docs-consistency.test.js` | 1 失败（语音 URL 语言不匹配，710 条用 `jp` 而非 `cn`） | **生成数据策略差异**：Paper-Yuan 默认日语语音、官方默认中文语音；需用统一策略重新生成 `data/assets.json` |
 | `test/i18n.test.js` | 1 失败（部分 Paper-Yuan 文案未包装） | 官方 i18n 门禁是合并引入的新测试；Paper-Yuan 自有文案未 i18n 化（已修复大部分，见下） |
 
+### 已知素材缺口：克莱门莎 `char_4231_clemnt`（上游素材库未更新，非代码问题）
+
+官方 v0.2.3 的**数据**把克莱门莎加进了干员名单 —— `data/backups.json` 自选池 `diy.ownedPool`（72 人）含她，
+分队 `band_clementia`（崇高牺牲）、战斗实现 `server/sim/content/kits/ops/op-clemnt.js`（注释：Official CN tables
+2026-10-08, client 2.7.81）都齐全；但她的**美术素材在本机完全不存在**（全机器搜索 `char_4231_clemnt` = **0 个文件**），
+所以自选界面里**没有头像、没有小人模型**，技能图标与语音同样缺失。
+
+2026-10-10 核查的根因（分两类）：
+
+| 素材 | 上游来源 | 状态 |
+|---|---|---|
+| **小人模型** Spine | isHarryh/Ark-Models `models_data.json` | ❌ **上游索引未收录**：线上索引 `Date: 2026-09-29`、3197 条，无 `char_4231_clemnt`；而同期实装的珊比 `char_4235_thumpy`、谬因 `char_4229_aphris`、可露希尔 `char_4228_closur`、机械师 `char_4230_mcnist` 全部在列 → 索引快照早于该干员实装（2026-10-09），需等上游更新 |
+| **头像** avatar / **立绘** portrait | yuanyan3060/ArknightsGameResource | ⚠️ 上游**现已可用**（实测 `avatar/char_4231_clemnt.png`、`portrait/char_4231_clemnt_1.png` 均 HTTP 200），但本次 `data/assets.json` 是 **`--offline` 离线重建**（只扫本地磁盘、不联网下载），所以没拿到 |
+| 技能图标 / 分支图标 / 中·日语音 | yuanyan `skill/`、AA2、AA2 voice 分支 | 同上，缺失（语音各 14 条） |
+
+影响范围可控：`data/assets.json` 的 `chars` 由官方 v0.2.3 的 **210 → 209**，逐叶子比对确认**唯一丢失的就是她**（无其他损失）。
+抓取报告 `downloadErrors: 0`，说明当时无网络错误，是根本没发起下载。客户端对缺失条目是**优雅降级**
+（`chessAvatarUrl` 返回 `null`、无 Spine 则不画模型），不会崩溃。
+
+修复路径（**本次未执行，待办**）：
+1. 等 Ark-Models 索引更新后，`node tools/fetch-assets.mjs --refresh-index` 联网重抓（可补头像/立绘/技能图标；模型须等索引）；
+2. 若不想让玩家选到无美术的干员，可在 `shared/diy.js` 过滤掉清单里查不到头像的干员。
+
+另一个同类缺口：`char_1052_kalts2`（凯尔希·思衡托）有头像与立绘，但 Spine 被剔除 —— 其 atlas 声明了第二张贴图页
+`char_1052_kalts22.png`，上游 dump 没有该页。
+
 ### 本次修复的问题
 - **`/sim/simdata.js` 浏览器安全转换丢失**（真实回归）：模块化服务端把静态处理移到 `server/http/static.js`，
   遗漏了 Paper-Yuan 原有的「剥离 Node-only 顶层 await 块」逻辑 → 旧版安卓 WebView 会报

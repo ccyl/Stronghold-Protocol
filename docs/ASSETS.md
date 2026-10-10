@@ -464,6 +464,26 @@ Other renderer rules from research 07 §5.4–5.5:
 - **Missing unit SFX:** use `audio.sfx.battle.enemyHit` or a WebAudio blip (research 07 §6.4).
 - **Bond icons:** if the real glyph ever fails, the stored file is the nation camp logo.
 
+### Known gaps (the dumps lag the game)
+
+The plan covers every operator of `data/backups.json`, but a planned entry whose files no dump carries is reported as a
+miss, and a rebuilt manifest drops it (`--strict` / `SP_ASSETS_STRICT` turns that into a failure). Two such gaps exist
+at 0.2.3-fusion-20p (checked 2026-10-10, both upstream-side — no code fix applies):
+
+- **`char_4231_clemnt` (克莱门莎):** every file missing — avatar, portrait, Spine, skill icons, voice. The model index
+  (`isHarryh/Ark-Models models_data.json`, `Date: 2026-09-29`, 3197 models) does not list it, while every operator
+  released around the same time does (`char_4235_thumpy`, `char_4229_aphris`, `char_4228_closur`, `char_4230_mcnist`),
+  so the snapshot predates the operator. The avatar and portrait are already on yuanyan (`HTTP 200`), but the
+  0.2.3-fusion-20p manifest was rebuilt with `--offline`, which never downloads: re-run
+  `node tools/fetch-assets.mjs --refresh-index` once the index catches up.
+- **`char_1052_kalts2` (凯尔希·思衡托):** avatar and portrait present, Spine dropped — its atlas declares a second
+  texture page (`char_1052_kalts22.png`) that the dump does not carry.
+
+Both degrade gracefully in the client (`chessAvatarUrl` returns `null`; no Spine means no model drawn), so a manifest
+without them is a missing-model operator, not a crash. The operator data itself is complete: the 自选 pool
+(`data/backups.json diy.ownedPool`), the band `band_clementia` and the kit
+(`server/sim/content/kits/ops/op-clemnt.js`) all carry the operator.
+
 ## Verification
 
 `node --test test/assets.test.js` covers the pure helpers: the resolver, the atlas normalizer, the format sniffers, WOFF2, audio banks, the plan id sets, the downloader against a fake network, and the self-heal of corrupt skeletons.
