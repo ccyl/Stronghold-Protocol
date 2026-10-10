@@ -344,7 +344,7 @@ describe('operator battle voice', () => {
       a.install();
       fw.fire('pointerdown');
       await tick();
-      assert.equal(a.voiceLang, 'cn');
+      assert.equal(a.voiceLang, 'jp', 'this build\'s 语音语言 defaults to 日本語 (DEFAULT_SETTINGS.voiceLang)');
       a.setVoiceLang('jp');
       assert.equal(a.voiceLang, 'jp');
       assert.equal(a.voice('char_a', 'select'), true);
@@ -888,18 +888,22 @@ describe('voiceKey and bilingual dub resolution', () => {
   });
 
   test('bilingual dub routing defaults to jp and switches cleanly to cn', () => {
+    // The official manifest layout (tools/assets/plan.mjs): `audio.voice` is the Chinese tree and `audio.voiceJp` the
+    // Japanese one — the two dubs share the slot and file names, not a `voice.jp` sub-tree.
     const mockManifest = {
       audio: {
-        voice: {
-          jp: { char_002_amiya: { start: '/v/jp_amiya_start.mp3' } },
-          cn: { char_002_amiya: { start: '/v/cn_amiya_start.mp3' } },
-        }
+        voice: { char_002_amiya: { start: '/v/cn_amiya_start.mp3' } },
+        voiceJp: { char_002_amiya: { start: '/v/jp_amiya_start.mp3' } },
       }
     };
     const a = new AudioManager({ win: null, getManifest: () => mockManifest });
     assert.equal(a.voiceLang, 'jp');
+    assert.deepEqual(voiceLine(mockManifest.audio, 'char_002_amiya', 'start', a.voiceLang),
+      { url: '/v/jp_amiya_start.mp3', fallback: '/v/cn_amiya_start.mp3' }, 'this build defaults to the Japanese dub');
     a.setVoiceLang('cn');
     assert.equal(a.voiceLang, 'cn');
+    assert.deepEqual(voiceLine(mockManifest.audio, 'char_002_amiya', 'start', a.voiceLang),
+      { url: '/v/cn_amiya_start.mp3', fallback: null }, '中文 reads audio.voice[charId][slot]');
     a.setVoiceLang('jp');
     assert.equal(a.voiceLang, 'jp');
   });
@@ -908,12 +912,10 @@ describe('voiceKey and bilingual dub resolution', () => {
     const mockManifest = {
       audio: {
         sfx: { battle: { deploy: '/sfx/b_deploy.mp3' } },
-        voice: {
-          jp: {
-            char_002_amiya: {
-              place: '/v/jp_amiya_place.mp3',
-              select: '/v/jp_amiya_select.mp3',
-            }
+        voiceJp: {
+          char_002_amiya: {
+            place: '/v/jp_amiya_place.mp3',
+            select: '/v/jp_amiya_select.mp3',
           }
         }
       }
