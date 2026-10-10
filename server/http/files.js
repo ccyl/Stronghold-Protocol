@@ -66,7 +66,9 @@ const GZIP_CACHE_MAX_TOTAL = 96 << 20;
 // place (atlas + png + skel must stay consistent), so "long" is one day; revalidation after that is a cheap 304.
 const LONG_CACHE = 'public, max-age=86400';          // 1 day
 const IMMUTABLE_CACHE = 'public, max-age=31536000, immutable';
-const LONG_CACHE_DIRS = ['assets', 'fonts', 'vendor']; // first path segment under public/
+// 'vendor' is code (third-party libs), not content: a dependency bump must reach clients at once,
+// so vendor files revalidate through the ETag (no-cache) instead of a 24 h blind cache.
+const LONG_CACHE_DIRS = ['assets', 'fonts']; // first path segment under public/
 
 const gzipAsync = promisify(zlib.gzip);
 
