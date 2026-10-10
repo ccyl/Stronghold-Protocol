@@ -147,10 +147,11 @@ describe('/sim/ ES2020 syntax and no top-level await for browser clients', () =>
     }
   });
 
-  test('server/index.js provides browser-safe simdata.js without top-level await', () => {
-    const serverIndex = read('server/index.js');
-    assert.match(serverIndex, /if\s*\(decoded\s*===\s*['"]\/sim\/simdata\.js['"]\)/, 'server/index.js must handle /sim/simdata.js for browser');
-    assert.match(serverIndex, /nodeLoader omitted/, 'server/index.js must strip top-level await for browser clients');
+  test('the static handler provides browser-safe simdata.js without top-level await', () => {
+    // the static handler lives in server/http/static.js (the modular server); server/index.js only wires it up
+    const staticJs = read('server/http/static.js');
+    assert.match(staticJs, /if\s*\(decoded\s*===\s*['"]\/sim\/simdata\.js['"]\)/, 'server/http/static.js must handle /sim/simdata.js for browser');
+    assert.match(staticJs, /nodeLoader omitted/, 'server/http/static.js must strip top-level await for browser clients');
   });
 });
 

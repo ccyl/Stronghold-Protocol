@@ -82,6 +82,24 @@ export function createStaticHandler({ publicDir, dataDir, sharedDir, simDir = pa
       res.end(req.method === 'HEAD' ? undefined : shimBody);
       return;
     }
+    // The simulation's data layer, made browser-safe: strip the Node-only top-level `await` block
+    // (`if (IS_NODE) { … await import('./nodeData.js') … }`) so Chrome < 89 (Android 7-9 WebView, Chromium 80-88)
+    // parses it without "Unexpected reserved word". The page injects the data with setSimData (DESIGN §14).
+    if (decoded === '/sim/simdata.js') {
+      try {
+        const rawCode = await fsp.readFile(path.join(simDir, 'simdata.js'), 'utf8');
+        const browserCode = rawCode.replace(/if\s*\(\s*IS_NODE\s*\)\s*\{[\s\S]*?\n\}/, '/* browser: nodeLoader omitted (setSimData injects data) */');
+        const bBody = Buffer.from(browserCode);
+        const bTag = `"simdata-${bBody.length.toString(16)}"`;
+        const headers = { 'Content-Type': MIME['.js'], 'Cache-Control': 'no-cache', ETag: bTag, 'Content-Length': bBody.length };
+        if (isNotModified(req, bTag, new Date(0))) { delete headers['Content-Length']; res.writeHead(304, headers); res.end(); return; }
+        res.writeHead(200, headers);
+        res.end(req.method === 'HEAD' ? undefined : bBody);
+        return;
+      } catch (err) {
+        log.warn?.('[static] failed to serve browser simdata', err);
+      }
+    }
     // Content packs (server/packs.js): the live index, and only the files a pack's manifest names
     if (decoded.startsWith(PACKS_URL)) {
       const parts = decoded.slice(PACKS_URL.length).split('/');

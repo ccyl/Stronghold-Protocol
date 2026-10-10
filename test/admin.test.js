@@ -2,6 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { startServer } from '../server/index.js';
+import { APP_VERSION } from '../shared/constants.js';
 
 test('admin dashboard: authorization, metrics, rooms and ops', async () => {
   const secret = 'test-secret-key-123';
@@ -20,7 +21,7 @@ test('admin dashboard: authorization, metrics, rooms and ops', async () => {
     });
     assert.equal(auth.status, 200);
     const overview = await auth.json();
-    assert.equal(overview.version.app, '0.2.1-fusion');
+    assert.equal(overview.version.app, APP_VERSION);
     assert.ok(typeof overview.system.processRssMb === 'number');
     assert.equal(overview.isDraining, false);
 
