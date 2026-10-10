@@ -10,13 +10,14 @@
 //   7. 状态同步：下发 match.status / match.found，更新 room.state.matching
 
 import { randomBytes } from 'node:crypto';
-import { MAX_SEATS } from '../shared/constants.js';
 import { sendSession } from './net.js';
 
 const MATCHMAKING_DEFAULTS = Object.freeze({
   tickIntervalMs: 1000,
   timeoutMs: 10_000, // 10 秒超时自动补 AI 或发车
-  targetPlayers: MAX_SEATS, // 4 人同盟
+  // Paper-Yuan's classic 4-player quick-match team. `MAX_SEATS` is 20 since the 20-player port and is
+  // NOT the matchmade team size; the room's capacity is set to this value in formRoom.
+  targetPlayers: 4,
 });
 
 export class Matchmaker {
@@ -328,7 +329,7 @@ export class Matchmaker {
     const hostEntry = matched[0];
     const hostSession = hostEntry.session;
 
-    const createRes = this.lobby.create(hostSession, { mode, difficulty });
+    const createRes = this.lobby.create(hostSession, { mode, difficulty, capacity: this.opts.targetPlayers });
     if (!createRes || createRes.error) {
       this.lobby.log.error('[matchmaker] failed to create room for match', createRes);
       return;

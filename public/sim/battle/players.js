@@ -84,6 +84,9 @@ export class BattlePlayers {
    */
   onOwnBoard(ps, r, c) {
     if (!ps) return false;
+    // A Unit may be passed as well (`onOwnBoard(unit, r, c)` — Paper-Yuan's older API, still used by
+    // test/sim/feedback3-ulpia-move.test.js): read its owner's board. A PlayerState has no `tileR`.
+    if (ps.tileR !== undefined && ps.player) ps = ps.player;
     let keys = ps._boardKeys;
     if (!keys) {
       keys = ps._boardKeys = new Set();
