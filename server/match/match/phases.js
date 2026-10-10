@@ -38,6 +38,9 @@ export class MatchPhases {
       if (shuffle) {
         if (!this.isSolo) this.rngDraft.shuffle(order);
         this.prioritizeDraftOrder(order);
+        // 「AI 队友最后选择」 (opts.aiPicksLast, GitHub #338): a stable partition after the shuffle and the priority
+        // partition — every human seat before every AI seat, the drawn order kept within each part
+        if (this.aiPicksLast) order.splice(0, order.length, ...this.humansFirst(order));
       }
       return { id, playerIds: playerIds.slice(), order, idx: 0, picks: {}, untimed: this.soloUntimed,
         turnDeadline: 0, turnSeconds: 0, timer: null, token: 0, done: !order.length };
@@ -106,10 +109,13 @@ export class MatchPhases {
   }
 
   maybeEndInfo() {
-    if (this.phase !== PHASE.INFO_CHECK) return;
+    if (this.phase !== PHASE.INFO_CHECK || this.setupVote || this._infoAdvanceTimer) return;
     if (this.order.every((p) => p.isBot || p.left || p.infoReady)) {
       this.setDeadline(0);
-      this.later(0, () => { if (this.phase === PHASE.INFO_CHECK) this.enterBandDraft(); });
+      this._infoAdvanceTimer = this.later(0, () => {
+        this._infoAdvanceTimer = null;
+        if (this.phase === PHASE.INFO_CHECK && !this.setupVote) this.enterBandDraft();
+      });
     }
   }
 
@@ -134,6 +140,22 @@ export class MatchPhases {
     this.setDeadline(0);
     for (const g of groups) this.startDraftTurn(g);
     this.markPublic();
+  }
+
+  /**
+   * The co-op room option 「AI 队友最后选择」 (this.aiPicksLast, GitHub #338): every human seat before every AI seat, each
+   * group in the order the draft drew (a stable partition applied AFTER the shuffle — no extra random draw: the order
+   * with the option off is unchanged, and with it on every random stream stands where it would without it; only the
+   * picks made in the new order can differ). A human is any seat that is not an AI seat (room.addBot): under AI 托管,
+   * disconnected or departed it still counts as a human. Used by the strategy draft and the 机变 draft
+   * (MatchSpDraft.enterSpDraft).
+   * @param {string[]} order playerIds in drawn order
+   * @returns {string[]}
+   */
+  humansFirst(order) {
+    if (!this.aiPicksLast) return order;
+    const bot = (pid) => !!this.players.get(pid)?.isBot;
+    return [...order.filter((pid) => !bot(pid)), ...order.filter(bot)];
   }
 
   draftTurn(playerId = null) {
@@ -304,6 +326,9 @@ export class MatchPhases {
     g.order.splice(g.idx, 1);
     g.order.push(ps.playerId);
     this.prioritizeDraftOrder(g.order, g.idx);
+    // 「AI 队友最后选择」 also holds through a skip: every human of the group stays ahead of every AI seat
+    // (MatchPhases.humansFirst, GitHub #338) [ASSUMED: the option's intent, humans before AI, kept through a skip]
+    if (this.aiPicksLast) g.order.splice(g.idx, g.order.length - g.idx, ...this.humansFirst(g.order.slice(g.idx)));
     this.startDraftTurn(g);
     return OK;
   }

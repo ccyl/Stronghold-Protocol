@@ -53,7 +53,12 @@ export function draftRequestScope({ draftId, groupId } = {}) {
 }
 
 export const actions = {
-  infoReady: () => act('g.infoReady'),
+  // `setupRevision` (0.2.2 房主重刷开局): the revision the player's 本局信息 was built from — the server refuses a stale one
+  infoReady: (setupRevision = 0) => act('g.infoReady', { setupRevision }),
+  rerollSetup: (setupRevision) => act('room.rerollSetup', { setupRevision }, { sfx: 'confirm' }),
+  rerollVote: (voteId, agree) => act('g.rerollVote', { voteId, agree }, { sfx: agree ? 'confirm' : 'back' }),
+  cancelReroll: (voteId) => act('room.cancelReroll', { voteId }, { sfx: 'back' }),
+  // `opts` (draftRequestScope: draftId / groupId) scopes a grouped 20-player draft's pick (server/match/match/intents.js)
   band: (bandId, opts = {}) => act('g.band', { bandId, ...draftRequestScope(opts) }),
   bandSkip: (opts = {}) => act('g.bandSkip', draftRequestScope(opts)),
   buy: (slot) => act('g.buy', { slot }),
@@ -69,7 +74,11 @@ export const actions = {
   art: (itemUid, row, col, dir) => act('g.art', dir ? { itemUid, row, col, dir } : { itemUid, row, col }),
   destroy: (uid) => act('g.destroy', { uid }),
   reward: (idx) => act('g.reward', { idx }),
-  choice: (idx, opts = {}) => act('g.choice', { idx, ...draftRequestScope(opts) }),
+  // 2nd arg: a string `choiceId` picks an open 教鞭 / 战术特训 choice (0.2.2, m.private `personalChoice`); an object
+  // (draftRequestScope: draftId / groupId) scopes a grouped 20-player draft's pick (server/match/match/intents.js g.choice)
+  choice: (idx, identityOrChoiceId = null) => act('g.choice', typeof identityOrChoiceId === 'string'
+    ? { idx, choiceId: identityOrChoiceId }
+    : { idx, ...draftRequestScope(identityOrChoiceId || {}) }),
   ready: (ready) => act('g.ready', { ready }, { sfx: ready ? 'ready' : 'back' }),
   emote: (id) => act('g.emote', { id }, { quiet: true }),
   chat: (text) => act('g.chat', { text }, { quiet: true }),
@@ -79,4 +88,7 @@ export const actions = {
   uniteSkipVote: ({ voteId } = {}) => act('g.uniteSkipVote', voteId == null ? {} : { voteId }, { sfx: 'confirm' }),
   // solo battles only (ui/matchStatus.js pauseAvailable): m.public.paused follows
   pause: (on) => act('g.pause', { on: !!on }, { sfx: on ? 'click' : 'confirm' }),
+  // room-level intent (NOT g.*): the host frees a spectator seat while the match runs — the server takes room.removeSpectator at
+  // any time (server/lobby.js removeSpectator), the game screen had no entry for it (ui/hud.js SpectatorPill; GitHub #120)
+  removeSpectator: (playerId) => act('room.removeSpectator', { playerId }, { sfx: 'back' }),
 };
