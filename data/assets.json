@@ -19,7 +19,9 @@
     "ui": 601,
     "sfxUnits": 382,
     "skins": 271,
-    "charsWithSkins": 172
+    "charsWithSkins": 172,
+    "modules": 131,
+    "voiceChars": 191
   },
   "chars": {
     "char_1012_skadi2": {
@@ -67918,7 +67920,12 @@
             "loop": "Move_Loop",
             "end": "Move_End"
           },
-          "stun": null
+          "stun": null,
+          "run": {
+            "begin": "Run_Begin",
+            "loop": "Run_Loop",
+            "end": "Run_End"
+          }
         },
         "animations": {
           "Attack": 1,
@@ -68101,7 +68108,23 @@
             "loop": "Move",
             "end": null
           },
-          "stun": null
+          "stun": null,
+          "skills": {
+            "0": {
+              "begin": null,
+              "loop": "Skill_1",
+              "end": null,
+              "index": 0,
+              "idle": null
+            },
+            "1": {
+              "begin": null,
+              "loop": "Skill_2",
+              "end": null,
+              "index": 1,
+              "idle": null
+            }
+          }
         },
         "animations": {
           "Attack_A": 2,
@@ -69788,6 +69811,22 @@
             "begin": null,
             "loop": "Stun",
             "end": null
+          },
+          "skills": {
+            "0": {
+              "begin": "Skill_1_Begin",
+              "loop": "Skill_1_Loop",
+              "end": "Skill_1_End",
+              "index": 0,
+              "idle": null
+            },
+            "1": {
+              "begin": null,
+              "loop": "Skill_2",
+              "end": null,
+              "index": 1,
+              "idle": null
+            }
           }
         },
         "animations": {
@@ -71389,7 +71428,12 @@
             "loop": "Run_Loop",
             "end": null
           },
-          "stun": null
+          "stun": null,
+          "run": {
+            "begin": null,
+            "loop": "Run_Loop",
+            "end": null
+          }
         },
         "animations": {
           "Attack": 1,
@@ -73133,7 +73177,12 @@
             "loop": "Run_Loop",
             "end": null
           },
-          "stun": null
+          "stun": null,
+          "run": {
+            "begin": null,
+            "loop": "Run_Loop",
+            "end": null
+          }
         },
         "animations": {
           "Attack": 1,
@@ -73185,7 +73234,12 @@
             "loop": "Run_Loop",
             "end": null
           },
-          "stun": null
+          "stun": null,
+          "run": {
+            "begin": null,
+            "loop": "Run_Loop",
+            "end": null
+          }
         },
         "animations": {
           "Attack": 1,
@@ -79078,7 +79132,23 @@
             "loop": "Move",
             "end": null
           },
-          "stun": null
+          "stun": null,
+          "skills": {
+            "0": {
+              "begin": null,
+              "loop": "Skill_1",
+              "end": null,
+              "index": 0,
+              "idle": null
+            },
+            "1": {
+              "begin": null,
+              "loop": "Skill_2",
+              "end": null,
+              "index": 1,
+              "idle": null
+            }
+          }
         },
         "animations": {
           "Attack": 2.333,
@@ -79143,7 +79213,23 @@
             "loop": "Move",
             "end": null
           },
-          "stun": null
+          "stun": null,
+          "skills": {
+            "0": {
+              "begin": null,
+              "loop": "Skill_1",
+              "end": null,
+              "index": 0,
+              "idle": null
+            },
+            "1": {
+              "begin": null,
+              "loop": "Skill_2",
+              "end": null,
+              "index": 1,
+              "idle": null
+            }
+          }
         },
         "animations": {
           "Attack_1": 2,
@@ -79504,7 +79590,23 @@
             "loop": "Move",
             "end": null
           },
-          "stun": null
+          "stun": null,
+          "skills": {
+            "0": {
+              "begin": null,
+              "loop": "Skill_01",
+              "end": null,
+              "index": 0,
+              "idle": null
+            },
+            "1": {
+              "begin": "Skill_02_Begin",
+              "loop": "Skill_02_Loop",
+              "end": "Skill_02_End",
+              "index": 1,
+              "idle": null
+            }
+          }
         },
         "animations": {
           "Attack_01": 1,
@@ -79576,7 +79678,37 @@
           },
           "die": "Die",
           "move": null,
-          "stun": null
+          "stun": null,
+          "skills": {
+            "0": {
+              "begin": null,
+              "loop": "Skill_01",
+              "end": null,
+              "index": 0,
+              "idle": null
+            },
+            "1": {
+              "begin": null,
+              "loop": "Skill_02",
+              "end": null,
+              "index": 1,
+              "idle": null
+            },
+            "2": {
+              "begin": null,
+              "loop": "Skill_03",
+              "end": null,
+              "index": 2,
+              "idle": null
+            },
+            "3": {
+              "begin": null,
+              "loop": "Skill_04",
+              "end": null,
+              "index": 3,
+              "idle": null
+            }
+          }
         },
         "animations": {
           "Attack": 1.667,
@@ -79869,7 +80001,30 @@
           },
           "die": "Die",
           "move": null,
-          "stun": null
+          "stun": null,
+          "skills": {
+            "0": {
+              "begin": null,
+              "loop": "Skill_1",
+              "end": null,
+              "index": 0,
+              "idle": null
+            },
+            "1": {
+              "begin": null,
+              "loop": "Skill_2",
+              "end": null,
+              "index": 1,
+              "idle": null
+            },
+            "2": {
+              "begin": null,
+              "loop": "Skill_3",
+              "end": null,
+              "index": 2,
+              "idle": null
+            }
+          }
         },
         "animations": {
           "Attack": 2.667,
@@ -79935,7 +80090,12 @@
             "loop": "Move",
             "end": null
           },
-          "stun": null
+          "stun": null,
+          "run": {
+            "begin": null,
+            "loop": "Run",
+            "end": null
+          }
         },
         "animations": {
           "Default": 0,
@@ -79988,7 +80148,12 @@
             "loop": "Move",
             "end": null
           },
-          "stun": null
+          "stun": null,
+          "run": {
+            "begin": null,
+            "loop": "Run",
+            "end": null
+          }
         },
         "animations": {
           "Default": 0,
@@ -80521,7 +80686,23 @@
             "loop": "Move",
             "end": null
           },
-          "stun": null
+          "stun": null,
+          "skills": {
+            "0": {
+              "begin": null,
+              "loop": "Skill_1_Appear",
+              "end": null,
+              "index": 0,
+              "idle": null
+            },
+            "1": {
+              "begin": null,
+              "loop": "Skill_2",
+              "end": null,
+              "index": 1,
+              "idle": null
+            }
+          }
         },
         "animations": {
           "Attack": 1.2,
@@ -81054,7 +81235,23 @@
           },
           "die": "Die",
           "move": null,
-          "stun": null
+          "stun": null,
+          "skills": {
+            "0": {
+              "begin": "Skill_01_Begin",
+              "loop": "Skill_01_Loop",
+              "end": "Skill_01_End",
+              "index": 0,
+              "idle": null
+            },
+            "1": {
+              "begin": null,
+              "loop": "Skill_02",
+              "end": null,
+              "index": 1,
+              "idle": null
+            }
+          }
         },
         "animations": {
           "Attack": 3,
@@ -81380,7 +81577,23 @@
             "loop": "Move",
             "end": null
           },
-          "stun": null
+          "stun": null,
+          "skills": {
+            "0": {
+              "begin": "Skill_1_Begin",
+              "loop": "Skill_1_Loop",
+              "end": "Skill_1_End",
+              "index": 0,
+              "idle": null
+            },
+            "1": {
+              "begin": null,
+              "loop": "Skill_2",
+              "end": null,
+              "index": 1,
+              "idle": null
+            }
+          }
         },
         "animations": {
           "Attack": 1.833,
@@ -81613,7 +81826,30 @@
           },
           "die": "Die",
           "move": null,
-          "stun": null
+          "stun": null,
+          "skills": {
+            "0": {
+              "begin": null,
+              "loop": "Skill_1",
+              "end": null,
+              "index": 0,
+              "idle": null
+            },
+            "1": {
+              "begin": null,
+              "loop": "Skill_2",
+              "end": null,
+              "index": 1,
+              "idle": null
+            },
+            "2": {
+              "begin": null,
+              "loop": "Skill_3",
+              "end": null,
+              "index": 2,
+              "idle": null
+            }
+          }
         },
         "animations": {
           "Attack": 2.1,
@@ -81675,7 +81911,30 @@
           },
           "die": "Die",
           "move": null,
-          "stun": null
+          "stun": null,
+          "skills": {
+            "0": {
+              "begin": null,
+              "loop": "Skill_1",
+              "end": null,
+              "index": 0,
+              "idle": null
+            },
+            "1": {
+              "begin": null,
+              "loop": "Skill_2",
+              "end": null,
+              "index": 1,
+              "idle": null
+            },
+            "2": {
+              "begin": null,
+              "loop": "Skill_3",
+              "end": null,
+              "index": 2,
+              "idle": null
+            }
+          }
         },
         "animations": {
           "Attack": 2.1,
@@ -81875,7 +82134,23 @@
             "loop": "Move",
             "end": null
           },
-          "stun": null
+          "stun": null,
+          "skills": {
+            "0": {
+              "begin": null,
+              "loop": "Skill_1",
+              "end": null,
+              "index": 0,
+              "idle": null
+            },
+            "1": {
+              "begin": "Skill_2_Begin",
+              "loop": "Skill_2_Loop",
+              "end": "Skill_2_End",
+              "index": 1,
+              "idle": null
+            }
+          }
         },
         "animations": {
           "Attack": 2.5,
@@ -81931,7 +82206,23 @@
             "loop": "Move",
             "end": null
           },
-          "stun": null
+          "stun": null,
+          "skills": {
+            "0": {
+              "begin": null,
+              "loop": "Skill_1",
+              "end": null,
+              "index": 0,
+              "idle": null
+            },
+            "1": {
+              "begin": "Skill_2_Begin",
+              "loop": "Skill_2_Loop",
+              "end": "Skill_2_End",
+              "index": 1,
+              "idle": null
+            }
+          }
         },
         "animations": {
           "Attack": 2.5,
@@ -82388,7 +82679,30 @@
           },
           "die": "Die",
           "move": null,
-          "stun": null
+          "stun": null,
+          "skills": {
+            "0": {
+              "begin": null,
+              "loop": "Skill_1",
+              "end": null,
+              "index": 0,
+              "idle": null
+            },
+            "1": {
+              "begin": null,
+              "loop": "Skill_2",
+              "end": null,
+              "index": 1,
+              "idle": null
+            },
+            "2": {
+              "begin": null,
+              "loop": "Skill_3",
+              "end": null,
+              "index": 2,
+              "idle": null
+            }
+          }
         },
         "animations": {
           "Attack": 2.667,
@@ -82448,7 +82762,23 @@
           },
           "die": "Die",
           "move": null,
-          "stun": null
+          "stun": null,
+          "skills": {
+            "0": {
+              "begin": "Skill_01_Begin",
+              "loop": "Skill_01_Loop",
+              "end": "Skill_01_End",
+              "index": 0,
+              "idle": null
+            },
+            "1": {
+              "begin": null,
+              "loop": "Skill_02",
+              "end": null,
+              "index": 1,
+              "idle": null
+            }
+          }
         },
         "animations": {
           "Attack": 3,
@@ -83171,7 +83501,54 @@
     },
     "token_10041_cathy_catsld": {
       "owner": "char_4162_cathy",
-      "avatar": "/assets/token/avatar/token_10041_cathy_catsld.png"
+      "avatar": "/assets/token/avatar/token_10041_cathy_catsld.png",
+      "spineLocal": {
+        "group": "spine/token/token_10041_cathy_catsld",
+        "skel": "token_10041_cathy_catsld.skel",
+        "atlas": "token_10041_cathy_catsld.atlas",
+        "textures": [
+          "token_10041_cathy_catsld.png"
+        ],
+        "pma": true,
+        "anims": {
+          "idle": "Idle",
+          "deploy": "Start",
+          "attack": {
+            "begin": null,
+            "loop": "Idle",
+            "end": null,
+            "via": "idle"
+          },
+          "attackDown": null,
+          "skill": {
+            "begin": null,
+            "loop": "Idle",
+            "end": null,
+            "via": "attack",
+            "index": 0,
+            "idle": null
+          },
+          "die": "Die",
+          "move": null,
+          "stun": null
+        },
+        "animations": {
+          "Default": 0,
+          "Die": 0.567,
+          "Idle": 0.7,
+          "Start": 0.667
+        },
+        "events": [
+          "OnStart"
+        ],
+        "hits": {},
+        "bounds": {
+          "x": 160.056,
+          "y": -1.331,
+          "width": 201.714,
+          "height": 335.376
+        }
+      }
     },
     "token_10056_angel2_target": {
       "owner": "char_1041_angel2",
@@ -83227,15 +83604,141 @@
     },
     "token_10057_svash2_eagle1": {
       "owner": "char_1045_svash2",
-      "avatar": "/assets/token/avatar/token_10057_svash2_eagle1.png"
+      "avatar": "/assets/token/avatar/token_10057_svash2_eagle1.png",
+      "spineLocal": {
+        "group": "spine/token/token_10057_svash2_eagle1",
+        "skel": "token_10057_svash2_eagle.skel",
+        "atlas": "token_10057_svash2_eagle.atlas",
+        "textures": [
+          "token_10057_svash2_eagle.png"
+        ],
+        "pma": true,
+        "anims": {
+          "idle": "Default",
+          "deploy": "Default",
+          "attack": {
+            "begin": null,
+            "loop": "Default",
+            "end": null,
+            "via": "idle"
+          },
+          "attackDown": null,
+          "skill": {
+            "begin": null,
+            "loop": "Default",
+            "end": null,
+            "via": "attack",
+            "index": 0,
+            "idle": null
+          },
+          "die": null,
+          "move": null,
+          "stun": null
+        },
+        "animations": {
+          "Default": 0
+        },
+        "events": [],
+        "hits": {},
+        "bounds": {
+          "x": -75,
+          "y": -0.51,
+          "width": 150,
+          "height": 174
+        }
+      }
     },
     "token_10057_svash2_eagle2": {
       "owner": "char_1045_svash2",
-      "avatar": "/assets/token/avatar/token_10057_svash2_eagle2.png"
+      "avatar": "/assets/token/avatar/token_10057_svash2_eagle2.png",
+      "spineLocal": {
+        "group": "spine/token/token_10057_svash2_eagle2",
+        "skel": "token_10057_svash2_eagle.skel",
+        "atlas": "token_10057_svash2_eagle.atlas",
+        "textures": [
+          "token_10057_svash2_eagle.png"
+        ],
+        "pma": true,
+        "anims": {
+          "idle": "Default",
+          "deploy": "Default",
+          "attack": {
+            "begin": null,
+            "loop": "Default",
+            "end": null,
+            "via": "idle"
+          },
+          "attackDown": null,
+          "skill": {
+            "begin": null,
+            "loop": "Default",
+            "end": null,
+            "via": "attack",
+            "index": 0,
+            "idle": null
+          },
+          "die": null,
+          "move": null,
+          "stun": null
+        },
+        "animations": {
+          "Default": 0
+        },
+        "events": [],
+        "hits": {},
+        "bounds": {
+          "x": -75,
+          "y": -0.51,
+          "width": 150,
+          "height": 174
+        }
+      }
     },
     "token_10057_svash2_eagle3": {
       "owner": "char_1045_svash2",
-      "avatar": "/assets/token/avatar/token_10057_svash2_eagle3.png"
+      "avatar": "/assets/token/avatar/token_10057_svash2_eagle3.png",
+      "spineLocal": {
+        "group": "spine/token/token_10057_svash2_eagle3",
+        "skel": "token_10057_svash2_eagle.skel",
+        "atlas": "token_10057_svash2_eagle.atlas",
+        "textures": [
+          "token_10057_svash2_eagle.png"
+        ],
+        "pma": true,
+        "anims": {
+          "idle": "Default",
+          "deploy": "Default",
+          "attack": {
+            "begin": null,
+            "loop": "Default",
+            "end": null,
+            "via": "idle"
+          },
+          "attackDown": null,
+          "skill": {
+            "begin": null,
+            "loop": "Default",
+            "end": null,
+            "via": "attack",
+            "index": 0,
+            "idle": null
+          },
+          "die": null,
+          "move": null,
+          "stun": null
+        },
+        "animations": {
+          "Default": 0
+        },
+        "events": [],
+        "hits": {},
+        "bounds": {
+          "x": -75,
+          "y": -0.51,
+          "width": 150,
+          "height": 174
+        }
+      }
     },
     "token_10058_sbell2_icetgt": {
       "owner": "char_1046_sbell2"
@@ -86345,6 +86848,139 @@
     "skchr_pallas_2": "skchr_pallas_2",
     "skchr_pallas_3": "skchr_pallas_3"
   },
+  "modules": {
+    "WAH-Y": "/assets/module/wah-y.png",
+    "aft-d": "/assets/module/aft-d.png",
+    "aft-x": "/assets/module/aft-x.png",
+    "aft-y": "/assets/module/aft-y.png",
+    "age-y": "/assets/module/age-y.png",
+    "alc-x": "/assets/module/alc-x.png",
+    "amb-x": "/assets/module/amb-x.png",
+    "amb-y": "/assets/module/amb-y.png",
+    "arc-x": "/assets/module/arc-x.png",
+    "arc-y": "/assets/module/arc-y.png",
+    "art-x": "/assets/module/art-x.png",
+    "art-y": "/assets/module/art-y.png",
+    "ast-x": "/assets/module/ast-x.png",
+    "bar-x": "/assets/module/bar-x.png",
+    "bar-y": "/assets/module/bar-y.png",
+    "bea-x": "/assets/module/bea-x.png",
+    "bea-y": "/assets/module/bea-y.png",
+    "bla-d": "/assets/module/bla-d.png",
+    "bla-x": "/assets/module/bla-x.png",
+    "bla-y": "/assets/module/bla-y.png",
+    "bls-x": "/assets/module/bls-x.png",
+    "bls-y": "/assets/module/bls-y.png",
+    "bom-x": "/assets/module/bom-x.png",
+    "ccr-d": "/assets/module/ccr-d.png",
+    "ccr-x": "/assets/module/ccr-x.png",
+    "ccr-y": "/assets/module/ccr-y.png",
+    "cen-x": "/assets/module/cen-x.png",
+    "cen-y": "/assets/module/cen-y.png",
+    "cha-x": "/assets/module/cha-x.png",
+    "cha-y": "/assets/module/cha-y.png",
+    "chg-x": "/assets/module/chg-x.png",
+    "chg-y": "/assets/module/chg-y.png",
+    "cra-x": "/assets/module/cra-x.png",
+    "cra-y": "/assets/module/cra-y.png",
+    "cru-x": "/assets/module/cru-x.png",
+    "cru-y": "/assets/module/cru-y.png",
+    "dea-x": "/assets/module/dea-x.png",
+    "dea-y": "/assets/module/dea-y.png",
+    "dec-X": "/assets/module/dec-x.png",
+    "dec-x": "/assets/module/dec-x.png",
+    "dec-y": "/assets/module/dec-y.png",
+    "dre-x": "/assets/module/dre-x.png",
+    "dre-y": "/assets/module/dre-y.png",
+    "exe-x": "/assets/module/exe-x.png",
+    "exe-y": "/assets/module/exe-y.png",
+    "fgt-x": "/assets/module/fgt-x.png",
+    "fgt-y": "/assets/module/fgt-y.png",
+    "for-x": "/assets/module/for-x.png",
+    "for-y": "/assets/module/for-y.png",
+    "fun-x": "/assets/module/fun-x.png",
+    "fun-y": "/assets/module/fun-y.png",
+    "gee-x": "/assets/module/gee-x.png",
+    "gee-y": "/assets/module/gee-y.png",
+    "gua-x": "/assets/module/gua-x.png",
+    "gua-y": "/assets/module/gua-y.png",
+    "ham-x": "/assets/module/ham-x.png",
+    "hes-x": "/assets/module/hes-x.png",
+    "hes-y": "/assets/module/hes-y.png",
+    "hok-x": "/assets/module/hok-x.png",
+    "hok-y": "/assets/module/hok-y.png",
+    "hun-x": "/assets/module/hun-x.png",
+    "hun-y": "/assets/module/hun-y.png",
+    "inc-x": "/assets/module/inc-x.png",
+    "inc-y": "/assets/module/inc-y.png",
+    "ins-x": "/assets/module/ins-x.png",
+    "ins-y": "/assets/module/ins-y.png",
+    "isw-a": "/assets/module/isw-a.png",
+    "lib-x": "/assets/module/lib-x.png",
+    "lor-d": "/assets/module/lor-d.png",
+    "lor-x": "/assets/module/lor-x.png",
+    "lor-y": "/assets/module/lor-y.png",
+    "lps-x": "/assets/module/lps-x.png",
+    "lps-y": "/assets/module/lps-y.png",
+    "mar-x": "/assets/module/mar-x.png",
+    "mar-y": "/assets/module/mar-y.png",
+    "mer-x": "/assets/module/mer-x.png",
+    "mer-y": "/assets/module/mer-y.png",
+    "msc-d": "/assets/module/msc-d.png",
+    "msc-x": "/assets/module/msc-x.png",
+    "msc-y": "/assets/module/msc-y.png",
+    "phy-x": "/assets/module/phy-x.png",
+    "phy-y": "/assets/module/phy-y.png",
+    "plx-x": "/assets/module/plx-x.png",
+    "plx-y": "/assets/module/plx-y.png",
+    "pri-x": "/assets/module/pri-x.png",
+    "pri-y": "/assets/module/pri-y.png",
+    "pro-x": "/assets/module/pro-x.png",
+    "pro-y": "/assets/module/pro-y.png",
+    "prp-x": "/assets/module/prp-x.png",
+    "pum-x": "/assets/module/pum-x.png",
+    "pum-y": "/assets/module/pum-y.png",
+    "pus-x": "/assets/module/pus-x.png",
+    "pus-y": "/assets/module/pus-y.png",
+    "ra-a": "/assets/module/ra-a.png",
+    "rea-x": "/assets/module/rea-x.png",
+    "rea-y": "/assets/module/rea-y.png",
+    "rin-x": "/assets/module/rin-x.png",
+    "rin-y": "/assets/module/rin-y.png",
+    "rit-x": "/assets/module/rit-x.png",
+    "rit-y": "/assets/module/rit-y.png",
+    "rpr-x": "/assets/module/rpr-x.png",
+    "rpr-y": "/assets/module/rpr-y.png",
+    "sbl-x": "/assets/module/sbl-x.png",
+    "sbl-y": "/assets/module/sbl-y.png",
+    "sie-x": "/assets/module/sie-x.png",
+    "sie-y": "/assets/module/sie-y.png",
+    "so-a": "/assets/module/so-a.png",
+    "so-b": "/assets/module/so-b.png",
+    "soc-x": "/assets/module/soc-x.png",
+    "sol-x": "/assets/module/sol-x.png",
+    "sol-y": "/assets/module/sol-y.png",
+    "spc-x": "/assets/module/spc-x.png",
+    "spc-y": "/assets/module/spc-y.png",
+    "spt-x": "/assets/module/spt-x.png",
+    "spt-y": "/assets/module/spt-y.png",
+    "sum-x": "/assets/module/sum-x.png",
+    "sum-y": "/assets/module/sum-y.png",
+    "swo-x": "/assets/module/swo-x.png",
+    "swo-y": "/assets/module/swo-y.png",
+    "tac-x": "/assets/module/tac-x.png",
+    "tac-y": "/assets/module/tac-y.png",
+    "trp-x": "/assets/module/trp-x.png",
+    "trp-y": "/assets/module/trp-y.png",
+    "umd-x": "/assets/module/umd-x.png",
+    "umd-y": "/assets/module/umd-y.png",
+    "uny-x": "/assets/module/uny-x.png",
+    "uny-y": "/assets/module/uny-y.png",
+    "wah-x": "/assets/module/wah-x.png",
+    "wdm-x": "/assets/module/wdm-x.png",
+    "wdm-y": "/assets/module/wdm-y.png",
+    "xah-x": "/assets/module/xah-x.png"
+  },
   "ui": {
     "garrisonTypeIcon/icon_battle": "/assets/ui/garrisonTypeIcon/icon_battle.png",
     "garrisonTypeIcon/icon_bond": "/assets/ui/garrisonTypeIcon/icon_bond.png",
@@ -86946,7 +87582,8 @@
     "guide/autochess_handbook_1": "/assets/ui/guide/autochess_handbook_1.png",
     "guide/autochess_handbook_2": "/assets/ui/guide/autochess_handbook_2.png",
     "guide/autochess_handbook_3": "/assets/ui/guide/autochess_handbook_3.png",
-    "guide/autochess_handbook_4": "/assets/ui/guide/autochess_handbook_4.png"
+    "guide/autochess_handbook_4": "/assets/ui/guide/autochess_handbook_4.png",
+    "campLogo/logo_minos": "/assets/ui/campLogo/logo_minos.png"
   },
   "prof": {
     "icon": {
@@ -87038,7 +87675,17 @@
       "bombarder": "/assets/prof/sub/bombarder.png",
       "geek": "/assets/prof/sub/geek.png",
       "healer": "/assets/prof/sub/healer.png",
-      "sword": "/assets/prof/sub/sword.png"
+      "sword": "/assets/prof/sub/sword.png",
+      "aoesniper": "/assets/prof/sub/aoesniper.png",
+      "siegesniper": "/assets/prof/sub/siegesniper.png",
+      "summoner": "/assets/prof/sub/summoner.png",
+      "duelist": "/assets/prof/sub/duelist.png",
+      "soulcaster": "/assets/prof/sub/soulcaster.png",
+      "bearer": "/assets/prof/sub/bearer.png",
+      "blessing": "/assets/prof/sub/blessing.png",
+      "artsprotector": "/assets/prof/sub/artsprotector.png",
+      "watchman": "/assets/prof/sub/watchman.png",
+      "traper": "/assets/prof/sub/traper.png"
     }
   },
   "audio": {
@@ -89151,6 +89798,712 @@
         },
         "enemy_9033_acdeer": {
           "attack": "/assets/audio/sfx/enemy/e_atk/e_atk_icevltn.mp3"
+        },
+        "char_003_kalts": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_healpistol_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_defboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_defboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_010_chen": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_circlesword_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_circlesword_n.mp3"
+        },
+        "char_017_huang": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_chainsaw_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_chainsaw_n.mp3",
+          "skills": {
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/player/p_skill/p_skill_chainsawulmextension_1_intro.mp3"
+          }
+        },
+        "char_1013_chen2": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_watergun_n_cast.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_watergun_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_1015_aglna2": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_arstrnstf_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_arstrnstf_n.mp3",
+          "die": "/assets/audio/sfx/battle/b_char/b_char_dead.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_1031_slent2": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_slbless_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_slbless_n.mp3"
+        },
+        "char_1034_jesca2": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_pistolup_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_pistolup_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/player/p_skill/p_skill_navalgunready.mp3"
+          }
+        },
+        "char_1035_wisdel": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_dkmrcaygn_n.mp3",
+          "skills": {
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_1042_phatm2": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_oprdmgrc_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_oprdmgrc_n.mp3",
+          "die": "/assets/audio/sfx/battle/b_char/b_char_dead.mp3",
+          "born": "/assets/audio/sfx/battle/b_char/b_char_oprdmgrc.mp3",
+          "skills": {
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/player/p_atk/p_atk_oprdmgrclp.mp3"
+          }
+        },
+        "char_1043_leizi2": {
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_lzxqlkl_n.mp3",
+          "die": "/assets/audio/sfx/battle/b_char/b_char_dead.mp3",
+          "born": "/assets/audio/sfx/battle/b_char/b_char_lzxqlkl.mp3",
+          "skill": "/assets/audio/sfx/player/p_skill/p_skill_lzxqlkl_d.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/player/p_skill/p_skill_lzxqlkl_d.mp3",
+            "1": "/assets/audio/sfx/player/p_skill/p_skill_lzxqlkl_h.mp3",
+            "2": "/assets/audio/sfx/player/p_skill/p_skill_lzxqlkl_s.mp3"
+          }
+        },
+        "char_1044_hsgma2": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_ktsldghst_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_ktsldghst_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/player/p_skill/p_skill_ktsldghst_s.mp3"
+          }
+        },
+        "char_1050_chen3": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_hljdswd_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_hljdswd_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/player/p_skill/p_skill_hljdfswd_s.mp3"
+          }
+        },
+        "char_1051_headb2": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_brhmx_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_brhmx_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_1052_kalts2": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_khlrftcrfr_n.mp3",
+          "die": "/assets/audio/sfx/battle/b_char/b_char_dead.mp3",
+          "born": "/assets/audio/sfx/battle/b_char/b_char_khlrftcr.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_healboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_healboost.mp3",
+            "1": "/assets/audio/sfx/player/p_skill/p_skill_khlrftcr_h.mp3",
+            "2": "/assets/audio/sfx/player/p_skill/p_skill_khlrftcr_s.mp3"
+          }
+        },
+        "char_112_siege": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_hammer_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_hammer_n.mp3",
+          "skills": {
+            "1": "/assets/audio/sfx/player/p_skill/p_skill_jumphammer_1.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_113_cqbw": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_grenade3_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_134_ifrit": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_flamethrower_n.mp3"
+        },
+        "char_147_shining": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_heal_n.mp3"
+        },
+        "char_1502_crosly": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_asndgrbm.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_asndgrsmk.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/player/p_skill/p_skill_asndgrbm.mp3",
+            "2": "/assets/audio/sfx/player/p_skill/p_skill_asndgrsmk.mp3"
+          }
+        },
+        "char_179_cgbird": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_heal_l.mp3"
+        },
+        "char_180_amgoat": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_firemag_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/player/p_skill/p_skill_volcano_loop.mp3"
+          }
+        },
+        "char_188_helage": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_falchion_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_falchion_n.mp3",
+          "skills": {
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_197_poca": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_bound_n.mp3",
+          "skills": {
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_2012_typhon": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_mechaxbow_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_mechaxbow_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/player/p_skill/p_skill_mechaxbow_s_aimboost.mp3"
+          }
+        },
+        "char_2013_cerber": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_phydark_n.mp3",
+          "skills": {
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_2014_nian": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_blade_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_blade_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_defboost.mp3",
+            "2": "/assets/audio/sfx/player/p_skill/p_skill_irondefense.mp3"
+          }
+        },
+        "char_2023_ling": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_lantern_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_lantern_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_2024_chyue": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_cypunch_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_cypunch_n.mp3",
+          "skill": "/assets/audio/sfx/player/p_atk/p_atk_cypunch_d.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/player/p_atk/p_atk_cypunch_d.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          },
+          "mix": {
+            "hit": {
+              "vol": 0.8
+            }
+          }
+        },
+        "char_2025_shu": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_drgndfmr_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_drgndfmr_n.mp3",
+          "die": "/assets/audio/sfx/battle/b_char/b_char_dead.mp3",
+          "born": "/assets/audio/sfx/battle/b_char/b_char_drgndfmr.mp3"
+        },
+        "char_2027_wang": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_stwctp_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_stwctp_n.mp3",
+          "die": "/assets/audio/sfx/battle/b_char/b_char_dead.mp3",
+          "born": "/assets/audio/sfx/battle/b_char/b_char_stwctpbn.mp3"
+        },
+        "char_225_haak": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_dartpistol_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_dartpistol_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_tactboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_tactboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_tactboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_tactboost.mp3"
+          }
+        },
+        "char_248_mgllan": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_icecamera_n.mp3"
+        },
+        "char_250_phatom": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_knife_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_knife_n.mp3",
+          "skill": "/assets/audio/sfx/player/p_skill/p_skill_nightshade.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/player/p_skill/p_skill_nightshade.mp3",
+            "1": "/assets/audio/sfx/player/p_skill/p_skill_nightraid.mp3",
+            "2": "/assets/audio/sfx/player/p_skill/p_skill_gorgeousshow.mp3"
+          }
+        },
+        "char_293_thorns": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_throwsabre_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_brandishsabre_n.mp3",
+          "skills": {
+            "1": "/assets/audio/sfx/battle/b_char/b_char_defboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_300_phenxi": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_fireboom_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_fireboom_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_322_lmlee": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_coinsword_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_coinsword_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_340_shwaz": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_militaryxbow_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_militaryxbow_n.mp3",
+          "skills": {
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/player/p_skill/p_skill_militaryxbowchange.mp3"
+          }
+        },
+        "char_362_saga": {
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_ninjasword_n.mp3",
+          "skills": {
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_377_gdglow": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_sparklight_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_sparklight_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_4009_irene": {
+          "attack": "/assets/audio/sfx/player/p_imp/p_imp_darkatana_n.mp3",
+          "skills": {
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_400_weedy": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_watercannon_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_watercannon_n.mp3",
+          "skills": {
+            "1": "/assets/audio/sfx/battle/b_char/b_char_tactboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_4011_lessng": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_shpbygrd_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_shpbygrd_n.mp3"
+        },
+        "char_4027_heyak": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_quetzstaff_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_quetzstaff_n.mp3"
+        },
+        "char_4037_demetr": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_rdbrkncls_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_rdbrkncls_n.mp3",
+          "skills": {
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_4046_ebnhlz": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_darkhole_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_darkhole_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_4048_doroth": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_sandatk_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_sandatk_n.mp3"
+        },
+        "char_4055_bgsnow": {
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_4065_judge": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_gavel_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_gavel_n.mp3",
+          "skill": "/assets/audio/sfx/player/p_atk/p_atk_gavel_d.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/player/p_atk/p_atk_gavel_d.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_defboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_defboost.mp3"
+          },
+          "mix": {
+            "attack": {
+              "vol": 2
+            },
+            "hit": {
+              "vol": 2
+            }
+          }
+        },
+        "char_4072_ironmn": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_elecdrill_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_4080_lin": {
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_tactboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_tactboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_4088_hodrer": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_hdvysword_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_hdvysword_n.mp3",
+          "skills": {
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_4098_vvana": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_lghtnswrd_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_lghtnswrd_n.mp3"
+        },
+        "char_4117_ray": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_sndshotgun_sreload.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_sndshotgun_n.mp3",
+          "skills": {
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_4121_zuole": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_wrrsrd_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_wrrsrd_n.mp3"
+        },
+        "char_4132_ascln": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_smksndrt_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_smksndrt_n.mp3",
+          "skills": {
+            "1": "/assets/audio/sfx/player/p_skill/p_skill_smksnpo.mp3",
+            "2": "/assets/audio/sfx/player/p_skill/p_skill_smksndrk.mp3"
+          },
+          "mix": {
+            "attack": {
+              "vol": 2
+            }
+          }
+        },
+        "char_4133_logos": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_mgcqilpn_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_mgcqilpn_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/player/p_skill/p_skill_mgcqilpnfld.mp3"
+          }
+        },
+        "char_4138_narant": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_nghtmrdisrsn_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_nghtmrdisrsn_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_tactboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_tactboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_416_zumama": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_snakeknife_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_snakeknife_n.mp3",
+          "skills": {
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_4179_monstr": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_kxdtctm_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_kxdtctm_n.mp3"
+        },
+        "char_4195_radian": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_plsldtym_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_plsldtym_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_4202_haruka": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_idgfshbl_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_idgfshbl_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_healboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_healboost.mp3",
+            "1": "/assets/audio/sfx/player/p_skill/p_skill_idgfshbl_h.mp3",
+            "2": "/assets/audio/sfx/player/p_skill/p_skill_idgfshbl_s.mp3"
+          }
+        },
+        "char_4204_mantra": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_mtelrncpnt_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_mtelrncpnt_n.mp3"
+        },
+        "char_4212_nasti": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_snftchlgy_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_snftchlgy_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_defboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_4226_veen": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_ergblswdfr_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_ergblb.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_4228_closur": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_tchdmtfr_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_tchdmt_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_tactboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_tactboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_4229_aphris": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_mcdtlsr_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_mcdtlsr_n.mp3",
+          "die": "/assets/audio/sfx/battle/b_char/b_char_dead.mp3",
+          "born": "/assets/audio/sfx/battle/b_char/b_char_set.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/player/p_skill/p_skill_mcdtlsr_s.mp3"
+          }
+        },
+        "char_4230_mcnist": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_megnrlg_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_megnrlg_n.mp3",
+          "skills": {
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_4235_thumpy": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_pnkrtbt_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_pnkrtbt_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_defboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_defboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_defboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_defboost.mp3"
+          }
+        },
+        "char_450_necras": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_prlfrhlrd_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_prlfrhlrd_n.mp3",
+          "skill": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+          "skills": {
+            "0": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "char_479_sleach": {
+          "attack": "/assets/audio/sfx/player/p_imp/p_imp_flagsword_n.mp3",
+          "skills": {
+            "1": "/assets/audio/sfx/battle/b_char/b_char_defboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_tactboost.mp3"
+          }
+        },
+        "char_485_pallas": {
+          "attack": "/assets/audio/sfx/player/p_imp/p_imp_chainwhip_n.mp3",
+          "skills": {
+            "1": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3",
+            "2": "/assets/audio/sfx/battle/b_char/b_char_atkboost.mp3"
+          }
+        },
+        "token_10002_kalts_mon3tr": {
+          "attack": "/assets/audio/sfx/player/p_aoe/p_aoe_mon3tr_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_prick_n.mp3",
+          "die": "/assets/audio/sfx/battle/b_char/b_char_mon3terdieroar_phase0.mp3",
+          "born": "/assets/audio/sfx/battle/b_char/b_char_mon3tr.mp3"
+        },
+        "token_10005_mgllan_drone2": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_uavlaser_n.mp3"
+        },
+        "token_10005_mgllan_drone3": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_uavvolley_n.mp3"
+        },
+        "token_10007_phatom_twin": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_knife_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_knife_n.mp3"
+        },
+        "token_10008_cqbw_box": {
+          "born": "/assets/audio/sfx/player/p_skill/p_skill_scarebox.mp3"
+        },
+        "token_10009_weedy_cannon": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_watercannontoken_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_watercannontoken_n.mp3"
+        },
+        "token_10020_ling_soul1": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_lanternsoul_s.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_lanternsoul_n.mp3",
+          "mix": {
+            "attack": {
+              "p": 0.3
+            }
+          }
+        },
+        "token_10020_ling_soul2": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_lanternsoul_h.mp3"
+        },
+        "token_10020_ling_soul3": {
+          "attack": "/assets/audio/sfx/player/p_imp/p_imp_lanternsoul_n.mp3",
+          "hit": "/assets/audio/sfx/player/p_atk/p_atk_lanternsoul_s.mp3",
+          "mix": {
+            "hit": {
+              "p": 0.3
+            }
+          }
+        },
+        "token_10024_ebnhlz_rcube": {
+          "die": "/assets/audio/sfx/battle/b_enemy/b_enemy_dead_n.mp3",
+          "born": "/assets/audio/sfx/player/p_skill/p_skill_darkholetokenborn.mp3"
+        },
+        "token_10025_doroth_recttp": {
+          "born": "/assets/audio/sfx/player/p_skill/p_skill_sandtrapset.mp3"
+        },
+        "token_10026_bgsnow_subbow": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_pencrossbow_d.mp3"
+        },
+        "token_10029_slent2_protrb": {
+          "born": "/assets/audio/sfx/player/p_imp/p_imp_slblessset.mp3"
+        },
+        "token_10032_jesca2_jckshd": {
+          "die": "/assets/audio/sfx/battle/b_char/b_char_tokendead.mp3",
+          "born": "/assets/audio/sfx/player/p_atk/p_atk_jsshldset.mp3"
+        },
+        "token_10034_ray_sndbst": {
+          "born": "/assets/audio/sfx/player/p_atk/p_atk_sndbstset.mp3"
+        },
+        "token_10035_wisdel_wward": {
+          "die": "/assets/audio/sfx/battle/b_char/b_char_tokendead.mp3",
+          "born": "/assets/audio/sfx/player/p_atk/p_atk_wichrfystlbr.mp3"
+        },
+        "token_10043_necras_skeltn": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_prlfrsdr.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_prlfrsdr.mp3",
+          "die": "/assets/audio/sfx/player/p_atk/p_atk_prlfrsdrd.mp3",
+          "born": "/assets/audio/sfx/battle/b_char/b_char_tokenset.mp3"
+        },
+        "token_10050_monstr_prosts": {
+          "die": "/assets/audio/sfx/battle/b_char/b_char_tokendead.mp3"
+        },
+        "token_10051_radian_tower1": {
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_plsldtymd_n.mp3"
+        },
+        "token_10052_radian_tower2": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_plsldtymh_n.mp3"
+        },
+        "token_10053_radian_tower3": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_plsldtyms_n.mp3"
+        },
+        "token_10054_phatm2_encdool": {
+          "born": "/assets/audio/sfx/player/p_atk/p_atk_dmgrct.mp3"
+        },
+        "token_10055_phatm2_mndclv": {
+          "die": "/assets/audio/sfx/player/p_atk/p_atk_oprdmbndp.mp3",
+          "born": "/assets/audio/sfx/player/p_atk/p_atk_oprdmbnap.mp3"
+        },
+        "token_10064_wang_stone1": {
+          "die": "/assets/audio/sfx/battle/b_char/b_char_tokendead.mp3",
+          "born": "/assets/audio/sfx/player/p_imp/p_imp_stwctptkin.mp3"
+        },
+        "token_10065_demetr_dmtpos": {
+          "die": "/assets/audio/sfx/battle/b_char/b_char_tokendead.mp3",
+          "born": "/assets/audio/sfx/player/p_imp/p_imp_rdbrknclsmk.mp3"
+        },
+        "token_10066_closur_ourbase": {
+          "die": "/assets/audio/sfx/battle/b_char/b_char_tokendead.mp3",
+          "born": "/assets/audio/sfx/player/p_skill/p_skill_tchdmtst.mp3"
+        },
+        "token_10068_kalts2_mtship": {
+          "born": "/assets/audio/sfx/player/p_imp/p_imp_khlrftcrmk.mp3"
+        },
+        "token_10069_mcnist_mcgraf": {
+          "attack": "/assets/audio/sfx/player/p_atk/p_atk_megnrlgrf.mp3",
+          "hit": "/assets/audio/sfx/player/p_imp/p_imp_megnrlgrf.mp3",
+          "die": "/assets/audio/sfx/battle/b_char/b_char_tokendead.mp3",
+          "born": "/assets/audio/sfx/battle/b_char/b_char_tokenset.mp3"
+        },
+        "token_10070_aphris_pc": {
+          "die": "/assets/audio/sfx/battle/b_char/b_char_tokendead.mp3",
+          "born": "/assets/audio/sfx/battle/b_char/b_char_tokenset.mp3"
+        },
+        "token_10071_aglna2_agairp": {
+          "die": "/assets/audio/sfx/ambience/a_bat/a_bat_arngmkdpr.mp3",
+          "born": "/assets/audio/sfx/ambience/a_bat/a_bat_arngmkpr.mp3"
         }
       }
     },
@@ -99732,7 +101085,2407 @@
       "jp/char_498_inside/cn_029.mp3": "/assets/audio/voice/jp/char_498_inside/cn_029.mp3",
       "jp/char_498_inside/cn_030.mp3": "/assets/audio/voice/jp/char_498_inside/cn_030.mp3",
       "jp/char_498_inside/cn_031.mp3": "/assets/audio/voice/jp/char_498_inside/cn_031.mp3",
-      "jp/char_498_inside/cn_032.mp3": "/assets/audio/voice/jp/char_498_inside/cn_032.mp3"
+      "jp/char_498_inside/cn_032.mp3": "/assets/audio/voice/jp/char_498_inside/cn_032.mp3",
+      "char_102_texas": {
+        "start": "/assets/audio/voice/cn/char_102_texas/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_102_texas/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_102_texas/cn_021.mp3",
+          "/assets/audio/voice/cn/char_102_texas/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_102_texas/cn_023.mp3",
+          "/assets/audio/voice/cn/char_102_texas/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_102_texas/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_102_texas/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_102_texas/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_102_texas/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_102_texas/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_102_texas/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_102_texas/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_102_texas/cn_032.mp3"
+      },
+      "char_108_silent": {
+        "start": "/assets/audio/voice/cn/char_108_silent/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_108_silent/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_108_silent/cn_021.mp3",
+          "/assets/audio/voice/cn/char_108_silent/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_108_silent/cn_023.mp3",
+          "/assets/audio/voice/cn/char_108_silent/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_108_silent/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_108_silent/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_108_silent/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_108_silent/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_108_silent/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_108_silent/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_108_silent/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_108_silent/cn_032.mp3"
+      },
+      "char_202_demkni": {
+        "start": "/assets/audio/voice/cn/char_202_demkni/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_202_demkni/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_202_demkni/cn_021.mp3",
+          "/assets/audio/voice/cn/char_202_demkni/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_202_demkni/cn_023.mp3",
+          "/assets/audio/voice/cn/char_202_demkni/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_202_demkni/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_202_demkni/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_202_demkni/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_202_demkni/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_202_demkni/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_202_demkni/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_202_demkni/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_202_demkni/cn_032.mp3"
+      },
+      "char_128_plosis": {
+        "start": "/assets/audio/voice/cn/char_128_plosis/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_128_plosis/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_128_plosis/cn_021.mp3",
+          "/assets/audio/voice/cn/char_128_plosis/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_128_plosis/cn_023.mp3",
+          "/assets/audio/voice/cn/char_128_plosis/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_128_plosis/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_128_plosis/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_128_plosis/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_128_plosis/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_128_plosis/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_128_plosis/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_128_plosis/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_128_plosis/cn_032.mp3"
+      },
+      "char_172_svrash": {
+        "start": "/assets/audio/voice/cn/char_172_svrash/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_172_svrash/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_172_svrash/cn_021.mp3",
+          "/assets/audio/voice/cn/char_172_svrash/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_172_svrash/cn_023.mp3",
+          "/assets/audio/voice/cn/char_172_svrash/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_172_svrash/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_172_svrash/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_172_svrash/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_172_svrash/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_172_svrash/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_172_svrash/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_172_svrash/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_172_svrash/cn_032.mp3"
+      },
+      "char_173_slchan": {
+        "start": "/assets/audio/voice/cn/char_173_slchan/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_173_slchan/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_173_slchan/cn_021.mp3",
+          "/assets/audio/voice/cn/char_173_slchan/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_173_slchan/cn_023.mp3",
+          "/assets/audio/voice/cn/char_173_slchan/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_173_slchan/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_173_slchan/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_173_slchan/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_173_slchan/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_173_slchan/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_173_slchan/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_173_slchan/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_173_slchan/cn_032.mp3"
+      },
+      "char_174_slbell": {
+        "start": "/assets/audio/voice/cn/char_174_slbell/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_174_slbell/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_174_slbell/cn_021.mp3",
+          "/assets/audio/voice/cn/char_174_slbell/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_174_slbell/cn_023.mp3",
+          "/assets/audio/voice/cn/char_174_slbell/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_174_slbell/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_174_slbell/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_174_slbell/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_174_slbell/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_174_slbell/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_174_slbell/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_174_slbell/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_174_slbell/cn_032.mp3"
+      },
+      "char_199_yak": {
+        "start": "/assets/audio/voice/cn/char_199_yak/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_199_yak/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_199_yak/cn_021.mp3",
+          "/assets/audio/voice/cn/char_199_yak/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_199_yak/cn_023.mp3",
+          "/assets/audio/voice/cn/char_199_yak/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_199_yak/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_199_yak/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_199_yak/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_199_yak/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_199_yak/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_199_yak/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_199_yak/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_199_yak/cn_032.mp3"
+      },
+      "char_196_sunbr": {
+        "start": "/assets/audio/voice/cn/char_196_sunbr/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_196_sunbr/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_196_sunbr/cn_021.mp3",
+          "/assets/audio/voice/cn/char_196_sunbr/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_196_sunbr/cn_023.mp3",
+          "/assets/audio/voice/cn/char_196_sunbr/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_196_sunbr/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_196_sunbr/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_196_sunbr/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_196_sunbr/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_196_sunbr/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_196_sunbr/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_196_sunbr/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_196_sunbr/cn_032.mp3"
+      },
+      "char_103_angel": {
+        "start": "/assets/audio/voice/cn/char_103_angel/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_103_angel/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_103_angel/cn_021.mp3",
+          "/assets/audio/voice/cn/char_103_angel/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_103_angel/cn_023.mp3",
+          "/assets/audio/voice/cn/char_103_angel/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_103_angel/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_103_angel/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_103_angel/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_103_angel/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_103_angel/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_103_angel/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_103_angel/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_103_angel/cn_032.mp3"
+      },
+      "char_136_hsguma": {
+        "start": "/assets/audio/voice/cn/char_136_hsguma/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_136_hsguma/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_136_hsguma/cn_021.mp3",
+          "/assets/audio/voice/cn/char_136_hsguma/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_136_hsguma/cn_023.mp3",
+          "/assets/audio/voice/cn/char_136_hsguma/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_136_hsguma/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_136_hsguma/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_136_hsguma/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_136_hsguma/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_136_hsguma/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_136_hsguma/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_136_hsguma/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_136_hsguma/cn_032.mp3"
+      },
+      "char_107_liskam": {
+        "start": "/assets/audio/voice/cn/char_107_liskam/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_107_liskam/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_107_liskam/cn_021.mp3",
+          "/assets/audio/voice/cn/char_107_liskam/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_107_liskam/cn_023.mp3",
+          "/assets/audio/voice/cn/char_107_liskam/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_107_liskam/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_107_liskam/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_107_liskam/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_107_liskam/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_107_liskam/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_107_liskam/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_107_liskam/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_107_liskam/cn_032.mp3"
+      },
+      "char_143_ghost": {
+        "start": "/assets/audio/voice/cn/char_143_ghost/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_143_ghost/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_143_ghost/cn_021.mp3",
+          "/assets/audio/voice/cn/char_143_ghost/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_143_ghost/cn_023.mp3",
+          "/assets/audio/voice/cn/char_143_ghost/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_143_ghost/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_143_ghost/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_143_ghost/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_143_ghost/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_143_ghost/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_143_ghost/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_143_ghost/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_143_ghost/cn_032.mp3"
+      },
+      "char_181_flower": {
+        "start": "/assets/audio/voice/cn/char_181_flower/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_181_flower/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_181_flower/cn_021.mp3",
+          "/assets/audio/voice/cn/char_181_flower/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_181_flower/cn_023.mp3",
+          "/assets/audio/voice/cn/char_181_flower/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_181_flower/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_181_flower/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_181_flower/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_181_flower/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_181_flower/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_181_flower/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_181_flower/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_181_flower/cn_032.mp3"
+      },
+      "char_126_shotst": {
+        "start": "/assets/audio/voice/cn/char_126_shotst/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_126_shotst/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_126_shotst/cn_021.mp3",
+          "/assets/audio/voice/cn/char_126_shotst/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_126_shotst/cn_023.mp3",
+          "/assets/audio/voice/cn/char_126_shotst/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_126_shotst/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_126_shotst/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_126_shotst/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_126_shotst/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_126_shotst/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_126_shotst/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_126_shotst/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_126_shotst/cn_032.mp3"
+      },
+      "char_127_estell": {
+        "start": "/assets/audio/voice/cn/char_127_estell/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_127_estell/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_127_estell/cn_021.mp3",
+          "/assets/audio/voice/cn/char_127_estell/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_127_estell/cn_023.mp3",
+          "/assets/audio/voice/cn/char_127_estell/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_127_estell/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_127_estell/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_127_estell/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_127_estell/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_127_estell/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_127_estell/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_127_estell/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_127_estell/cn_032.mp3"
+      },
+      "char_145_prove": {
+        "start": "/assets/audio/voice/cn/char_145_prove/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_145_prove/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_145_prove/cn_021.mp3",
+          "/assets/audio/voice/cn/char_145_prove/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_145_prove/cn_023.mp3",
+          "/assets/audio/voice/cn/char_145_prove/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_145_prove/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_145_prove/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_145_prove/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_145_prove/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_145_prove/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_145_prove/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_145_prove/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_145_prove/cn_032.mp3"
+      },
+      "char_183_skgoat": {
+        "start": "/assets/audio/voice/cn/char_183_skgoat/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_183_skgoat/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_183_skgoat/cn_021.mp3",
+          "/assets/audio/voice/cn/char_183_skgoat/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_183_skgoat/cn_023.mp3",
+          "/assets/audio/voice/cn/char_183_skgoat/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_183_skgoat/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_183_skgoat/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_183_skgoat/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_183_skgoat/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_183_skgoat/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_183_skgoat/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_183_skgoat/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_183_skgoat/cn_032.mp3"
+      },
+      "char_150_snakek": {
+        "start": "/assets/audio/voice/cn/char_150_snakek/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_150_snakek/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_150_snakek/cn_021.mp3",
+          "/assets/audio/voice/cn/char_150_snakek/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_150_snakek/cn_023.mp3",
+          "/assets/audio/voice/cn/char_150_snakek/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_150_snakek/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_150_snakek/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_150_snakek/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_150_snakek/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_150_snakek/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_150_snakek/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_150_snakek/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_150_snakek/cn_032.mp3"
+      },
+      "char_140_whitew": {
+        "start": "/assets/audio/voice/cn/char_140_whitew/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_140_whitew/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_140_whitew/cn_021.mp3",
+          "/assets/audio/voice/cn/char_140_whitew/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_140_whitew/cn_023.mp3",
+          "/assets/audio/voice/cn/char_140_whitew/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_140_whitew/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_140_whitew/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_140_whitew/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_140_whitew/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_140_whitew/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_140_whitew/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_140_whitew/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_140_whitew/cn_032.mp3"
+      },
+      "char_171_bldsk": {
+        "start": "/assets/audio/voice/cn/char_171_bldsk/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_171_bldsk/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_171_bldsk/cn_021.mp3",
+          "/assets/audio/voice/cn/char_171_bldsk/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_171_bldsk/cn_023.mp3",
+          "/assets/audio/voice/cn/char_171_bldsk/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_171_bldsk/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_171_bldsk/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_171_bldsk/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_171_bldsk/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_171_bldsk/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_171_bldsk/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_171_bldsk/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_171_bldsk/cn_032.mp3"
+      },
+      "char_237_gravel": {
+        "start": "/assets/audio/voice/cn/char_237_gravel/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_237_gravel/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_237_gravel/cn_021.mp3",
+          "/assets/audio/voice/cn/char_237_gravel/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_237_gravel/cn_023.mp3",
+          "/assets/audio/voice/cn/char_237_gravel/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_237_gravel/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_237_gravel/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_237_gravel/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_237_gravel/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_237_gravel/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_237_gravel/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_237_gravel/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_237_gravel/cn_032.mp3"
+      },
+      "char_290_vigna": {
+        "start": "/assets/audio/voice/cn/char_290_vigna/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_290_vigna/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_290_vigna/cn_021.mp3",
+          "/assets/audio/voice/cn/char_290_vigna/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_290_vigna/cn_023.mp3",
+          "/assets/audio/voice/cn/char_290_vigna/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_290_vigna/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_290_vigna/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_290_vigna/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_290_vigna/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_290_vigna/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_290_vigna/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_290_vigna/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_290_vigna/cn_032.mp3"
+      },
+      "char_291_aglina": {
+        "start": "/assets/audio/voice/cn/char_291_aglina/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_291_aglina/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_291_aglina/cn_021.mp3",
+          "/assets/audio/voice/cn/char_291_aglina/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_291_aglina/cn_023.mp3",
+          "/assets/audio/voice/cn/char_291_aglina/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_291_aglina/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_291_aglina/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_291_aglina/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_291_aglina/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_291_aglina/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_291_aglina/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_291_aglina/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_291_aglina/cn_032.mp3"
+      },
+      "char_263_skadi": {
+        "start": "/assets/audio/voice/cn/char_263_skadi/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_263_skadi/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_263_skadi/cn_021.mp3",
+          "/assets/audio/voice/cn/char_263_skadi/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_263_skadi/cn_023.mp3",
+          "/assets/audio/voice/cn/char_263_skadi/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_263_skadi/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_263_skadi/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_263_skadi/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_263_skadi/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_263_skadi/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_263_skadi/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_263_skadi/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_263_skadi/cn_032.mp3"
+      },
+      "char_308_swire": {
+        "start": "/assets/audio/voice/cn/char_308_swire/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_308_swire/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_308_swire/cn_021.mp3",
+          "/assets/audio/voice/cn/char_308_swire/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_308_swire/cn_023.mp3",
+          "/assets/audio/voice/cn/char_308_swire/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_308_swire/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_308_swire/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_308_swire/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_308_swire/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_308_swire/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_308_swire/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_308_swire/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_308_swire/cn_032.mp3"
+      },
+      "char_253_greyy": {
+        "start": "/assets/audio/voice/cn/char_253_greyy/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_253_greyy/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_253_greyy/cn_021.mp3",
+          "/assets/audio/voice/cn/char_253_greyy/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_253_greyy/cn_023.mp3",
+          "/assets/audio/voice/cn/char_253_greyy/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_253_greyy/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_253_greyy/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_253_greyy/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_253_greyy/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_253_greyy/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_253_greyy/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_253_greyy/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_253_greyy/cn_032.mp3"
+      },
+      "char_279_excu": {
+        "start": "/assets/audio/voice/cn/char_279_excu/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_279_excu/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_279_excu/cn_021.mp3",
+          "/assets/audio/voice/cn/char_279_excu/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_279_excu/cn_023.mp3",
+          "/assets/audio/voice/cn/char_279_excu/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_279_excu/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_279_excu/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_279_excu/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_279_excu/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_279_excu/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_279_excu/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_279_excu/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_279_excu/cn_032.mp3"
+      },
+      "char_213_mostma": {
+        "start": "/assets/audio/voice/cn/char_213_mostma/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_213_mostma/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_213_mostma/cn_021.mp3",
+          "/assets/audio/voice/cn/char_213_mostma/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_213_mostma/cn_023.mp3",
+          "/assets/audio/voice/cn/char_213_mostma/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_213_mostma/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_213_mostma/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_213_mostma/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_213_mostma/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_213_mostma/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_213_mostma/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_213_mostma/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_213_mostma/cn_032.mp3"
+      },
+      "char_306_leizi": {
+        "start": "/assets/audio/voice/cn/char_306_leizi/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_306_leizi/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_306_leizi/cn_021.mp3",
+          "/assets/audio/voice/cn/char_306_leizi/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_306_leizi/cn_023.mp3",
+          "/assets/audio/voice/cn/char_306_leizi/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_306_leizi/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_306_leizi/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_306_leizi/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_306_leizi/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_306_leizi/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_306_leizi/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_306_leizi/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_306_leizi/cn_032.mp3"
+      },
+      "char_222_bpipe": {
+        "start": "/assets/audio/voice/cn/char_222_bpipe/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_222_bpipe/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_222_bpipe/cn_021.mp3",
+          "/assets/audio/voice/cn/char_222_bpipe/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_222_bpipe/cn_023.mp3",
+          "/assets/audio/voice/cn/char_222_bpipe/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_222_bpipe/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_222_bpipe/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_222_bpipe/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_222_bpipe/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_222_bpipe/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_222_bpipe/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_222_bpipe/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_222_bpipe/cn_032.mp3"
+      },
+      "char_337_utage": {
+        "start": "/assets/audio/voice/cn/char_337_utage/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_337_utage/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_337_utage/cn_021.mp3",
+          "/assets/audio/voice/cn/char_337_utage/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_337_utage/cn_023.mp3",
+          "/assets/audio/voice/cn/char_337_utage/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_337_utage/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_337_utage/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_337_utage/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_337_utage/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_337_utage/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_337_utage/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_337_utage/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_337_utage/cn_032.mp3"
+      },
+      "char_254_vodfox": {
+        "start": "/assets/audio/voice/cn/char_254_vodfox/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_254_vodfox/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_254_vodfox/cn_021.mp3",
+          "/assets/audio/voice/cn/char_254_vodfox/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_254_vodfox/cn_023.mp3",
+          "/assets/audio/voice/cn/char_254_vodfox/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_254_vodfox/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_254_vodfox/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_254_vodfox/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_254_vodfox/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_254_vodfox/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_254_vodfox/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_254_vodfox/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_254_vodfox/cn_032.mp3"
+      },
+      "char_373_lionhd": {
+        "start": "/assets/audio/voice/cn/char_373_lionhd/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_373_lionhd/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_373_lionhd/cn_021.mp3",
+          "/assets/audio/voice/cn/char_373_lionhd/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_373_lionhd/cn_023.mp3",
+          "/assets/audio/voice/cn/char_373_lionhd/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_373_lionhd/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_373_lionhd/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_373_lionhd/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_373_lionhd/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_373_lionhd/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_373_lionhd/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_373_lionhd/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_373_lionhd/cn_032.mp3"
+      },
+      "char_258_podego": {
+        "start": "/assets/audio/voice/cn/char_258_podego/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_258_podego/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_258_podego/cn_021.mp3",
+          "/assets/audio/voice/cn/char_258_podego/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_258_podego/cn_023.mp3",
+          "/assets/audio/voice/cn/char_258_podego/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_258_podego/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_258_podego/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_258_podego/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_258_podego/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_258_podego/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_258_podego/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_258_podego/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_258_podego/cn_032.mp3"
+      },
+      "char_358_lisa": {
+        "start": "/assets/audio/voice/cn/char_358_lisa/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_358_lisa/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_358_lisa/cn_021.mp3",
+          "/assets/audio/voice/cn/char_358_lisa/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_358_lisa/cn_023.mp3",
+          "/assets/audio/voice/cn/char_358_lisa/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_358_lisa/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_358_lisa/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_358_lisa/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_358_lisa/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_358_lisa/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_358_lisa/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_358_lisa/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_358_lisa/cn_032.mp3"
+      },
+      "char_344_beewax": {
+        "start": "/assets/audio/voice/cn/char_344_beewax/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_344_beewax/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_344_beewax/cn_021.mp3",
+          "/assets/audio/voice/cn/char_344_beewax/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_344_beewax/cn_023.mp3",
+          "/assets/audio/voice/cn/char_344_beewax/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_344_beewax/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_344_beewax/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_344_beewax/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_344_beewax/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_344_beewax/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_344_beewax/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_344_beewax/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_344_beewax/cn_032.mp3"
+      },
+      "char_294_ayer": {
+        "start": "/assets/audio/voice/cn/char_294_ayer/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_294_ayer/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_294_ayer/cn_021.mp3",
+          "/assets/audio/voice/cn/char_294_ayer/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_294_ayer/cn_023.mp3",
+          "/assets/audio/voice/cn/char_294_ayer/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_294_ayer/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_294_ayer/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_294_ayer/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_294_ayer/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_294_ayer/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_294_ayer/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_294_ayer/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_294_ayer/cn_032.mp3"
+      },
+      "char_388_mint": {
+        "start": "/assets/audio/voice/cn/char_388_mint/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_388_mint/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_388_mint/cn_021.mp3",
+          "/assets/audio/voice/cn/char_388_mint/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_388_mint/cn_023.mp3",
+          "/assets/audio/voice/cn/char_388_mint/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_388_mint/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_388_mint/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_388_mint/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_388_mint/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_388_mint/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_388_mint/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_388_mint/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_388_mint/cn_032.mp3"
+      },
+      "char_350_surtr": {
+        "start": "/assets/audio/voice/cn/char_350_surtr/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_350_surtr/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_350_surtr/cn_021.mp3",
+          "/assets/audio/voice/cn/char_350_surtr/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_350_surtr/cn_023.mp3",
+          "/assets/audio/voice/cn/char_350_surtr/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_350_surtr/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_350_surtr/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_350_surtr/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_350_surtr/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_350_surtr/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_350_surtr/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_350_surtr/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_350_surtr/cn_032.mp3"
+      },
+      "char_381_bubble": {
+        "start": "/assets/audio/voice/cn/char_381_bubble/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_381_bubble/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_381_bubble/cn_021.mp3",
+          "/assets/audio/voice/cn/char_381_bubble/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_381_bubble/cn_023.mp3",
+          "/assets/audio/voice/cn/char_381_bubble/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_381_bubble/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_381_bubble/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_381_bubble/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_381_bubble/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_381_bubble/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_381_bubble/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_381_bubble/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_381_bubble/cn_032.mp3"
+      },
+      "char_423_blemsh": {
+        "start": "/assets/audio/voice/cn/char_423_blemsh/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_423_blemsh/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_423_blemsh/cn_021.mp3",
+          "/assets/audio/voice/cn/char_423_blemsh/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_423_blemsh/cn_023.mp3",
+          "/assets/audio/voice/cn/char_423_blemsh/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_423_blemsh/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_423_blemsh/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_423_blemsh/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_423_blemsh/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_423_blemsh/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_423_blemsh/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_423_blemsh/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_423_blemsh/cn_032.mp3"
+      },
+      "char_311_mudrok": {
+        "start": "/assets/audio/voice/cn/char_311_mudrok/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_311_mudrok/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_311_mudrok/cn_021.mp3",
+          "/assets/audio/voice/cn/char_311_mudrok/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_311_mudrok/cn_023.mp3",
+          "/assets/audio/voice/cn/char_311_mudrok/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_311_mudrok/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_311_mudrok/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_311_mudrok/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_311_mudrok/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_311_mudrok/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_311_mudrok/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_311_mudrok/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_311_mudrok/cn_032.mp3"
+      },
+      "char_391_rosmon": {
+        "start": "/assets/audio/voice/cn/char_391_rosmon/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_391_rosmon/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_391_rosmon/cn_021.mp3",
+          "/assets/audio/voice/cn/char_391_rosmon/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_391_rosmon/cn_023.mp3",
+          "/assets/audio/voice/cn/char_391_rosmon/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_391_rosmon/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_391_rosmon/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_391_rosmon/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_391_rosmon/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_391_rosmon/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_391_rosmon/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_391_rosmon/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_391_rosmon/cn_032.mp3"
+      },
+      "char_264_f12yin": {
+        "start": "/assets/audio/voice/cn/char_264_f12yin/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_264_f12yin/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_264_f12yin/cn_021.mp3",
+          "/assets/audio/voice/cn/char_264_f12yin/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_264_f12yin/cn_023.mp3",
+          "/assets/audio/voice/cn/char_264_f12yin/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_264_f12yin/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_264_f12yin/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_264_f12yin/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_264_f12yin/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_264_f12yin/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_264_f12yin/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_264_f12yin/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_264_f12yin/cn_032.mp3"
+      },
+      "char_440_pinecn": {
+        "start": "/assets/audio/voice/cn/char_440_pinecn/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_440_pinecn/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_440_pinecn/cn_021.mp3",
+          "/assets/audio/voice/cn/char_440_pinecn/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_440_pinecn/cn_023.mp3",
+          "/assets/audio/voice/cn/char_440_pinecn/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_440_pinecn/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_440_pinecn/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_440_pinecn/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_440_pinecn/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_440_pinecn/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_440_pinecn/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_440_pinecn/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_440_pinecn/cn_032.mp3"
+      },
+      "char_332_archet": {
+        "start": "/assets/audio/voice/cn/char_332_archet/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_332_archet/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_332_archet/cn_021.mp3",
+          "/assets/audio/voice/cn/char_332_archet/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_332_archet/cn_023.mp3",
+          "/assets/audio/voice/cn/char_332_archet/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_332_archet/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_332_archet/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_332_archet/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_332_archet/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_332_archet/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_332_archet/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_332_archet/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_332_archet/cn_032.mp3"
+      },
+      "char_2015_dusk": {
+        "start": "/assets/audio/voice/cn/char_2015_dusk/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_2015_dusk/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_2015_dusk/cn_021.mp3",
+          "/assets/audio/voice/cn/char_2015_dusk/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_2015_dusk/cn_023.mp3",
+          "/assets/audio/voice/cn/char_2015_dusk/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_2015_dusk/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_2015_dusk/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_2015_dusk/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_2015_dusk/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_2015_dusk/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_2015_dusk/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_2015_dusk/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_2015_dusk/cn_032.mp3"
+      },
+      "char_472_pasngr": {
+        "start": "/assets/audio/voice/cn/char_472_pasngr/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_472_pasngr/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_472_pasngr/cn_021.mp3",
+          "/assets/audio/voice/cn/char_472_pasngr/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_472_pasngr/cn_023.mp3",
+          "/assets/audio/voice/cn/char_472_pasngr/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_472_pasngr/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_472_pasngr/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_472_pasngr/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_472_pasngr/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_472_pasngr/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_472_pasngr/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_472_pasngr/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_472_pasngr/cn_032.mp3"
+      },
+      "char_1012_skadi2": {
+        "start": "/assets/audio/voice/cn/char_1012_skadi2/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_1012_skadi2/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_1012_skadi2/cn_021.mp3",
+          "/assets/audio/voice/cn/char_1012_skadi2/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_1012_skadi2/cn_023.mp3",
+          "/assets/audio/voice/cn/char_1012_skadi2/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_1012_skadi2/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_1012_skadi2/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_1012_skadi2/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_1012_skadi2/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_1012_skadi2/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_1012_skadi2/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_1012_skadi2/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_1012_skadi2/cn_032.mp3"
+      },
+      "char_474_glady": {
+        "start": "/assets/audio/voice/cn/char_474_glady/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_474_glady/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_474_glady/cn_021.mp3",
+          "/assets/audio/voice/cn/char_474_glady/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_474_glady/cn_023.mp3",
+          "/assets/audio/voice/cn/char_474_glady/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_474_glady/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_474_glady/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_474_glady/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_474_glady/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_474_glady/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_474_glady/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_474_glady/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_474_glady/cn_032.mp3"
+      },
+      "char_426_billro": {
+        "start": "/assets/audio/voice/cn/char_426_billro/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_426_billro/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_426_billro/cn_021.mp3",
+          "/assets/audio/voice/cn/char_426_billro/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_426_billro/cn_023.mp3",
+          "/assets/audio/voice/cn/char_426_billro/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_426_billro/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_426_billro/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_426_billro/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_426_billro/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_426_billro/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_426_billro/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_426_billro/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_426_billro/cn_032.mp3"
+      },
+      "char_469_indigo": {
+        "start": "/assets/audio/voice/cn/char_469_indigo/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_469_indigo/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_469_indigo/cn_021.mp3",
+          "/assets/audio/voice/cn/char_469_indigo/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_469_indigo/cn_023.mp3",
+          "/assets/audio/voice/cn/char_469_indigo/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_469_indigo/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_469_indigo/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_469_indigo/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_469_indigo/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_469_indigo/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_469_indigo/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_469_indigo/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_469_indigo/cn_032.mp3"
+      },
+      "char_437_mizuki": {
+        "start": "/assets/audio/voice/cn/char_437_mizuki/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_437_mizuki/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_437_mizuki/cn_021.mp3",
+          "/assets/audio/voice/cn/char_437_mizuki/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_437_mizuki/cn_023.mp3",
+          "/assets/audio/voice/cn/char_437_mizuki/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_437_mizuki/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_437_mizuki/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_437_mizuki/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_437_mizuki/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_437_mizuki/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_437_mizuki/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_437_mizuki/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_437_mizuki/cn_032.mp3"
+      },
+      "char_430_fartth": {
+        "start": "/assets/audio/voice/cn/char_430_fartth/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_430_fartth/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_430_fartth/cn_021.mp3",
+          "/assets/audio/voice/cn/char_430_fartth/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_430_fartth/cn_023.mp3",
+          "/assets/audio/voice/cn/char_430_fartth/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_430_fartth/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_430_fartth/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_430_fartth/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_430_fartth/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_430_fartth/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_430_fartth/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_430_fartth/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_430_fartth/cn_032.mp3"
+      },
+      "char_431_ashlok": {
+        "start": "/assets/audio/voice/cn/char_431_ashlok/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_431_ashlok/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_431_ashlok/cn_021.mp3",
+          "/assets/audio/voice/cn/char_431_ashlok/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_431_ashlok/cn_023.mp3",
+          "/assets/audio/voice/cn/char_431_ashlok/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_431_ashlok/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_431_ashlok/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_431_ashlok/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_431_ashlok/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_431_ashlok/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_431_ashlok/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_431_ashlok/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_431_ashlok/cn_032.mp3"
+      },
+      "char_1014_nearl2": {
+        "start": "/assets/audio/voice/cn/char_1014_nearl2/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_1014_nearl2/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_1014_nearl2/cn_021.mp3",
+          "/assets/audio/voice/cn/char_1014_nearl2/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_1014_nearl2/cn_023.mp3",
+          "/assets/audio/voice/cn/char_1014_nearl2/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_1014_nearl2/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_1014_nearl2/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_1014_nearl2/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_1014_nearl2/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_1014_nearl2/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_1014_nearl2/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_1014_nearl2/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_1014_nearl2/cn_032.mp3"
+      },
+      "char_420_flamtl": {
+        "start": "/assets/audio/voice/cn/char_420_flamtl/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_420_flamtl/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_420_flamtl/cn_021.mp3",
+          "/assets/audio/voice/cn/char_420_flamtl/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_420_flamtl/cn_023.mp3",
+          "/assets/audio/voice/cn/char_420_flamtl/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_420_flamtl/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_420_flamtl/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_420_flamtl/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_420_flamtl/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_420_flamtl/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_420_flamtl/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_420_flamtl/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_420_flamtl/cn_032.mp3"
+      },
+      "char_496_wildmn": {
+        "start": "/assets/audio/voice/cn/char_496_wildmn/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_496_wildmn/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_496_wildmn/cn_021.mp3",
+          "/assets/audio/voice/cn/char_496_wildmn/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_496_wildmn/cn_023.mp3",
+          "/assets/audio/voice/cn/char_496_wildmn/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_496_wildmn/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_496_wildmn/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_496_wildmn/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_496_wildmn/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_496_wildmn/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_496_wildmn/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_496_wildmn/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_496_wildmn/cn_032.mp3"
+      },
+      "char_206_gnosis": {
+        "start": "/assets/audio/voice/cn/char_206_gnosis/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_206_gnosis/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_206_gnosis/cn_021.mp3",
+          "/assets/audio/voice/cn/char_206_gnosis/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_206_gnosis/cn_023.mp3",
+          "/assets/audio/voice/cn/char_206_gnosis/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_206_gnosis/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_206_gnosis/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_206_gnosis/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_206_gnosis/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_206_gnosis/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_206_gnosis/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_206_gnosis/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_206_gnosis/cn_032.mp3"
+      },
+      "char_4013_kjera": {
+        "start": "/assets/audio/voice/cn/char_4013_kjera/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4013_kjera/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4013_kjera/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4013_kjera/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4013_kjera/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4013_kjera/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4013_kjera/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4013_kjera/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4013_kjera/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4013_kjera/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4013_kjera/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4013_kjera/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4013_kjera/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4013_kjera/cn_032.mp3"
+      },
+      "char_1021_kroos2": {
+        "start": "/assets/audio/voice/cn/char_1021_kroos2/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_1021_kroos2/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_1021_kroos2/cn_021.mp3",
+          "/assets/audio/voice/cn/char_1021_kroos2/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_1021_kroos2/cn_023.mp3",
+          "/assets/audio/voice/cn/char_1021_kroos2/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_1021_kroos2/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_1021_kroos2/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_1021_kroos2/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_1021_kroos2/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_1021_kroos2/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_1021_kroos2/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_1021_kroos2/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_1021_kroos2/cn_032.mp3"
+      },
+      "char_4016_kazema": {
+        "start": "/assets/audio/voice/cn/char_4016_kazema/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4016_kazema/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4016_kazema/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4016_kazema/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4016_kazema/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4016_kazema/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4016_kazema/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4016_kazema/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4016_kazema/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4016_kazema/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4016_kazema/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4016_kazema/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4016_kazema/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4016_kazema/cn_032.mp3"
+      },
+      "char_4036_forcer": {
+        "start": "/assets/audio/voice/cn/char_4036_forcer/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4036_forcer/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4036_forcer/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4036_forcer/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4036_forcer/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4036_forcer/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4036_forcer/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4036_forcer/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4036_forcer/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4036_forcer/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4036_forcer/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4036_forcer/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4036_forcer/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4036_forcer/cn_032.mp3"
+      },
+      "char_4039_horn": {
+        "start": "/assets/audio/voice/cn/char_4039_horn/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4039_horn/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4039_horn/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4039_horn/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4039_horn/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4039_horn/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4039_horn/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4039_horn/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4039_horn/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4039_horn/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4039_horn/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4039_horn/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4039_horn/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4039_horn/cn_032.mp3"
+      },
+      "char_4040_rockr": {
+        "start": "/assets/audio/voice/cn/char_4040_rockr/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4040_rockr/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4040_rockr/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4040_rockr/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4040_rockr/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4040_rockr/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4040_rockr/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4040_rockr/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4040_rockr/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4040_rockr/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4040_rockr/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4040_rockr/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4040_rockr/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4040_rockr/cn_032.mp3"
+      },
+      "char_1023_ghost2": {
+        "start": "/assets/audio/voice/cn/char_1023_ghost2/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_1023_ghost2/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_1023_ghost2/cn_021.mp3",
+          "/assets/audio/voice/cn/char_1023_ghost2/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_1023_ghost2/cn_023.mp3",
+          "/assets/audio/voice/cn/char_1023_ghost2/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_1023_ghost2/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_1023_ghost2/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_1023_ghost2/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_1023_ghost2/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_1023_ghost2/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_1023_ghost2/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_1023_ghost2/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_1023_ghost2/cn_032.mp3"
+      },
+      "char_4042_lumen": {
+        "start": "/assets/audio/voice/cn/char_4042_lumen/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4042_lumen/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4042_lumen/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4042_lumen/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4042_lumen/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4042_lumen/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4042_lumen/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4042_lumen/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4042_lumen/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4042_lumen/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4042_lumen/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4042_lumen/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4042_lumen/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4042_lumen/cn_032.mp3"
+      },
+      "char_1026_gvial2": {
+        "start": "/assets/audio/voice/cn/char_1026_gvial2/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_1026_gvial2/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_1026_gvial2/cn_021.mp3",
+          "/assets/audio/voice/cn/char_1026_gvial2/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_1026_gvial2/cn_023.mp3",
+          "/assets/audio/voice/cn/char_1026_gvial2/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_1026_gvial2/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_1026_gvial2/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_1026_gvial2/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_1026_gvial2/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_1026_gvial2/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_1026_gvial2/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_1026_gvial2/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_1026_gvial2/cn_032.mp3"
+      },
+      "char_4054_malist": {
+        "start": "/assets/audio/voice/cn/char_4054_malist/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4054_malist/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4054_malist/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4054_malist/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4054_malist/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4054_malist/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4054_malist/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4054_malist/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4054_malist/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4054_malist/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4054_malist/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4054_malist/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4054_malist/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4054_malist/cn_032.mp3"
+      },
+      "char_4064_mlynar": {
+        "start": "/assets/audio/voice/cn/char_4064_mlynar/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4064_mlynar/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4064_mlynar/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4064_mlynar/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4064_mlynar/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4064_mlynar/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4064_mlynar/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4064_mlynar/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4064_mlynar/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4064_mlynar/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4064_mlynar/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4064_mlynar/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4064_mlynar/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4064_mlynar/cn_032.mp3"
+      },
+      "char_427_vigil": {
+        "start": "/assets/audio/voice/cn/char_427_vigil/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_427_vigil/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_427_vigil/cn_021.mp3",
+          "/assets/audio/voice/cn/char_427_vigil/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_427_vigil/cn_023.mp3",
+          "/assets/audio/voice/cn/char_427_vigil/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_427_vigil/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_427_vigil/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_427_vigil/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_427_vigil/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_427_vigil/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_427_vigil/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_427_vigil/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_427_vigil/cn_032.mp3"
+      },
+      "char_1028_texas2": {
+        "start": "/assets/audio/voice/cn/char_1028_texas2/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_1028_texas2/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_1028_texas2/cn_021.mp3",
+          "/assets/audio/voice/cn/char_1028_texas2/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_1028_texas2/cn_023.mp3",
+          "/assets/audio/voice/cn/char_1028_texas2/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_1028_texas2/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_1028_texas2/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_1028_texas2/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_1028_texas2/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_1028_texas2/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_1028_texas2/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_1028_texas2/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_1028_texas2/cn_032.mp3"
+      },
+      "char_1020_reed2": {
+        "start": "/assets/audio/voice/cn/char_1020_reed2/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_1020_reed2/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_1020_reed2/cn_021.mp3",
+          "/assets/audio/voice/cn/char_1020_reed2/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_1020_reed2/cn_023.mp3",
+          "/assets/audio/voice/cn/char_1020_reed2/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_1020_reed2/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_1020_reed2/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_1020_reed2/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_1020_reed2/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_1020_reed2/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_1020_reed2/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_1020_reed2/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_1020_reed2/cn_032.mp3"
+      },
+      "char_4082_qiubai": {
+        "start": "/assets/audio/voice/cn/char_4082_qiubai/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4082_qiubai/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4082_qiubai/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4082_qiubai/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4082_qiubai/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4082_qiubai/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4082_qiubai/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4082_qiubai/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4082_qiubai/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4082_qiubai/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4082_qiubai/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4082_qiubai/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4082_qiubai/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4082_qiubai/cn_032.mp3"
+      },
+      "char_491_humus": {
+        "start": "/assets/audio/voice/cn/char_491_humus/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_491_humus/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_491_humus/cn_021.mp3",
+          "/assets/audio/voice/cn/char_491_humus/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_491_humus/cn_023.mp3",
+          "/assets/audio/voice/cn/char_491_humus/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_491_humus/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_491_humus/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_491_humus/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_491_humus/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_491_humus/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_491_humus/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_491_humus/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_491_humus/cn_032.mp3"
+      },
+      "char_4087_ines": {
+        "start": "/assets/audio/voice/cn/char_4087_ines/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4087_ines/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4087_ines/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4087_ines/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4087_ines/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4087_ines/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4087_ines/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4087_ines/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4087_ines/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4087_ines/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4087_ines/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4087_ines/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4087_ines/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4087_ines/cn_032.mp3"
+      },
+      "char_249_mlyss": {
+        "start": "/assets/audio/voice/cn/char_249_mlyss/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_249_mlyss/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_249_mlyss/cn_021.mp3",
+          "/assets/audio/voice/cn/char_249_mlyss/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_249_mlyss/cn_023.mp3",
+          "/assets/audio/voice/cn/char_249_mlyss/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_249_mlyss/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_249_mlyss/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_249_mlyss/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_249_mlyss/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_249_mlyss/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_249_mlyss/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_249_mlyss/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_249_mlyss/cn_032.mp3"
+      },
+      "char_1032_excu2": {
+        "start": "/assets/audio/voice/cn/char_1032_excu2/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_1032_excu2/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_1032_excu2/cn_021.mp3",
+          "/assets/audio/voice/cn/char_1032_excu2/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_1032_excu2/cn_023.mp3",
+          "/assets/audio/voice/cn/char_1032_excu2/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_1032_excu2/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_1032_excu2/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_1032_excu2/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_1032_excu2/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_1032_excu2/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_1032_excu2/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_1032_excu2/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_1032_excu2/cn_032.mp3"
+      },
+      "char_498_inside": {
+        "start": "/assets/audio/voice/cn/char_498_inside/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_498_inside/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_498_inside/cn_021.mp3",
+          "/assets/audio/voice/cn/char_498_inside/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_498_inside/cn_023.mp3",
+          "/assets/audio/voice/cn/char_498_inside/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_498_inside/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_498_inside/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_498_inside/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_498_inside/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_498_inside/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_498_inside/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_498_inside/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_498_inside/cn_032.mp3"
+      },
+      "char_341_sntlla": {
+        "start": "/assets/audio/voice/cn/char_341_sntlla/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_341_sntlla/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_341_sntlla/cn_021.mp3",
+          "/assets/audio/voice/cn/char_341_sntlla/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_341_sntlla/cn_023.mp3",
+          "/assets/audio/voice/cn/char_341_sntlla/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_341_sntlla/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_341_sntlla/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_341_sntlla/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_341_sntlla/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_341_sntlla/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_341_sntlla/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_341_sntlla/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_341_sntlla/cn_032.mp3"
+      },
+      "char_1016_agoat2": {
+        "start": "/assets/audio/voice/cn/char_1016_agoat2/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_1016_agoat2/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_1016_agoat2/cn_021.mp3",
+          "/assets/audio/voice/cn/char_1016_agoat2/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_1016_agoat2/cn_023.mp3",
+          "/assets/audio/voice/cn/char_1016_agoat2/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_1016_agoat2/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_1016_agoat2/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_1016_agoat2/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_1016_agoat2/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_1016_agoat2/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_1016_agoat2/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_1016_agoat2/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_1016_agoat2/cn_032.mp3"
+      },
+      "char_1033_swire2": {
+        "start": "/assets/audio/voice/cn/char_1033_swire2/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_1033_swire2/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_1033_swire2/cn_021.mp3",
+          "/assets/audio/voice/cn/char_1033_swire2/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_1033_swire2/cn_023.mp3",
+          "/assets/audio/voice/cn/char_1033_swire2/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_1033_swire2/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_1033_swire2/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_1033_swire2/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_1033_swire2/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_1033_swire2/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_1033_swire2/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_1033_swire2/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_1033_swire2/cn_032.mp3"
+      },
+      "char_494_vendla": {
+        "start": "/assets/audio/voice/cn/char_494_vendla/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_494_vendla/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_494_vendla/cn_021.mp3",
+          "/assets/audio/voice/cn/char_494_vendla/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_494_vendla/cn_023.mp3",
+          "/assets/audio/voice/cn/char_494_vendla/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_494_vendla/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_494_vendla/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_494_vendla/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_494_vendla/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_494_vendla/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_494_vendla/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_494_vendla/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_494_vendla/cn_032.mp3"
+      },
+      "char_4100_caper": {
+        "start": "/assets/audio/voice/cn/char_4100_caper/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4100_caper/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4100_caper/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4100_caper/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4100_caper/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4100_caper/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4100_caper/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4100_caper/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4100_caper/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4100_caper/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4100_caper/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4100_caper/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4100_caper/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4100_caper/cn_032.mp3"
+      },
+      "char_245_cello": {
+        "start": "/assets/audio/voice/cn/char_245_cello/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_245_cello/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_245_cello/cn_021.mp3",
+          "/assets/audio/voice/cn/char_245_cello/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_245_cello/cn_023.mp3",
+          "/assets/audio/voice/cn/char_245_cello/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_245_cello/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_245_cello/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_245_cello/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_245_cello/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_245_cello/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_245_cello/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_245_cello/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_245_cello/cn_032.mp3"
+      },
+      "char_4114_harold": {
+        "start": "/assets/audio/voice/cn/char_4114_harold/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4114_harold/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4114_harold/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4114_harold/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4114_harold/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4114_harold/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4114_harold/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4114_harold/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4114_harold/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4114_harold/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4114_harold/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4114_harold/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4114_harold/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4114_harold/cn_032.mp3"
+      },
+      "char_4116_blkkgt": {
+        "start": "/assets/audio/voice/cn/char_4116_blkkgt/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4116_blkkgt/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4116_blkkgt/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4116_blkkgt/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4116_blkkgt/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4116_blkkgt/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4116_blkkgt/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4116_blkkgt/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4116_blkkgt/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4116_blkkgt/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4116_blkkgt/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4116_blkkgt/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4116_blkkgt/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4116_blkkgt/cn_032.mp3"
+      },
+      "char_4122_grabds": {
+        "start": "/assets/audio/voice/cn/char_4122_grabds/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4122_grabds/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4122_grabds/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4122_grabds/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4122_grabds/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4122_grabds/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4122_grabds/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4122_grabds/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4122_grabds/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4122_grabds/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4122_grabds/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4122_grabds/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4122_grabds/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4122_grabds/cn_032.mp3"
+      },
+      "char_446_aroma": {
+        "start": "/assets/audio/voice/cn/char_446_aroma/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_446_aroma/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_446_aroma/cn_021.mp3",
+          "/assets/audio/voice/cn/char_446_aroma/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_446_aroma/cn_023.mp3",
+          "/assets/audio/voice/cn/char_446_aroma/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_446_aroma/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_446_aroma/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_446_aroma/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_446_aroma/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_446_aroma/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_446_aroma/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_446_aroma/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_446_aroma/cn_032.mp3"
+      },
+      "char_4134_cetsyr": {
+        "start": "/assets/audio/voice/cn/char_4134_cetsyr/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4134_cetsyr/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4134_cetsyr/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4134_cetsyr/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4134_cetsyr/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4134_cetsyr/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4134_cetsyr/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4134_cetsyr/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4134_cetsyr/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4134_cetsyr/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4134_cetsyr/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4134_cetsyr/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4134_cetsyr/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4134_cetsyr/cn_032.mp3"
+      },
+      "char_4145_ulpia": {
+        "start": "/assets/audio/voice/cn/char_4145_ulpia/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4145_ulpia/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4145_ulpia/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4145_ulpia/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4145_ulpia/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4145_ulpia/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4145_ulpia/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4145_ulpia/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4145_ulpia/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4145_ulpia/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4145_ulpia/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4145_ulpia/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4145_ulpia/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4145_ulpia/cn_032.mp3"
+      },
+      "char_4137_udflow": {
+        "start": "/assets/audio/voice/cn/char_4137_udflow/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4137_udflow/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4137_udflow/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4137_udflow/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4137_udflow/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4137_udflow/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4137_udflow/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4137_udflow/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4137_udflow/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4137_udflow/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4137_udflow/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4137_udflow/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4137_udflow/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4137_udflow/cn_032.mp3"
+      },
+      "char_4079_haini": {
+        "start": "/assets/audio/voice/cn/char_4079_haini/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4079_haini/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4079_haini/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4079_haini/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4079_haini/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4079_haini/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4079_haini/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4079_haini/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4079_haini/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4079_haini/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4079_haini/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4079_haini/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4079_haini/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4079_haini/cn_032.mp3"
+      },
+      "char_4146_nymph": {
+        "start": "/assets/audio/voice/cn/char_4146_nymph/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4146_nymph/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4146_nymph/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4146_nymph/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4146_nymph/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4146_nymph/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4146_nymph/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4146_nymph/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4146_nymph/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4146_nymph/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4146_nymph/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4146_nymph/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4146_nymph/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4146_nymph/cn_032.mp3"
+      },
+      "char_4151_tinman": {
+        "start": "/assets/audio/voice/cn/char_4151_tinman/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4151_tinman/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4151_tinman/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4151_tinman/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4151_tinman/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4151_tinman/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4151_tinman/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4151_tinman/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4151_tinman/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4151_tinman/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4151_tinman/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4151_tinman/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4151_tinman/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4151_tinman/cn_032.mp3"
+      },
+      "char_4139_papyrs": {
+        "start": "/assets/audio/voice/cn/char_4139_papyrs/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4139_papyrs/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4139_papyrs/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4139_papyrs/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4139_papyrs/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4139_papyrs/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4139_papyrs/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4139_papyrs/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4139_papyrs/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4139_papyrs/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4139_papyrs/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4139_papyrs/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4139_papyrs/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4139_papyrs/cn_032.mp3"
+      },
+      "char_4058_pepe": {
+        "start": "/assets/audio/voice/cn/char_4058_pepe/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4058_pepe/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4058_pepe/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4058_pepe/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4058_pepe/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4058_pepe/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4058_pepe/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4058_pepe/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4058_pepe/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4058_pepe/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4058_pepe/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4058_pepe/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4058_pepe/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4058_pepe/cn_032.mp3"
+      },
+      "char_1019_siege2": {
+        "start": "/assets/audio/voice/cn/char_1019_siege2/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_1019_siege2/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_1019_siege2/cn_021.mp3",
+          "/assets/audio/voice/cn/char_1019_siege2/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_1019_siege2/cn_023.mp3",
+          "/assets/audio/voice/cn/char_1019_siege2/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_1019_siege2/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_1019_siege2/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_1019_siege2/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_1019_siege2/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_1019_siege2/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_1019_siege2/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_1019_siege2/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_1019_siege2/cn_032.mp3"
+      },
+      "char_4162_cathy": {
+        "start": "/assets/audio/voice/cn/char_4162_cathy/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4162_cathy/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4162_cathy/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4162_cathy/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4162_cathy/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4162_cathy/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4162_cathy/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4162_cathy/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4162_cathy/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4162_cathy/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4162_cathy/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4162_cathy/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4162_cathy/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4162_cathy/cn_032.mp3"
+      },
+      "char_1038_whitw2": {
+        "start": "/assets/audio/voice/cn/char_1038_whitw2/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_1038_whitw2/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_1038_whitw2/cn_021.mp3",
+          "/assets/audio/voice/cn/char_1038_whitw2/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_1038_whitw2/cn_023.mp3",
+          "/assets/audio/voice/cn/char_1038_whitw2/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_1038_whitw2/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_1038_whitw2/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_1038_whitw2/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_1038_whitw2/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_1038_whitw2/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_1038_whitw2/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_1038_whitw2/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_1038_whitw2/cn_032.mp3"
+      },
+      "char_4026_vulpis": {
+        "start": "/assets/audio/voice/cn/char_4026_vulpis/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4026_vulpis/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4026_vulpis/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4026_vulpis/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4026_vulpis/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4026_vulpis/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4026_vulpis/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4026_vulpis/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4026_vulpis/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4026_vulpis/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4026_vulpis/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4026_vulpis/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4026_vulpis/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4026_vulpis/cn_032.mp3"
+      },
+      "char_4148_philae": {
+        "start": "/assets/audio/voice/cn/char_4148_philae/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4148_philae/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4148_philae/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4148_philae/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4148_philae/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4148_philae/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4148_philae/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4148_philae/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4148_philae/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4148_philae/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4148_philae/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4148_philae/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4148_philae/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4148_philae/cn_032.mp3"
+      },
+      "char_1039_thorn2": {
+        "start": "/assets/audio/voice/cn/char_1039_thorn2/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_1039_thorn2/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_1039_thorn2/cn_021.mp3",
+          "/assets/audio/voice/cn/char_1039_thorn2/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_1039_thorn2/cn_023.mp3",
+          "/assets/audio/voice/cn/char_1039_thorn2/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_1039_thorn2/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_1039_thorn2/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_1039_thorn2/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_1039_thorn2/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_1039_thorn2/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_1039_thorn2/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_1039_thorn2/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_1039_thorn2/cn_032.mp3"
+      },
+      "char_4163_rosesa": {
+        "start": "/assets/audio/voice/cn/char_4163_rosesa/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4163_rosesa/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4163_rosesa/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4163_rosesa/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4163_rosesa/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4163_rosesa/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4163_rosesa/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4163_rosesa/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4163_rosesa/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4163_rosesa/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4163_rosesa/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4163_rosesa/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4163_rosesa/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4163_rosesa/cn_032.mp3"
+      },
+      "char_2026_yu": {
+        "start": "/assets/audio/voice/cn/char_2026_yu/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_2026_yu/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_2026_yu/cn_021.mp3",
+          "/assets/audio/voice/cn/char_2026_yu/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_2026_yu/cn_023.mp3",
+          "/assets/audio/voice/cn/char_2026_yu/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_2026_yu/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_2026_yu/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_2026_yu/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_2026_yu/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_2026_yu/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_2026_yu/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_2026_yu/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_2026_yu/cn_032.mp3"
+      },
+      "char_1040_blaze2": {
+        "start": "/assets/audio/voice/cn/char_1040_blaze2/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_1040_blaze2/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_1040_blaze2/cn_021.mp3",
+          "/assets/audio/voice/cn/char_1040_blaze2/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_1040_blaze2/cn_023.mp3",
+          "/assets/audio/voice/cn/char_1040_blaze2/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_1040_blaze2/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_1040_blaze2/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_1040_blaze2/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_1040_blaze2/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_1040_blaze2/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_1040_blaze2/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_1040_blaze2/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_1040_blaze2/cn_032.mp3"
+      },
+      "char_4010_etlchi": {
+        "start": "/assets/audio/voice/cn/char_4010_etlchi/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4010_etlchi/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4010_etlchi/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4010_etlchi/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4010_etlchi/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4010_etlchi/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4010_etlchi/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4010_etlchi/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4010_etlchi/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4010_etlchi/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4010_etlchi/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4010_etlchi/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4010_etlchi/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4010_etlchi/cn_032.mp3"
+      },
+      "char_1041_angel2": {
+        "start": "/assets/audio/voice/cn/char_1041_angel2/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_1041_angel2/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_1041_angel2/cn_021.mp3",
+          "/assets/audio/voice/cn/char_1041_angel2/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_1041_angel2/cn_023.mp3",
+          "/assets/audio/voice/cn/char_1041_angel2/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_1041_angel2/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_1041_angel2/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_1041_angel2/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_1041_angel2/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_1041_angel2/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_1041_angel2/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_1041_angel2/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_1041_angel2/cn_032.mp3"
+      },
+      "char_4193_lemuen": {
+        "start": "/assets/audio/voice/cn/char_4193_lemuen/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4193_lemuen/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4193_lemuen/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4193_lemuen/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4193_lemuen/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4193_lemuen/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4193_lemuen/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4193_lemuen/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4193_lemuen/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4193_lemuen/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4193_lemuen/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4193_lemuen/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4193_lemuen/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4193_lemuen/cn_032.mp3"
+      },
+      "char_4194_rmixer": {
+        "start": "/assets/audio/voice/cn/char_4194_rmixer/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4194_rmixer/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4194_rmixer/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4194_rmixer/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4194_rmixer/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4194_rmixer/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4194_rmixer/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4194_rmixer/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4194_rmixer/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4194_rmixer/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4194_rmixer/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4194_rmixer/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4194_rmixer/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4194_rmixer/cn_032.mp3"
+      },
+      "char_4191_tippi": {
+        "start": "/assets/audio/voice/cn/char_4191_tippi/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4191_tippi/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4191_tippi/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4191_tippi/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4191_tippi/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4191_tippi/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4191_tippi/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4191_tippi/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4191_tippi/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4191_tippi/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4191_tippi/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4191_tippi/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4191_tippi/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4191_tippi/cn_032.mp3"
+      },
+      "char_4196_reckpr": {
+        "start": "/assets/audio/voice/cn/char_4196_reckpr/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4196_reckpr/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4196_reckpr/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4196_reckpr/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4196_reckpr/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4196_reckpr/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4196_reckpr/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4196_reckpr/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4196_reckpr/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4196_reckpr/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4196_reckpr/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4196_reckpr/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4196_reckpr/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4196_reckpr/cn_032.mp3"
+      },
+      "char_4207_branch": {
+        "start": "/assets/audio/voice/cn/char_4207_branch/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4207_branch/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4207_branch/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4207_branch/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4207_branch/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4207_branch/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4207_branch/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4207_branch/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4207_branch/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4207_branch/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4207_branch/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4207_branch/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4207_branch/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4207_branch/cn_032.mp3"
+      },
+      "char_1046_sbell2": {
+        "start": "/assets/audio/voice/cn/char_1046_sbell2/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_1046_sbell2/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_1046_sbell2/cn_021.mp3",
+          "/assets/audio/voice/cn/char_1046_sbell2/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_1046_sbell2/cn_023.mp3",
+          "/assets/audio/voice/cn/char_1046_sbell2/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_1046_sbell2/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_1046_sbell2/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_1046_sbell2/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_1046_sbell2/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_1046_sbell2/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_1046_sbell2/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_1046_sbell2/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_1046_sbell2/cn_032.mp3"
+      },
+      "char_1045_svash2": {
+        "start": "/assets/audio/voice/cn/char_1045_svash2/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_1045_svash2/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_1045_svash2/cn_021.mp3",
+          "/assets/audio/voice/cn/char_1045_svash2/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_1045_svash2/cn_023.mp3",
+          "/assets/audio/voice/cn/char_1045_svash2/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_1045_svash2/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_1045_svash2/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_1045_svash2/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_1045_svash2/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_1045_svash2/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_1045_svash2/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_1045_svash2/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_1045_svash2/cn_032.mp3"
+      },
+      "char_1047_halo2": {
+        "start": "/assets/audio/voice/cn/char_1047_halo2/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_1047_halo2/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_1047_halo2/cn_021.mp3",
+          "/assets/audio/voice/cn/char_1047_halo2/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_1047_halo2/cn_023.mp3",
+          "/assets/audio/voice/cn/char_1047_halo2/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_1047_halo2/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_1047_halo2/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_1047_halo2/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_1047_halo2/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_1047_halo2/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_1047_halo2/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_1047_halo2/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_1047_halo2/cn_032.mp3"
+      },
+      "char_4211_snhunt": {
+        "start": "/assets/audio/voice/cn/char_4211_snhunt/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4211_snhunt/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4211_snhunt/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4211_snhunt/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4211_snhunt/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4211_snhunt/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4211_snhunt/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4211_snhunt/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4211_snhunt/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4211_snhunt/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4211_snhunt/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4211_snhunt/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4211_snhunt/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4211_snhunt/cn_032.mp3"
+      },
+      "char_4051_akkord": {
+        "start": "/assets/audio/voice/cn/char_4051_akkord/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4051_akkord/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4051_akkord/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4051_akkord/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4051_akkord/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4051_akkord/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4051_akkord/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4051_akkord/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4051_akkord/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4051_akkord/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4051_akkord/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4051_akkord/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4051_akkord/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4051_akkord/cn_032.mp3"
+      },
+      "char_4056_titi": {
+        "start": "/assets/audio/voice/cn/char_4056_titi/cn_019.mp3",
+        "faceEnemy": "/assets/audio/voice/cn/char_4056_titi/cn_020.mp3",
+        "select": [
+          "/assets/audio/voice/cn/char_4056_titi/cn_021.mp3",
+          "/assets/audio/voice/cn/char_4056_titi/cn_022.mp3"
+        ],
+        "place": [
+          "/assets/audio/voice/cn/char_4056_titi/cn_023.mp3",
+          "/assets/audio/voice/cn/char_4056_titi/cn_024.mp3"
+        ],
+        "skill1": "/assets/audio/voice/cn/char_4056_titi/cn_025.mp3",
+        "skill2": "/assets/audio/voice/cn/char_4056_titi/cn_026.mp3",
+        "skill3": "/assets/audio/voice/cn/char_4056_titi/cn_027.mp3",
+        "skill4": "/assets/audio/voice/cn/char_4056_titi/cn_028.mp3",
+        "resultFour": "/assets/audio/voice/cn/char_4056_titi/cn_029.mp3",
+        "resultThree": "/assets/audio/voice/cn/char_4056_titi/cn_030.mp3",
+        "resultTwo": "/assets/audio/voice/cn/char_4056_titi/cn_031.mp3",
+        "resultLose": "/assets/audio/voice/cn/char_4056_titi/cn_032.mp3"
+      }
     }
   },
   "fonts": {

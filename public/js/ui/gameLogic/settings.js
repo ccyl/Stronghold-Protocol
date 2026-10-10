@@ -7,7 +7,7 @@ import { DEFAULT_HOTKEYS, sanitizeHotkeys } from './shortcuts.js';
 // ---- settings ------------------------------------------------------------------------------------------------------
 
 /** keys: the in-match shortcuts' key map (ui/gameLogic/shortcuts.js; settings → 快捷键). */
-export const DEFAULT_SETTINGS = Object.freeze({ bgm: 0.6, sfx: 0.8, voice: 0.8, voiceLang: 'jp', muted: false, damageNumbers: true, quality: 'high', board: 'auto', keys: DEFAULT_HOTKEYS });
+export const DEFAULT_SETTINGS = Object.freeze({ bgm: 0.6, sfx: 0.8, voice: 0.8, voiceLang: 'jp', muted: false, damageNumbers: true, quality: 'high', board: 'auto', highRefresh: true, keys: DEFAULT_HOTKEYS });
 const QUALITIES = ['high', 'medium', 'low'];
 const BOARDS = ['auto', '3d', '2d'];
 
@@ -15,7 +15,7 @@ const BOARDS = ['auto', '3d', '2d'];
  * Sanitize persisted settings.
  * @param {any} raw
  * @returns {{ bgm: number, sfx: number, voice: number, voiceLang: 'jp'|'cn', muted: boolean, damageNumbers: boolean, quality: 'high'|'medium'|'low', board: 'auto'|'3d'|'2d',
- *   keys: Record<'refresh'|'freeze'|'levelUp'|'retreat'|'sell'|'ready', string> }}
+ *   highRefresh: boolean, keys: Record<'refresh'|'freeze'|'levelUp'|'retreat'|'sell'|'ready', string> }}
  */
 export function sanitizeSettings(raw) {
   const r = isObj(raw) ? raw : {};
@@ -30,6 +30,7 @@ export function sanitizeSettings(raw) {
     damageNumbers: typeof r.damageNumbers === 'boolean' ? r.damageNumbers : DEFAULT_SETTINGS.damageNumbers,
     quality: QUALITIES.includes(r.quality) ? r.quality : DEFAULT_SETTINGS.quality,
     board: BOARDS.includes(r.board) ? r.board : DEFAULT_SETTINGS.board,
+    highRefresh: typeof r.highRefresh === 'boolean' ? r.highRefresh : DEFAULT_SETTINGS.highRefresh,
     keys: sanitizeHotkeys(r.keys),
   };
 }
