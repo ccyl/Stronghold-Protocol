@@ -74,6 +74,7 @@ import { store as appStore } from '../store.js';
 import { unitStatsEntry, fxForm, RESULT_LIMITS } from '../../../shared/protocol.js';
 import { MAX_SEATS } from '../../../shared/constants.js';
 import { spectateEffects } from './observe.js';
+import { t } from '../../../shared/i18n.js';
 
 const TICK = 1 / 30;
 /** Fast-forward budget per frame (ticks) when far behind. */
@@ -140,7 +141,7 @@ export const SIM_RETRIES_MAX = 4;
 function engineTag() {
   const ua = typeof navigator !== 'undefined' && navigator.userAgent ? navigator.userAgent : '';
   const m = ua.match(/(?:Chrome|Chromium|CriOS)\/(\d+)/) || ua.match(/Version\/(\d+)[^)]*Safari/);
-  return m ? `引擎 Chromium ${m[1]}` : '引擎未知';
+  return m ? t('引擎 Chromium {0}', { 0: m[1] }) : t('引擎未知');
 }
 
 /**

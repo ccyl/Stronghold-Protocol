@@ -79,7 +79,7 @@ function SlotCard({ m, slot, pick, illegal, onOpen, onClear }) {
         if (!skinId) return null;
         const skinInfo = availableSkins(rec.charId).find((s) => s.id === skinId);
         return html`<span class="diy-slot__kit" data-skin=${skinId}>
-          <span class="diy-slot__micon" style="color: var(--mint-400); font-weight: bold; font-size: 11px;">衣</span>
+          <span class="diy-slot__micon" style="color: var(--mint-400); font-weight: bold; font-size: 11px;">${t('衣')}</span>
           <span style="color: var(--mint-400);">${t('时装：{name}', { name: skinInfo?.name || skinId })}</span>
         </span>`;
       })()}

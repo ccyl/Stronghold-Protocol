@@ -239,7 +239,7 @@ function OnlinePill({ count }) {
   return html`<div class="online-pill">
     <span class="online-pill__dot"></span>
     <span class="num">${count ?? 1}</span>
-    <span class="online-pill__label">在线</span>
+    <span class="online-pill__label">${t('在线')}</span>
   </div>`;
 }
 
@@ -294,8 +294,8 @@ function MatchmakingModal({ open, onClose, onJoin, onSpectate }) {
       <header class="modal__head mm-modal__head">
         <${MicroLabel} tone="mint">MULTIPLAYER MATCHMAKING<//>
         <div class="mm-modal__title-row">
-          <h2 class="modal__title mm-modal__title">多人匹配</h2>
-          <button type="button" class="mm-modal__close" onClick=${onClose} aria-label="关闭">
+          <h2 class="modal__title mm-modal__title">${t('多人匹配')}</h2>
+          <button type="button" class="mm-modal__close" onClick=${onClose} aria-label=${t('关闭')}>
             <${Icon} name="close" />
           </button>
         </div>
@@ -305,19 +305,19 @@ function MatchmakingModal({ open, onClose, onJoin, onSpectate }) {
         <div class="mm-stats-bar">
           <div class="mm-stats-col">
             <span class="mm-stats-num mm-stats-num--mint num">${data.online ?? 1}</span>
-            <span class="mm-stats-label">在线博士</span>
+            <span class="mm-stats-label">${t('在线博士')}</span>
           </div>
           <div class="mm-stats-col">
             <span class="mm-stats-num num">${data.roomsCount ?? 0}</span>
-            <span class="mm-stats-label">同盟房间</span>
+            <span class="mm-stats-label">${t('同盟房间')}</span>
           </div>
           <div class="mm-stats-col">
             <span class="mm-stats-num num">${data.matchesCount ?? 0}</span>
-            <span class="mm-stats-label">进行中对局</span>
+            <span class="mm-stats-label">${t('进行中对局')}</span>
           </div>
           <button type="button" class="mm-refresh-btn" onClick=${fetchRooms} disabled=${loading}>
             <${Icon} name="refresh" class=${loading ? 'is-spinning' : ''} />
-            <span>刷新</span>
+            <span>${t('刷新')}</span>
           </button>
         </div>
 
@@ -326,7 +326,7 @@ function MatchmakingModal({ open, onClose, onJoin, onSpectate }) {
             ? data.rooms.map((r) => html`<div key=${r.code} class="mm-room-card">
                 <div class="mm-room-code num">${r.code}</div>
                 <div class="mm-room-info">
-                  <div class="mm-room-name">${r.name || `同盟 #${r.code}`}</div>
+                  <div class="mm-room-name">${r.name || t('同盟 #{code}', { code: r.code })}</div>
                   <div class="mm-room-meta">
                     <span class="mm-room-diff" style=${`--d-color:${DIFFICULTY_COLORS[r.difficulty] || 'var(--mint)'}`}>
                       <${DifficultyIcon} difficulty=${r.difficulty} class="diff-glyph" />
@@ -337,7 +337,7 @@ function MatchmakingModal({ open, onClose, onJoin, onSpectate }) {
                       <span class="num">${r.humans} / ${r.maxSeats || 10}</span>
                     </span>
                     <span class=${`mm-room-status ${r.inMatch ? 'is-in-match' : 'is-waiting'}`}>
-                      ${r.inMatch ? '进行中' : '等待中'}
+                      ${r.inMatch ? t('进行中') : t('等待中')}
                     </span>
                   </div>
                 </div>
@@ -349,7 +349,7 @@ function MatchmakingModal({ open, onClose, onJoin, onSpectate }) {
                     class=${`mm-btn-join ${r.inMatch ? 'is-disabled-match' : ''}`}
                     disabled=${r.inMatch}
                     onClick=${() => { onClose(); onJoin(r.code); }}>
-                    加入
+                    ${t('加入')}
                   <//>
                   <${Button}
                     variant="secondary"
@@ -357,20 +357,20 @@ function MatchmakingModal({ open, onClose, onJoin, onSpectate }) {
                     icon="eye"
                     class="mm-btn-spectate"
                     onClick=${() => { onClose(); onSpectate(r.code); }}>
-                    观战
+                    ${t('观战')}
                   <//>
                 </div>
               </div>`)
             : html`<div class="mm-room-empty">
                 <${Icon} name="search" />
-                <span>暂无公开同盟房间，可创建同盟或使用快速匹配</span>
+                <span>${t('暂无公开同盟房间，可创建同盟或使用快速匹配')}</span>
               </div>`
           }
         </div>
 
         <footer class="mm-modal__foot">
           <div class="mm-foot-tag"><${MicroLabel}>AUTO-REFRESH 4S<//></div>
-          <div class="mm-foot-text">列表每 4 秒自动刷新；观战不占博士席位，「进行中」的同盟只能观战。</div>
+          <div class="mm-foot-text">${t('列表每 4 秒自动刷新；观战不占博士席位，「进行中」的同盟只能观战。')}</div>
         </footer>
       </div>
     </div>
@@ -407,12 +407,12 @@ export function LobbyScreen() {
     if (!nativeShell || roomMode !== 'coop' || !codeOk) { setLanRoom(null); return undefined; }
     let cancelled = false;
     setLanRoom(null);
-    setLanNote('正在局域网中查找该房间…');
+    setLanNote(t('正在局域网中查找该房间…'));
     globalThis.__onRoomFound = (list) => {
       if (cancelled) return;
       const host = (list || []).find((h) => !h.self);
-      if (host) { setLanRoom(host); setLanNote(`已找到房主 ${host.ip}（${host.humans || 0} 人在房）· 点「加入同盟」进入`); }
-      else setLanNote('局域网里没有这个房间：确认房主已创建同盟模拟房间，且两台设备在同一网络');
+      if (host) { setLanRoom(host); setLanNote(t('已找到房主 {ip}（{1} 人在房）· 点「加入同盟」进入', { ip: host.ip, 1: host.humans || 0 })); }
+      else setLanNote(t('局域网里没有这个房间：确认房主已创建同盟模拟房间，且两台设备在同一网络'));
     };
     nativeShell.findRoom(code);
     return () => { cancelled = true; delete globalThis.__onRoomFound; };
@@ -472,7 +472,7 @@ export function LobbyScreen() {
     // server we are on, which by definition does not have that room.
     if (nativeShell && lanRoom) {
       nativeShell.connectToHost(lanRoom.ip, k);
-      setLanNote(`正在进入 ${lanRoom.ip} 的房间…`);
+      setLanNote(t('正在进入 {ip} 的房间…', { ip: lanRoom.ip }));
       return;
     }
     run('join', () => net.request('room.join', { code: k }));
@@ -553,8 +553,8 @@ export function LobbyScreen() {
         <div class="section-label"><span class="section-label__idx num">03</span>${t('加入同盟')}<${MicroLabel}>JOIN WITH ALLIANCE KEY<//></div>
         <${Panel} class="join-panel" tone="amber">
           ${nativeShell && roomMode === 'coop' && codeOk ? html`<div class="join-foot">
-            <span class=${lanRoom ? 't-lo' : 't-dim'}>${lanNote || '正在局域网中查找该房间…'}</span>
-            <button type="button" class="code-chip" onClick=${() => { setLanRoom(null); setLanNote('正在局域网中查找该房间…'); nativeShell.findRoom(code); }}>重新搜索</button>
+            <span class=${lanRoom ? 't-lo' : 't-dim'}>${lanNote || t('正在局域网中查找该房间…')}</span>
+            <button type="button" class="code-chip" onClick=${() => { setLanRoom(null); setLanNote(t('正在局域网中查找该房间…')); nativeShell.findRoom(code); }}>${t('重新搜索')}</button>
           </div>` : null}
           <div class="join-row">
             <${TextField} size="code" icon="key" value=${code} placeholder=${t('输入同盟密钥 / 粘贴邀请链接')}

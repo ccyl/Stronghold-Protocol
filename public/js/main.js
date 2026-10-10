@@ -191,23 +191,23 @@ async function checkServerLoadNotice(load) {
     })();
 
     const advice = isPreloaded
-      ? '检测到您已预载核心资源。当前服务器算力负荷极高（CPU ' + (load.cpuPercent || 0) + '%），对局中可能有轻微同步延迟。'
-      : '检测到您尚未预载资源！在当前服务器高负荷下直接进入游玩极易发生静态素材拉取超时或断线。建议立即前往主页右下角「⚡资源预载」或前往备用服务器。';
+      ? t('检测到您已预载核心资源。当前服务器算力负荷极高（CPU ') + (load.cpuPercent || 0) + t('%），对局中可能有轻微同步延迟。')
+      : t('检测到您尚未预载资源！在当前服务器高负荷下直接进入游玩极易发生静态素材拉取超时或断线。建议立即前往主页右下角「⚡资源预载」或前往备用服务器。');
 
     await alertDialog({
-      title: '⚠ 服务器高载荷预警',
+      title: t('⚠ 服务器高载荷预警'),
       text: html`<div>
-        <p style="margin: 0 0 .12rem 0; line-height: 1.5;">${load.message || '当前服务器在线人数较多，负载已逼近承载上限。'}</p>
+        <p style="margin: 0 0 .12rem 0; line-height: 1.5;">${load.message || t('当前服务器在线人数较多，负载已逼近承载上限。')}</p>
         <p style="margin: 0 0 .1rem 0; color: var(--amber); font-size: .13rem;">${advice}</p>
         <div style="font-size: .12rem; color: var(--text-lo); background: rgba(0,0,0,0.25); padding: .08rem; border-radius: 4px;">
-          当前在线: <b>${load.onlineCount}</b> 人 · 算力折算点数: <b>${load.score} / ${load.maxScore || 150}</b> · CPU: <b>${load.cpuPercent}%</b>
+          ${t('当前在线:')} <b>${load.onlineCount}</b> ${t('人 · 算力折算点数:')} <b>${load.score} / ${load.maxScore || 150}</b> · CPU: <b>${load.cpuPercent}%</b>
         </div>
       </div>`,
-      okText: '我知道了，继续游玩',
+      okText: t('我知道了，继续游玩'),
       tone: 'warn',
     });
   } else if (load.status === 'warning') {
-    toast(`⚠️ 服务器较拥挤（在线 ${load.onlineCount} 人），建议未预载玩家先进行资源预载`, 'warn', { ttl: 8000 });
+    toast(t('⚠️ 服务器较拥挤（在线 {onlineCount} 人），建议未预载玩家先进行资源预载', { onlineCount: load.onlineCount }), 'warn', { ttl: 8000 });
   }
 }
 
@@ -273,7 +273,7 @@ function wireNet() {
   });
   net.on('match.found', (msg) => {
     store.patch('matchmaking', { status: 'found', roomCode: msg.roomCode });
-    toast(`已匹配到同盟小队（${msg.roomCode}）！`, 'success', { ttl: 3000 });
+    toast(t('已匹配到同盟小队（{roomCode}）！', { roomCode: msg.roomCode }), 'success', { ttl: 3000 });
   });
   net.on('server.maintenance', (msg) => {
     const active = !!msg.active;
@@ -284,7 +284,7 @@ function wireNet() {
       reason: msg.reason || '',
     });
     if (active) {
-      toast(`⚠ 服务器将于 ${msg.seconds || 60} 秒后停服维护（${msg.reason || '例行维护'}）`, 'warn', { ttl: 9000 });
+      toast(t('⚠ 服务器将于 {0} 秒后停服维护（{1}）', { 0: msg.seconds || 60, 1: msg.reason || t('例行维护') }), 'warn', { ttl: 9000 });
     }
   });
   net.on('room.chat', (msg) => {
@@ -392,8 +392,8 @@ function MaintenanceBanner() {
     <div class="maint-banner__content">
       <div class="maint-banner__hazard"><${Icon} name="warn" /></div>
       <div class="maint-banner__text">
-        <span class="maint-banner__title">停服维护倒计时</span>
-        <span class="maint-banner__desc">${maint.reason || '服务器即将进行停机维护，请尽快完成当前模拟并保存进度'}</span>
+        <span class="maint-banner__title">${t('停服维护倒计时')}</span>
+        <span class="maint-banner__desc">${maint.reason || t('服务器即将进行停机维护，请尽快完成当前模拟并保存进度')}</span>
       </div>
       <div class="maint-banner__timer">
         <span class="maint-banner__time num">${mm}:${ss}</span>

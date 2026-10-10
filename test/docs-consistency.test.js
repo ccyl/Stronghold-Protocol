@@ -872,7 +872,9 @@ test('干员战斗语音 (DESIGN §21.30): the manifest data, the official prior
   const { VOICE_PRIORITY, VOICE_COOLDOWN_MS, resultVoiceSlot } = await import('../public/js/audio.js');
   const manifest = JSON.parse(readFileSync(join(ROOT, 'data/assets.json'), 'utf8'));
   const voice = manifest.audio?.voice ?? {};
-  const charIds = Object.keys(voice);
+  // `voice` is multi-purpose: the `jp` / `cn` language views, the flat per-operator slot maps and a flat
+  // file→URL map. The operators are its `char_*` keys — what `stats.voiceChars` counts.
+  const charIds = Object.keys(voice).filter((k) => k.startsWith('char_'));
   assert.ok(charIds.length >= 100, `${charIds.length} operators carry official battle voice`);
   assert.equal(manifest.stats.voiceChars, charIds.length, 'stats.voiceChars counts them');
   // one operator carries every slot a battle can play — and none of the prep-only ones (plan.mjs VOICE_BATTLE_SLOTS):

@@ -294,7 +294,7 @@ function Detail({ m, chess, golden, entries, onChange, onReset, locked, notOwned
   const activeTab = tab === 'mod' && !hasMod ? 'skill' : tab;
 
   useEffect(() => { if (bodyRef.current) bodyRef.current.scrollTop = 0; }, [chess?.chessId, activeTab]);
-  if (!chess) return html`<aside class="lo-detail lo-detail--empty"><p class="t-dim">没有符合条件的干员</p></aside>`;
+  if (!chess) return html`<aside class="lo-detail lo-detail--empty"><p class="t-dim">${t('没有符合条件的干员')}</p></aside>`;
   const lv = (c) => c?.status?.skillLevel ?? '—';
   return html`<aside class="lo-detail" aria-label=${t('{name} 调配', { name: chess.name })}>
     <div class="lo-dhead">
@@ -315,18 +315,18 @@ function Detail({ m, chess, golden, entries, onChange, onReset, locked, notOwned
       </div>
       <${Button} variant="ghost" size="sm" icon="refresh" class="lo-dhead__reset" disabled=${!choice.changed} onClick=${onReset}>${t('恢复默认')}<//>
     </div>
-    <div class="lo-dtabs" role="tablist" aria-label="调配项目">
+    <div class="lo-dtabs" role="tablist" aria-label=${t('调配项目')}>
       <button type="button" role="tab" aria-selected=${activeTab === 'skill'} class=${cx('lo-dtab', activeTab === 'skill' && 'is-on')} onClick=${() => setTab('skill')}>
-        技能 <span class="lo-dtab__en num">SKILL</span>
+        ${t('技能')} <span class="lo-dtab__en num">SKILL</span>
       </button>
       ${hasMod ? html`<button type="button" role="tab" aria-selected=${activeTab === 'mod'} class=${cx('lo-dtab', activeTab === 'mod' && 'is-on')} onClick=${() => setTab('mod')}>
-        模组 <span class="lo-dtab__en num">MODULE</span>
+        ${t('模组')} <span class="lo-dtab__en num">MODULE</span>
       </button>` : null}
       <button type="button" role="tab" aria-selected=${activeTab === 'stats'} class=${cx('lo-dtab', activeTab === 'stats' && 'is-on')} onClick=${() => setTab('stats')}>
-        数值 <span class="lo-dtab__en num">STATS</span>
+        ${t('数值')} <span class="lo-dtab__en num">STATS</span>
       </button>
       <button type="button" role="tab" aria-selected=${activeTab === 'skin'} class=${cx('lo-dtab', activeTab === 'skin' && 'is-on')} onClick=${() => setTab('skin')}>
-        换装 <span class="lo-dtab__en num">SKIN</span>
+        ${t('换装')} <span class="lo-dtab__en num">SKIN</span>
       </button>
     </div>
     <div class="lo-detail__body" ref=${bodyRef}>
