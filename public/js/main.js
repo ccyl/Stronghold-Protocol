@@ -197,7 +197,7 @@ async function checkServerLoadNotice(load) {
     await alertDialog({
       title: t('⚠ 服务器高载荷预警'),
       text: html`<div>
-        <p style="margin: 0 0 .12rem 0; line-height: 1.5;">${load.message || t('当前服务器在线人数较多，负载已逼近承载上限。')}</p>
+        <p style="margin: 0 0 .12rem 0; line-height: 1.5;">${load.message ? t(load.message) : t('当前服务器在线人数较多，负载已逼近承载上限。')}</p>
         <p style="margin: 0 0 .1rem 0; color: var(--amber); font-size: .13rem;">${advice}</p>
         <div style="font-size: .12rem; color: var(--text-lo); background: rgba(0,0,0,0.25); padding: .08rem; border-radius: 4px;">
           ${t('当前在线:')} <b>${load.onlineCount}</b> ${t('人 · 算力折算点数:')} <b>${load.score} / ${load.maxScore || 150}</b> · CPU: <b>${load.cpuPercent}%</b>
@@ -284,7 +284,7 @@ function wireNet() {
       reason: msg.reason || '',
     });
     if (active) {
-      toast(t('⚠ 服务器将于 {0} 秒后停服维护（{1}）', { 0: msg.seconds || 60, 1: msg.reason || t('例行维护') }), 'warn', { ttl: 9000 });
+      toast(t('⚠ 服务器将于 {0} 秒后停服维护（{1}）', { 0: msg.seconds || 60, 1: msg.reason ? t(msg.reason) : t('例行维护') }), 'warn', { ttl: 9000 });
     }
   });
   net.on('room.chat', (msg) => {
@@ -393,7 +393,7 @@ function MaintenanceBanner() {
       <div class="maint-banner__hazard"><${Icon} name="warn" /></div>
       <div class="maint-banner__text">
         <span class="maint-banner__title">${t('停服维护倒计时')}</span>
-        <span class="maint-banner__desc">${maint.reason || t('服务器即将进行停机维护，请尽快完成当前模拟并保存进度')}</span>
+        <span class="maint-banner__desc">${maint.reason ? t(maint.reason) : t('服务器即将进行停机维护，请尽快完成当前模拟并保存进度')}</span>
       </div>
       <div class="maint-banner__timer">
         <span class="maint-banner__time num">${mm}:${ss}</span>

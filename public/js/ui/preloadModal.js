@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from '../../vendor/hooks.module.js';
 import { html, Modal, Button, Icon, MicroLabel, ProgressBar } from './components.js';
 import { data, loadData } from '../data.js';
+import { t } from '../../../shared/i18n.js';
 
 const CACHE_NAME = 'stronghold-assets-v0.2.1';
 const PRELOAD_STORAGE_KEY = 'sp_preloaded_profiles';
@@ -172,7 +173,7 @@ class PreloadEngine {
       const urls = extractUrls(safeAssets, safeSkins)[profile] || [];
       if (urls.length === 0) {
         this.status = 'error';
-        this.lastError = '未能解析到资源清单，请检查网络连接';
+        this.lastError = t('未能解析到资源清单，请检查网络连接');
         this.notify();
         return;
       }
@@ -265,7 +266,7 @@ class PreloadEngine {
       }
     } catch (err) {
       this.status = 'error';
-      this.lastError = err.message || '预载过程发生异常';
+      this.lastError = err.message || t('预载过程发生异常');
       this.notify();
     }
   }
@@ -319,19 +320,19 @@ export function usePreloadState() {
 export function PreloadPill({ onClick }) {
   const p = usePreloadState();
 
-  let text = '⚡ 资源预载';
+  let text = t('⚡ 资源预载');
   let pillClass = 'preload-pill';
 
   if (p.status === 'downloading') {
     const pct = p.totalCount > 0 ? Math.round((p.doneCount / p.totalCount) * 100) : 0;
-    text = `⚡ 预载中 ${pct}%`;
+    text = t('⚡ 预载中 {pct}%', { pct });
     pillClass += ' is-loading';
   } else if (p.status === 'completed' || p.cachedProfiles.full || p.cachedProfiles.core) {
-    text = p.cachedProfiles.full ? '⚡ 资源已全量就绪' : '⚡ 基础资源已就绪';
+    text = p.cachedProfiles.full ? t('⚡ 资源已全量就绪') : t('⚡ 基础资源已就绪');
     pillClass += ' is-ready';
   }
 
-  return html`<button type="button" class=${pillClass} onClick=${onClick} title="管理网页端离线资源缓存">
+  return html`<button type="button" class=${pillClass} onClick=${onClick} title=${t('管理网页端离线资源缓存')}>
     <span class="preload-pill__dot"></span>
     <span class="preload-pill__text">${text}</span>
   </button>`;
@@ -350,27 +351,27 @@ export function PreloadModal({ open, onClose }) {
 
   const isBusy = p.status === 'downloading' || p.status === 'scanning';
 
-  return html`<${Modal} open=${open} onClose=${onClose} title="资源预载与离线缓存中心" micro="ASSET PRELOAD CENTER"
+  return html`<${Modal} open=${open} onClose=${onClose} title=${t('资源预载与离线缓存中心')} micro="ASSET PRELOAD CENTER"
     width="min(7.2rem, 94vw)"
     actions=${html`
       <div style="display:flex;width:100%;justify-content:space-between;align-items:center;">
         <${Button} variant="secondary" size="md" tone="red" disabled=${isBusy}
-          onClick=${() => preloadEngine.clearCache()}>清除本地缓存<//>
+          onClick=${() => preloadEngine.clearCache()}>${t('清除本地缓存')}<//>
         <div style="display:flex;gap:8px;">
           ${p.status === 'downloading'
-            ? html`<${Button} variant="secondary" size="md" onClick=${() => preloadEngine.pause()}>暂停<//>`
+            ? html`<${Button} variant="secondary" size="md" onClick=${() => preloadEngine.pause()}>${t('暂停')}<//>`
             : p.status === 'paused'
-            ? html`<${Button} variant="primary" size="md" onClick=${() => preloadEngine.resume()}>继续<//>`
+            ? html`<${Button} variant="primary" size="md" onClick=${() => preloadEngine.resume()}>${t('继续')}<//>`
             : html`<${Button} variant="primary" size="md" iconRight="download" onClick=${() => preloadEngine.start(selectedProfile)}>
-                ${p.status === 'completed' ? '重新校验/下载' : '开始预载'}
+                ${p.status === 'completed' ? t('重新校验/下载') : t('开始预载')}
               <//>`}
-          <${Button} variant="secondary" size="md" onClick=${onClose}>完成<//>
+          <${Button} variant="secondary" size="md" onClick=${onClose}>${t('完成')}<//>
         </div>
       </div>
     `}>
     <div class="preload-content">
       <p class="preload-desc">
-        手机原生客户端已内置全量素材包；网页端可通过此功能将常用素材<b>预载至浏览器磁盘缓存</b>。预载后局内战斗、干员调配 DIY 与时装切换将直接本地秒开，免除弱网与延迟卡顿。
+        ${t('手机原生客户端已内置全量素材包；网页端可通过此功能将常用素材')}<b>${t('预载至浏览器磁盘缓存')}</b>${t('。预载后局内战斗、干员调配 DIY 与时装切换将直接本地秒开，免除弱网与延迟卡顿。')}
       </p>
 
       <div class="preload-profiles" role="radiogroup">
@@ -379,13 +380,13 @@ export function PreloadModal({ open, onClose }) {
             disabled=${isBusy} onChange=${() => setSelectedProfile('core')} />
           <div class="preload-card__body">
             <div class="preload-card__head">
-              <span class="preload-card__title">⚡ 基础核心包</span>
-              <span class="preload-card__size">~35 MB (推荐)</span>
+              <span class="preload-card__title">${t('⚡ 基础核心包')}</span>
+              <span class="preload-card__size">${t('~35 MB (推荐)')}</span>
             </div>
             <div class="preload-card__detail">
-              包含：全部界面 UI、干员基础/精二头像、全量 271 款时装皮肤缩略图、表情包、大厅背景音乐与常用音效。
+              ${t('包含：全部界面 UI、干员基础/精二头像、全量 271 款时装皮肤缩略图、表情包、大厅背景音乐与常用音效。')}
             </div>
-            ${p.cachedProfiles.core ? html`<div class="preload-card__badge is-ready">✓ 已缓存</div>` : null}
+            ${p.cachedProfiles.core ? html`<div class="preload-card__badge is-ready">${t('✓ 已缓存')}</div>` : null}
           </div>
         </label>
 
@@ -394,13 +395,13 @@ export function PreloadModal({ open, onClose }) {
             disabled=${isBusy} onChange=${() => setSelectedProfile('full')} />
           <div class="preload-card__body">
             <div class="preload-card__head">
-              <span class="preload-card__title">🌟 完整离线包</span>
-              <span class="preload-card__size">~280 MB (全量)</span>
+              <span class="preload-card__title">${t('🌟 完整离线包')}</span>
+              <span class="preload-card__size">${t('~280 MB (全量)')}</span>
             </div>
             <div class="preload-card__detail">
-              包含：在核心包基础上，追加全部干员与敌方战斗 Spine 骨骼模型、高精度立绘、全阶段战斗 BGM 与干员语音。
+              ${t('包含：在核心包基础上，追加全部干员与敌方战斗 Spine 骨骼模型、高精度立绘、全阶段战斗 BGM 与干员语音。')}
             </div>
-            ${p.cachedProfiles.full ? html`<div class="preload-card__badge is-ready">✓ 已缓存</div>` : null}
+            ${p.cachedProfiles.full ? html`<div class="preload-card__badge is-ready">${t('✓ 已缓存')}</div>` : null}
           </div>
         </label>
       </div>
@@ -409,18 +410,18 @@ export function PreloadModal({ open, onClose }) {
         <div class="preload-monitor">
           <div class="preload-monitor__header">
             <span class="preload-monitor__status">
-              ${p.status === 'scanning' ? '🔍 正在解析资源依赖清单...' :
-                p.status === 'downloading' ? `⚡ 正在高速预载中 · ${speedMb} MB/s` :
-                p.status === 'paused' ? '⏸ 预载已暂停' : '🎉 资源预载校验完成！'}
+              ${p.status === 'scanning' ? t('🔍 正在解析资源依赖清单...') :
+                p.status === 'downloading' ? t('⚡ 正在高速预载中 · {speedMb} MB/s', { speedMb }) :
+                p.status === 'paused' ? t('⏸ 预载已暂停') : t('🎉 资源预载校验完成！')}
             </span>
-            <span class="preload-monitor__counts">${p.doneCount} / ${p.totalCount} 文件 (${pct}%)</span>
+            <span class="preload-monitor__counts">${t('{doneCount} / {totalCount} 文件 ({pct}%)', { doneCount: p.doneCount, totalCount: p.totalCount, pct })}</span>
           </div>
           
           <${ProgressBar} value=${pct} max=${100} tone="mint" size="md" />
 
           <div class="preload-monitor__footer">
-            <span class="preload-monitor__current t-lo">正在处理: ${p.currentFile || '准备中...'}</span>
-            <span class="preload-monitor__bytes num">已下载: ${mbDownloaded} MB</span>
+            <span class="preload-monitor__current t-lo">${t('正在处理:')} ${p.currentFile || t('准备中...')}</span>
+            <span class="preload-monitor__bytes num">${t('已下载: {mbDownloaded} MB', { mbDownloaded })}</span>
           </div>
         </div>
       ` : null}

@@ -357,7 +357,7 @@ export class Lobby {
   onMessage(session, msg) {
     if (this.maintenance) {
       if (msg.t === 'room.create' || msg.t === 'room.start' || msg.t === 'match.queue') {
-        return fail(ERR.MAINTENANCE, '服务器即将维护，暂时关闭入口');
+        return fail(ERR.MAINTENANCE, '服务器即将维护，暂时关闭入口'); // i18n-ignore: developer detail (the client shows ERR_TEXT.MAINTENANCE)
       }
     }
     switch (msg.t) {
@@ -464,7 +464,7 @@ export class Lobby {
    * @param {(() => void) | null} [onComplete] called after shutdown
    * @returns {{ active: boolean, deadline: number, seconds: number, reason: string }}
    */
-  startMaintenance(seconds = 60, reason = '系统例行维护', onComplete = null) {
+  startMaintenance(seconds = 60, reason = '系统例行维护', onComplete = null) { // i18n-ignore: server-sent text; the client translates msg.reason (main.js)
     if (this.maintenanceTimer) clearTimeout(this.maintenanceTimer);
     const deadline = this.now() + Math.max(1, seconds) * 1000;
     this.maintenance = { active: true, deadline, seconds, reason };
@@ -512,7 +512,7 @@ export class Lobby {
 
   create(session, { mode, difficulty, capacity = DEFAULT_SEATS }) {
     if (!ROOM_CAPACITIES.includes(capacity)) return fail(ERR.BAD_MSG, 'invalid capacity');
-    if (this.isDraining) return fail(ERR.MAINTENANCE, '服务正在热重载更新中，暂停创建新房间，请稍候连接新节点');
+    if (this.isDraining) return fail(ERR.MAINTENANCE, '服务正在热重载更新中，暂停创建新房间，请稍候连接新节点'); // i18n-ignore: developer detail (the client shows ERR_TEXT.MAINTENANCE)
     const cur = this.roomOf(session);
     if (cur && cur.match) return fail(ERR.ROOM_STARTED, 'leave your running match first');
     if (this.rooms.size >= this.opts.maxRooms) return fail(ERR.INTERNAL, 'too many rooms');
@@ -591,7 +591,7 @@ export class Lobby {
       const humans = r.activeHumans().length;
       list.push({
         code: r.code,
-        name: host?.name || `同盟 #${r.code}`,
+        name: host?.name || '', // the client falls back to t('同盟 #{code}') for an unnamed room
         difficulty: r.difficulty,
         humans,
         maxSeats: 10,
@@ -725,7 +725,7 @@ export class Lobby {
 
     const seat = room.seatOf(session.playerId);
     const spectator = room.spectatorOf(session.playerId);
-    const senderName = seat?.name || spectator?.name || session.name || '博士';
+    const senderName = seat?.name || spectator?.name || session.name || ''; // the client shows t('博士') for an empty name
     const seatIdx = seat ? seat.seat : -1;
 
     this.broadcastRoom(room, {
@@ -965,10 +965,10 @@ export class Lobby {
     let message = '';
     if (loadScore >= 135 || cpu >= 85 || freeMemMb < 250) {
       status = 'critical';
-      message = '当前服务器处于高载荷运行状态（算力/网络接近上限）。新加入玩家或未预载玩家可能会遇到明显卡顿或掉线，建议前往备用服游玩或稍后再试。';
+      message = '当前服务器处于高载荷运行状态（算力/网络接近上限）。新加入玩家或未预载玩家可能会遇到明显卡顿或掉线，建议前往备用服游玩或稍后再试。'; // i18n-ignore: server-sent text; the client translates serverLoad.message (main.js)
     } else if (loadScore >= 100 || cpu >= 75 || freeMemMb < 400) {
       status = 'warning';
-      message = '当前服务器处于高峰拥挤状态。建议网页端玩家在主页右下角「⚡资源预载」完成缓存后再进入游戏，以获得顺畅体验。';
+      message = '当前服务器处于高峰拥挤状态。建议网页端玩家在主页右下角「⚡资源预载」完成缓存后再进入游戏，以获得顺畅体验。'; // i18n-ignore: server-sent text; the client translates serverLoad.message (main.js)
     }
 
     return {

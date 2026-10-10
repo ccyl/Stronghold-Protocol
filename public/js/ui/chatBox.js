@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from '../../vendor/hooks.module.js';
 import { net } from '../net.js';
 import { useStore, store, pushChatMessage } from '../store.js';
 import { toast } from './toasts.js';
+import { t } from '../../../shared/i18n.js';
 
 export function ChatBox({ active: controlledActive, onToggle, showTrigger = controlledActive === undefined }) {
   const messages = useStore((s) => s.chatMessages) || [];
@@ -62,19 +63,19 @@ export function ChatBox({ active: controlledActive, onToggle, showTrigger = cont
     } catch (err) {
       console.warn('[chat] send failed', err);
       if (err?.code === 'RATE' || err?.error === 'RATE') {
-        toast('发言过于频繁，请稍候', 'warn');
+        toast(t('发言过于频繁，请稍候'), 'warn');
       } else if (!net.connected || !store.get().session?.entered) {
         // 离线/单机调试模式回退
         pushChatMessage({
           playerId: store.get().session?.playerId || 'me',
-          name: store.get().session?.name || '博士',
+          name: store.get().session?.name || t('博士'),
           seat: 0,
           isSpectator: false,
           text,
           at: Date.now(),
         });
       } else {
-        toast(err?.msg || '发送失败，请重试', 'warn');
+        toast(err?.msg || t('发送失败，请重试'), 'warn');
       }
     }
   };
@@ -95,12 +96,12 @@ export function ChatBox({ active: controlledActive, onToggle, showTrigger = cont
       <!-- Tactical Chat Stream (pass-through clicks, expands on hover/active) -->
       <div class="chat-log" ref=${logRef}>
         ${messages.map((m, i) => {
-          const seatLabel = m.isSpectator ? '观战' : `P${(m.seat ?? 0) + 1}`;
+          const seatLabel = m.isSpectator ? t('观战') : `P${(m.seat ?? 0) + 1}`;
           const colorCls = getSeatColorClass(m.seat, m.isSpectator);
           return html`
             <div key=${i} class="chat-item">
               <span class=${`chat-seat ${colorCls}`}>
-                [${seatLabel}] ${m.name || '博士'}:
+                [${seatLabel}] ${m.name || t('博士')}:
               </span>
               <span class="chat-text">${m.text}</span>
             </div>
@@ -116,7 +117,7 @@ export function ChatBox({ active: controlledActive, onToggle, showTrigger = cont
             type="text"
             class="chat-input"
             maxlength="80"
-            placeholder="输入对话 (Enter发送, Esc取消)..."
+            placeholder=${t('输入对话 (Enter发送, Esc取消)...')}
             value=${draft}
             onInput=${(e) => setDraft(e.target.value)}
             onKeyDown=${(e) => e.stopPropagation()}
@@ -127,7 +128,7 @@ export function ChatBox({ active: controlledActive, onToggle, showTrigger = cont
               }, 180);
             }}
           />
-          <button type="submit" class="chat-send-btn">发送</button>
+          <button type="submit" class="chat-send-btn">${t('发送')}</button>
         </form>
       ` : (showTrigger ? html`
         <button
@@ -137,8 +138,8 @@ export function ChatBox({ active: controlledActive, onToggle, showTrigger = cont
             setActive(true);
             setTimeout(() => inputRef.current?.focus(), 30);
           }}
-          title="打开对话"
-          aria-label="打开对话"
+          title=${t('打开对话')}
+          aria-label=${t('打开对话')}
         >
           💬
         </button>

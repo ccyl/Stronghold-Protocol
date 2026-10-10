@@ -8,6 +8,7 @@ import { html, MicroLabel } from './components.js';
 import { useStore, shallowEqual } from '../store.js';
 import { data } from '../data.js';
 import { skinsStore, availableSkins, loadSkinData, setSkin, clearSkin } from './skins.js';
+import { t } from '../../../shared/i18n.js';
 
 const cx = (...p) => p.flat().filter(Boolean).join(' ');
 
@@ -35,8 +36,8 @@ export function SkinSection({ chess }) {
     let dead = false;
     loadSkinData();
     const off = data.subscribe?.(() => { if (!dead) bump((n) => n + 1); });
-    const t = setInterval(() => { if (!dead) bump((n) => n + 1); }, 500);
-    return () => { dead = true; clearInterval(t); off?.(); };
+    const timer = setInterval(() => { if (!dead) bump((n) => n + 1); }, 500);
+    return () => { dead = true; clearInterval(timer); off?.(); };
   }, [chessId]);
 
   if (!chessId || !charId) return null;
@@ -44,8 +45,8 @@ export function SkinSection({ chess }) {
   if (!skinsReady) {
     return html`<section class="lo-sec lo-sec--skin" data-testid="skin-section">
       <header class="lo-sec__head">
-        <h3>皮肤<${MicroLabel}>SKIN<//></h3>
-        <span class="lo-sec__note">正在载入配置…</span>
+        <h3>${t('皮肤')}<${MicroLabel}>SKIN<//></h3>
+        <span class="lo-sec__note">${t('正在载入配置…')}</span>
       </header>
     </section>`;
   }
@@ -58,10 +59,10 @@ export function SkinSection({ chess }) {
 
   return html`<section class="lo-sec lo-sec--skin" data-testid="skin-section">
     <header class="lo-sec__head">
-      <h3>皮肤<${MicroLabel}>SKIN<//></h3>
-      <span class="lo-sec__note">${list.length} 款可选</span>
+      <h3>${t('皮肤')}<${MicroLabel}>SKIN<//></h3>
+      <span class="lo-sec__note">${t('{n} 款可选', { n: list.length })}</span>
     </header>
-    <div class="lo-skins" role="radiogroup" aria-label="选择皮肤">
+    <div class="lo-skins" role="radiogroup" aria-label=${t('选择皮肤')}>
       <button type="button" role="radio" aria-checked=${chosen ? 'false' : 'true'} data-skin=""
         class=${cx('lo-skin', 'lo-skin--default', !chosen && 'is-on')} onClick=${() => clearSkin(chessId)}>
         <span class="lo-skin__art">
@@ -70,10 +71,10 @@ export function SkinSection({ chess }) {
             : html`<span class="lo-skin__art--none"></span>`}
         </span>
         <span class="lo-skin__text">
-          <b class="lo-skin__name">默认</b>
+          <b class="lo-skin__name">${t('默认')}</b>
           <span class="lo-skin__group">DEFAULT</span>
         </span>
-        ${!chosen ? html`<span class="lo-skin__badge">已装配</span>` : null}
+        ${!chosen ? html`<span class="lo-skin__badge">${t('已装配')}</span>` : null}
       </button>
       ${list.map((x) => {
         const art = skinAvatar(charId, x.id) || defaultArt;
@@ -95,7 +96,7 @@ export function SkinSection({ chess }) {
             <b class="lo-skin__name">${x.name}</b>
             <span class="lo-skin__group">${x.group || 'SPECIAL'}</span>
           </span>
-          ${isEquipped ? html`<span class="lo-skin__badge">已装配</span>` : null}
+          ${isEquipped ? html`<span class="lo-skin__badge">${t('已装配')}</span>` : null}
         </button>`;
       })}
     </div>

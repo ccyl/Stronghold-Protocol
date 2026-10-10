@@ -71,8 +71,8 @@ function Toggle({ label, micro, value, onChange }) {
 }
 
 const QUALITY = [['high', N_('高')], ['medium', N_('中')], ['low', N_('低')]];
-const VOICE_LANG = [['jp', '日语 (默认)'], ['cn', '中文']];
-const BOARDS = [['auto', '自动'], ['3d', '3D 全景'], ['2d', '2D 俯视']];
+const VOICE_LANG = [['jp', N_('日语 (默认)')], ['cn', N_('中文')]];
+const BOARDS = [['auto', N_('自动')], ['3d', N_('3D 全景')], ['2d', N_('2D 俯视')]];
 /** The rebindable shortcuts' names (msgids), by action. */
 const HOTKEY_NAMES = { refresh: N_('刷新商店'), freeze: N_('冻结 / 解冻商店'), levelUp: N_('升级调度中心'), retreat: N_('撤退选中干员'),
   sell: N_('出售选中干员'), ready: N_('准备就绪 / 暂停（独立模拟）') };
@@ -207,12 +207,12 @@ export function SettingsModal({ open, onClose }) {
       <${Slider} label=${t('干员语音')} micro="VOICE" icon="mic" value=${s.voice}
         onInput=${(v) => { updateSettings({ voice: v }); if (!testedVoice) { setTestedVoice(true); setTimeout(() => setTestedVoice(false), 400); audio.sfx('tab'); } }} />
       <div class="set-row">
-        <span class="set-row__label">语音语言<${MicroLabel}>VOICE DUB<//></span>
+        <span class="set-row__label">${t('语音语言')}<${MicroLabel}>VOICE DUB<//></span>
         <div class="set-seg" role="radiogroup">
           ${VOICE_LANG.map(([id, label]) => {
             const on = (s.voiceLang || 'jp') === id;
             return html`<button key=${id} type="button" role="radio" aria-checked=${on ? 'true' : 'false'}
-              class=${on ? 'is-on' : ''} onClick=${() => { updateSettings({ voiceLang: id }); audio.setVoiceLang?.(id); audio.sfx?.('click'); }}>${label}</button>`;
+              class=${on ? 'is-on' : ''} onClick=${() => { updateSettings({ voiceLang: id }); audio.setVoiceLang?.(id); audio.sfx?.('click'); }}>${t(label)}</button>`;
           })}
         </div>
       </div>
@@ -228,37 +228,37 @@ export function SettingsModal({ open, onClose }) {
         </div>
       </div>
       <${HotkeySection} keys=${s.keys} touchUi=${touchUi} />
-      <${Toggle} label="动态高刷新率" micro="PREP 120 / BATTLE 60" value=${s.highRefresh !== false}
+      <${Toggle} label=${t('动态高刷新率')} micro="PREP 120 / BATTLE 60" value=${s.highRefresh !== false}
         onChange=${(v) => updateSettings({ highRefresh: v })} />
       <div class="set-row">
-        <span class="set-row__label">棋盘视角<${MicroLabel}>BOARD VIEW<//></span>
+        <span class="set-row__label">${t('棋盘视角')}<${MicroLabel}>BOARD VIEW<//></span>
         <div class="set-seg" role="radiogroup">
           ${BOARDS.map(([id, label]) => html`<button key=${id} type="button" role="radio" aria-checked=${(s.board || 'auto') === id ? 'true' : 'false'}
-            class=${(s.board || 'auto') === id ? 'is-on' : ''} onClick=${() => updateSettings({ board: id })}>${label}</button>`)}
+            class=${(s.board || 'auto') === id ? 'is-on' : ''} onClick=${() => updateSettings({ board: id })}>${t(label)}</button>`)}
         </div>
       </div>
       <div class="set-row">
-        <span class="set-row__label">联机服务器<${MicroLabel}>SERVER URL<//></span>
+        <span class="set-row__label">${t('联机服务器')}<${MicroLabel}>SERVER URL<//></span>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
-          <input type="text" placeholder="默认本机" value=${serverUrl}
+          <input type="text" placeholder=${t('默认本机')} value=${serverUrl}
             onInput=${(e) => setServerUrl(e.target.value)}
             style="width:145px;padding:3px 6px;font-size:11px;background:#14171a;color:#eee;border:1px solid #444;border-radius:3px;" />
-          <button type="button" class="btn" style="padding:3px 8px;font-size:11px;" onClick=${applyServerUrl}>切换并重连</button>
-          ${serverUrl ? html`<button type="button" class="btn" style="padding:3px 6px;font-size:11px;opacity:0.75;" onClick=${() => { setServerUrl(''); globalThis.localStorage?.removeItem('sp_ws_url'); globalThis.location?.reload(); }}>恢复默认</button>` : null}
+          <button type="button" class="btn" style="padding:3px 8px;font-size:11px;" onClick=${applyServerUrl}>${t('切换并重连')}</button>
+          ${serverUrl ? html`<button type="button" class="btn" style="padding:3px 6px;font-size:11px;opacity:0.75;" onClick=${() => { setServerUrl(''); globalThis.localStorage?.removeItem('sp_ws_url'); globalThis.location?.reload(); }}>${t('恢复默认')}</button>` : null}
         </div>
       </div>
       ${nativeShell ? html`<div class="set-row">
-            <span class="set-row__label">本机服务<${MicroLabel}>LOCAL ENGINE<//></span>
+            <span class="set-row__label">${t('本机服务')}<${MicroLabel}>LOCAL ENGINE<//></span>
             <div class="set-engine-grid">
-              <button type="button" onClick=${() => nativeShell.openServerSettings()}>服务器设置</button>
-              <button type="button" onClick=${() => nativeShell.restartLocalServer()}>重启引擎</button>
-              <button type="button" onClick=${() => nativeShell.showLogs()}>运行日志</button>
-              <button type="button" onClick=${() => nativeShell.reloadClient()}>重载页面</button>
+              <button type="button" onClick=${() => nativeShell.openServerSettings()}>${t('服务器设置')}</button>
+              <button type="button" onClick=${() => nativeShell.restartLocalServer()}>${t('重启引擎')}</button>
+              <button type="button" onClick=${() => nativeShell.showLogs()}>${t('运行日志')}</button>
+              <button type="button" onClick=${() => nativeShell.reloadClient()}>${t('重载页面')}</button>
             </div>
           </div>` : null}
       ${nativeShell || touchUi
         ? null
-        : html`<p class="set-hint">快捷键：<kbd>R</kbd> 刷新 · <kbd>F</kbd> 冻结 · <kbd>D</kbd> 升级 · <kbd>Q</kbd> 撤退选中干员 · <kbd>X</kbd> 出售选中干员 · <kbd>Space</kbd> 准备就绪 · <kbd>Esc</kbd> 关闭弹窗 · 右键查看详情</p>`}
+        : html`<p class="set-hint">${t('快捷键：')}<kbd>R</kbd> ${t('刷新 ·')} <kbd>F</kbd> ${t('冻结 ·')} <kbd>D</kbd> ${t('升级 ·')} <kbd>Q</kbd> ${t('撤退选中干员 ·')} <kbd>X</kbd> ${t('出售选中干员 ·')} <kbd>Space</kbd> ${t('准备就绪 ·')} <kbd>Esc</kbd> ${t('关闭弹窗 · 右键查看详情')}</p>`}
       <p class="set-hint">${touchUi ? t('触屏操作：点击单位选中（撤退 / 出售）· 长按单位或卡牌查看详情 · 拖动部署后滑动选择朝向') : t('右键查看详情')}</p>
     </div>
   <//>`;

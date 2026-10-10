@@ -70,7 +70,7 @@ export class AdminService {
     this.isDraining = false;
     this.drainStartedAt = null;
 
-    recordAdminLog('info', `[AdminService] 初始化成功，当前版本: v${APP_VERSION} (tag: ${buildTag})`);
+    recordAdminLog('info', `[AdminService] 初始化成功，当前版本: v${APP_VERSION} (tag: ${buildTag})`); // i18n-ignore: admin audit log (recordAdminLog)
   }
 
   /** Validate token or basic header */
@@ -225,7 +225,7 @@ export class AdminService {
         this.lobby.broadcastRoom(r, {
           t: 'room.chat',
           playerId: 'system',
-          name: '📢 系统公告',
+          name: '📢 系统公告', // i18n-ignore: a chat sender label (sender names are never translated; the announcement text is raw admin input)
           seat: -1,
           isSpectator: false,
           text,
@@ -236,7 +236,7 @@ export class AdminService {
         // ignore single room broadcast error
       }
     }
-    recordAdminLog('info', `[Admin] 发送系统公告给 ${count} 个房间: "${text}"`);
+    recordAdminLog('info', `[Admin] 发送系统公告给 ${count} 个房间: "${text}"`); // i18n-ignore: admin audit log (recordAdminLog)
     return true;
   }
 
@@ -250,7 +250,7 @@ export class AdminService {
     if (this.lobby) {
       this.lobby.isDraining = true;
     }
-    recordAdminLog('warn', '[Admin] 启动热重载平滑排空模式 (Graceful Drain)：新房间将拒绝创建，等待存量对局结束');
+    recordAdminLog('warn', '[Admin] 启动热重载平滑排空模式 (Graceful Drain)：新房间将拒绝创建，等待存量对局结束'); // i18n-ignore: admin audit log (recordAdminLog)
     return true;
   }
 }

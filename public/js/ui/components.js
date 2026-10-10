@@ -789,8 +789,8 @@ export function doctorNo(id) {
 export function PingPill({ ms, jitter, quality, online = true, class: cls }) {
   const ok = online && Number.isFinite(ms);
   const tier = !ok ? 'off' : ms < 60 && (!jitter || jitter < 30) ? 'low' : ms < 200 ? 'medium' : 'high';
-  const jitterText = Number.isFinite(jitter) && jitter > 0 ? ` (波动 ±${Math.round(jitter)}ms)` : '';
-  const qualityText = quality === 'good' ? ' · 网络稳定' : quality === 'fair' ? ' · 轻微波动' : quality === 'poor' ? ' · 弱网抖动' : '';
+  const jitterText = Number.isFinite(jitter) && jitter > 0 ? t(' (波动 ±{0}ms)', { 0: Math.round(jitter) }) : '';
+  const qualityText = quality === 'good' ? t(' · 网络稳定') : quality === 'fair' ? t(' · 轻微波动') : quality === 'poor' ? t(' · 弱网抖动') : '';
   return html`<span class=${cx('ping', `ping--${tier}`, cls)} title=${ok ? `${t('当前延迟 {ms}ms', { ms })}${jitterText}${qualityText}` : t('未连接')}>
     <${Icon} name=${ok ? 'signal' : 'wifiOff'} class="ping__icon" />
     <span class="ping__value">${ok ? Math.min(9999, Math.round(ms)) : '--'}</span><span class="ping__unit">ms</span>

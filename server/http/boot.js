@@ -100,7 +100,7 @@ export async function runMain(start) {
           stop('MAINTENANCE_NOW');
         } else {
           const sec = Number(arg1) > 0 ? Number(arg1) : 60;
-          const reason = rest || '系统例行维护';
+          const reason = rest || '系统例行维护'; // i18n-ignore: server-sent text; the client translates msg.reason (main.js)
           console.log(`  [运维] 已向全服广播维护通知：${sec} 秒后停机 (${reason})`);
           srv.lobby.startMaintenance(sec, reason, () => stop('MAINTENANCE_DEADLINE'));
         }
@@ -122,7 +122,7 @@ export async function runMain(start) {
     }
     console.log('\n[SIGINT] ⚠ 收到退出信号，已向全服广播 60 秒停服维护倒计时！');
     console.log('         如需立即强制退出，请再次按下 Ctrl+C。');
-    srv.lobby.startMaintenance(60, '服务器即将关闭维护', () => stop('MAINTENANCE'));
+    srv.lobby.startMaintenance(60, '服务器即将关闭维护', () => stop('MAINTENANCE')); // i18n-ignore: server-sent text; the client translates msg.reason (main.js)
   });
   process.on('SIGTERM', () => stop('SIGTERM'));
 }

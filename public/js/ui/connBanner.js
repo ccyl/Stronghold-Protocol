@@ -37,8 +37,8 @@ export function ConnectionBanner() {
     const exhausted = (simError.tries || 1) >= (simError.max || 4);
     return html`<div class="conn-banner" role="alert">
       <${Icon} name="refresh" />
-      <span>${exhausted ? '战斗引擎加载失败，请刷新页面重试' : `战斗引擎加载中，正在自动重试（${simError.tries}/${simError.max || 4}）`} · ${simError.text}</span>
-      <${Button} size="sm" variant="secondary" icon="refresh" onClick=${() => location.reload()}>刷新页面<//>
+      <span>${exhausted ? t('战斗引擎加载失败，请刷新页面重试') : t('战斗引擎加载中，正在自动重试（{tries}/{1}）', { tries: simError.tries, 1: simError.max || 4 })} · ${simError.text}</span>
+      <${Button} size="sm" variant="secondary" icon="refresh" onClick=${() => location.reload()}>${t('刷新页面')}<//>
     </div>`;
   }
   if (conn.status === 'online' && buildStale) {

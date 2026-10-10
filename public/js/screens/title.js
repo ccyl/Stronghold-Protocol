@@ -288,7 +288,7 @@ export function TitleScreen() {
     <footer class="title-foot">
       <div class="title-foot__col">
         <span>${t('非官方同人复刻 · 游戏素材版权归 上海鹰角网络 / Yostar 所有')}</span>
-        <span class="title-foot__credit">B 站 纸鸢安好 · UID 99201674 · 安卓端适配参考 B 站 @Ausevay</span>
+        <span class="title-foot__credit">B 站 纸鸢安好 · UID 99201674 · 安卓端适配参考 B 站 @Ausevay</span><!-- i18n-ignore: a credit line (personal handle, kept verbatim in both languages) -->
       </div>
       <div class="title-foot__right">
         <${PreloadPill} onClick=${() => setPreloadOpen(true)} />
