@@ -18,7 +18,7 @@ import {
 } from '../../public/js/ui/stats.js';
 import { createStore, emptyMatch } from '../../public/js/store.js';
 import { normalizeResult } from '../../public/js/ui/gameLogic.js';
-import { PHASE } from '../../shared/constants.js';
+import { PHASE, MAX_SEATS } from '../../shared/constants.js';
 
 /** A realistic m.result in the shape server/match/results.js buildResult emits (replayed byte-identically). */
 function baseResult(over = {}) {
@@ -432,8 +432,11 @@ describe('local stats: bounded storage', () => {
       })),
       bigUnknown: 'y'.repeat(1e6),
     });
-    assert.ok(JSON.stringify(rec).length < 40_000, `${JSON.stringify(rec).length} chars`);
-    assert.equal(rec.players.length, 6);
+    // This branch seats MAX_SEATS, not the official 4 (the old bound kept 6 rows). Every field is bounded per player,
+    // so the record bound scales with the room: 20 rows of maximal junk stay well under the storage budget
+    // (MAX_CHARS 800_000), and a real 20-player record is ~24 KB.
+    assert.ok(JSON.stringify(rec).length < MAX_SEATS * 6_000, `${JSON.stringify(rec).length} chars`);
+    assert.equal(rec.players.length, MAX_SEATS);
     assert.equal(rec.players[0].lineup.length, 12);
     assert.equal(rec.players[0].lineup[0].items.length, 4);
     assert.equal(rec.players[0].name.length, 24);

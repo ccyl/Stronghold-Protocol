@@ -32,8 +32,10 @@ const draftScopeOptional = ['draftId', 'groupId'];
 
 // ---- client-side combat (DESIGN §14): b.progress / b.result payloads -------------------------------------------
 
-/** Size limits of a b.result payload (the whole frame also obeys the 64 KB inbound limit). */
-export const RESULT_LIMITS = Object.freeze({ players: 4, sources: MAX_SEATS, leaked: 400, unitsEnd: 64, unitStats: 160, layerGains: 40, mods: 16, unspawned: 400 });
+/** Size limits of a b.result payload (the whole frame also obeys the 64 KB inbound limit). `players` is the per-player
+ * map bound: this branch seats up to MAX_SEATS, so the official 4 rejected (and silently downgraded to b.yield) every
+ * client-authoritative result of a larger room. */
+export const RESULT_LIMITS = Object.freeze({ players: MAX_SEATS, sources: MAX_SEATS, leaked: 400, unitsEnd: 64, unitStats: 160, layerGains: 40, mods: 16, unspawned: 400 });
 const BIG = 1e13;
 const isStat = (v) => v === undefined || isNum(v, 0, BIG);
 const isModVal = (v) => v === null || isNum(v, -BIG, BIG) || isStr(v, 64) || isBool(v);
