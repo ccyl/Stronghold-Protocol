@@ -7,7 +7,24 @@
 - 分支/提交：`fusion-20p`，本次合并提交 `993e1b3e`（父提交 `31f245ff` + 官方 `bc50cac0`），随后 `ed8d97bd` 修复合并暴露的问题
 - 版本号：`0.2.4-fusion-20p`
 - 工作目录：`/home/ccyl/stronghold/fusion-20p`
-- 测试端口：**3010**（3000 仍为 Paper-Yuan 生产服 `0.2.3-fusion-20p`，未受影响）
+- 测试端口：**3010**；**生产端口 3000 已于 2026-10-11 升级到 `0.2.4-fusion-20p`**（见下方「生产部署记录」）
+
+## 生产部署记录（2026-10-11，端口 3000）
+
+生产目录 `/home/ccyl/stronghold/server` 部署前与 `stronghold-v0.2.3-fusion-20p-full.zip` **逐字节一致**
+（14086/14086 文件 CRC 相同），因此直接用**增量包**升级，未删除任何文件：
+
+1. 备份：`/home/ccyl/stronghold/backup/code-0.2.3-fusion-20p-20261011-131322/`（`code.tar.gz` 7 MB + `ROLLBACK.md`）
+2. 停服 → `unzip -o stronghold-0.2.4-fusion-20p-update.zip -d /home/ccyl/stronghold/server` → 启动
+3. 启动命令与原环境完全一致：
+   `cd /home/ccyl/stronghold/server && ADMIN_SECRET=…  PORT=3000 HOST=0.0.0.0 nohup node server/index.js > /tmp/paper3000.log 2>&1 &`
+4. 验证：`/healthz` = `0.2.4-fusion-20p`；首页 200；克莱门莎头像/立绘/技能/小人模型均 200；`/assets/module/gua-y.png` 200
+   （新版才有）；`data/local-assets.json` = `local-client / 1481 条`；清单 **210** 名干员；
+   **生产目录与 0.2.4 完整包逐文件 CRC 一致（14733/14733，0 差异）**
+5. 实机自检：20 人房间创建、房间聊天、`room.skins`、容量 20↔16、AI 补满 20 座、开局 `INFO_CHECK`、`m.private` 手牌 10 张 —— 全部通过
+
+**回滚**：`backup/code-0.2.3-fusion-20p-20261011-131322/ROLLBACK.md` 写了两条路径（重新解压旧完整包 / 仅回滚代码）。
+素材本轮只做「新增 + 给 atlas 补 `size:` 行」，对旧代码无害，所以只回滚代码也是安全的。
 
 ## 本次合并带来（官方 v0.2.4）
 
