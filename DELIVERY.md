@@ -190,31 +190,32 @@ PORT=3010 HOST=0.0.0.0 ADMIN_SECRET=你的密钥 node server/index.js
 | `test/client-static.test.js` | 挂起（未决 Promise） | 原分支同样 | 会让整套测试不退出，需单独排除 |
 | `test/docs-consistency.test.js`、`test/i18n.test.js`、`test/docs-paths.test.js` | **全部通过** | 24/24、10/10、7/7 | 0.2.3 轮已修复 |
 
-### 已知素材缺口：克莱门莎 `char_4231_clemnt`（上游素材库未更新，非代码问题）
+### 素材缺口：克莱门莎 `char_4231_clemnt` —— 已修复
 
-官方 v0.2.3 的**数据**把克莱门莎加进了干员名单 —— `data/backups.json` 自选池 `diy.ownedPool`（72 人）含她，
-分队 `band_clementia`（崇高牺牲）、战斗实现 `server/sim/content/kits/ops/op-clemnt.js`（注释：Official CN tables
-2026-10-08, client 2.7.81）都齐全；但她的**美术素材在本机完全不存在**（全机器搜索 `char_4231_clemnt` = **0 个文件**），
-所以自选界面里**没有头像、没有小人模型**，技能图标与语音同样缺失。
+官方 v0.2.3 的**数据**把克莱门莎加进了干员名单（`data/backups.json` 自选池 `diy.ownedPool`、分队
+`band_clementia`、战斗实现 `server/sim/content/kits/ops/op-clemnt.js` 都齐全），但 0.2.3-fusion-20p 打包时她的
+**美术素材磁盘上完全没有**（全机器搜索 = 0 个文件），所以自选界面里没有头像、没有小人模型。
 
-2026-10-10 核查的根因（分两类）：
+**2026-10-10 的根因**（已记录，现已解决）：
 
-| 素材 | 上游来源 | 状态 |
+| 素材 | 上游来源 | 当时状态 |
 |---|---|---|
-| **小人模型** Spine | isHarryh/Ark-Models `models_data.json` | ❌ **上游索引未收录**：线上索引 `Date: 2026-09-29`、3197 条，无 `char_4231_clemnt`；而同期实装的珊比 `char_4235_thumpy`、谬因 `char_4229_aphris`、可露希尔 `char_4228_closur`、机械师 `char_4230_mcnist` 全部在列 → 索引快照早于该干员实装（2026-10-09），需等上游更新 |
-| **头像** avatar / **立绘** portrait | yuanyan3060/ArknightsGameResource | ⚠️ 上游**现已可用**（实测 `avatar/char_4231_clemnt.png`、`portrait/char_4231_clemnt_1.png` 均 HTTP 200），但本次 `data/assets.json` 是 **`--offline` 离线重建**（只扫本地磁盘、不联网下载），所以没拿到 |
-| 技能图标 / 分支图标 / 中·日语音 | yuanyan `skill/`、AA2、AA2 voice 分支 | 同上，缺失（语音各 14 条） |
+| 头像 avatar / 立绘 portrait / 技能图标 | yuanyan3060/ArknightsGameResource | 上游已可用，但清单是 **`--offline` 离线重建**（只扫磁盘、不联网），没抓到 |
+| 小人模型 Spine | fexli/ArknightsResource `spine/{id}/{id}/{Front,Back}/` | 当时上游 dump 未收录 → 抓取报告 `missing skel` |
 
-影响范围可控：`data/assets.json` 的 `chars` 由官方 v0.2.3 的 **210 → 209**，逐叶子比对确认**唯一丢失的就是她**（无其他损失）。
-抓取报告 `downloadErrors: 0`，说明当时无网络错误，是根本没发起下载。客户端对缺失条目是**优雅降级**
-（`chessAvatarUrl` 返回 `null`、无 Spine 则不画模型），不会崩溃。
+**2026-10-11 联网重抓后已全部补齐**（`node tools/fetch-assets.mjs --add-only --allow-shrink`，下载 643 个文件 /
+10.4 MB）：头像、E2 头像、两张立绘、三个技能图标、Front + Back 战斗小人模型全部到位；`chars` **209 → 210**，
+`charsWithBack` 205 → 207。**她的语音仍缺**（镜像尚未收录，`voiceChars` 保持 191），客户端不播放。
 
-修复路径（**本次未执行，待办**）：
-1. 等 Ark-Models 索引更新后，`node tools/fetch-assets.mjs --refresh-index` 联网重抓（可补头像/立绘/技能图标；模型须等索引）；
-2. 若不想让玩家选到无美术的干员，可在 `shared/diy.js` 过滤掉清单里查不到头像的干员。
+**顺带修好的同类缺口**：`char_1052_kalts2`（凯尔希·思衡托）此前因 atlas 声明了第二张贴图页
+`char_1052_kalts22.png` 而整体被剔除；该页本次已抓到，模型随之入清单。
 
-另一个同类缺口：`char_1052_kalts2`（凯尔希·思衡托）有头像与立绘，但 Spine 被剔除 —— 其 atlas 声明了第二张贴图页
-`char_1052_kalts22.png`，上游 dump 没有该页。
+**顺带发现并修复的系统性问题：皮肤 atlas 未做后处理。** `tools/fetch-skin-spines.mjs` 只下载、不规范化，它抓的
+**343 个皮肤 atlas 一直缺少 `size:` 行**（`processModels` 对「不是本次下载的既有文件」不重写，`--add-only` 更窄），
+而 `test/assets.test.js` 明确要求每个 atlas 都有 `size:`。已用 `processModels` 同一套 `normalizeAtlas`
+（`tools/assets/atlas.mjs`，尺寸取自 PNG 头）补齐 **1014/1014** 全部合规 —— 这也是 kalts2 模型能解析的前提。
+
+### 本次合并（0.2.4）修复与验证
 
 ### 本次合并（0.2.4）修复与验证
 

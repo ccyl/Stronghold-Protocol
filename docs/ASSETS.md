@@ -467,21 +467,26 @@ Other renderer rules from research 07 §5.4–5.5:
 ### Known gaps (the dumps lag the game)
 
 The plan covers every operator of `data/backups.json`, but a planned entry whose files no dump carries is reported as a
-miss, and a rebuilt manifest drops it (`--strict` / `SP_ASSETS_STRICT` turns that into a failure). Two such gaps exist
-at 0.2.3-fusion-20p (checked 2026-10-10, both upstream-side — no code fix applies):
+miss, and a rebuilt manifest drops it (`--strict` / `SP_ASSETS_STRICT` turns that into a failure). Two gaps existed at
+0.2.3-fusion-20p; **both are closed as of 0.2.4-fusion-20p** by a plain online `fetch-assets` run (2026-10-11):
 
-- **`char_4231_clemnt` (克莱门莎):** every file missing — avatar, portrait, Spine, skill icons, voice. The model index
-  (`isHarryh/Ark-Models models_data.json`, `Date: 2026-09-29`, 3197 models) does not list it, while every operator
-  released around the same time does (`char_4235_thumpy`, `char_4229_aphris`, `char_4228_closur`, `char_4230_mcnist`),
-  so the snapshot predates the operator. The avatar and portrait are already on yuanyan (`HTTP 200`), but the
-  0.2.3-fusion-20p manifest was rebuilt with `--offline`, which never downloads: re-run
-  `node tools/fetch-assets.mjs --refresh-index` once the index catches up.
-- **`char_1052_kalts2` (凯尔希·思衡托):** avatar and portrait present, Spine dropped — its atlas declares a second
-  texture page (`char_1052_kalts22.png`) that the dump does not carry.
+- **`char_4231_clemnt` (克莱门莎):** was missing every file. Her operator data arrived with official v0.2.3 while the
+  mirrors still lagged. The run has her avatar, E2 avatar, both portraits, the three skill icons and the Front / Back
+  battle Spine. Her voice lines are still absent from the dumps (`voiceChars` stays 191): the manifest carries no
+  entry and the client plays nothing.
+- **`char_1052_kalts2` (凯尔希·思衡托):** was dropped because its atlas declares a second texture page
+  (`char_1052_kalts22.png`) the dump did not carry. That page is now on disk and the model is in the manifest.
 
-Both degrade gracefully in the client (`chessAvatarUrl` returns `null`; no Spine means no model drawn), so a manifest
-without them is a missing-model operator, not a crash. The operator data itself is complete: the 自选 pool
-(`data/backups.json diy.ownedPool`), the band `band_clementia` and the kit
+**The atlas post-processing applies to skin models too.** `tools/fetch-skin-spines.mjs` only downloads; it does not
+normalize, so the 343 atlases it had fetched kept fexli's missing `size:` lines, and `processModels` leaves an existing
+atlas alone (it never rewrites one it did not download in that run — `--add-only` narrows that further). They were
+normalized with the same `normalizeAtlas` `processModels` uses (`tools/assets/atlas.mjs`, page sizes read from the PNG
+headers). `test/assets.test.js` asserts `size:` on every atlas, so a future skin fetch must run that pass or the test
+fails — and without it a two-page model such as kalts2's never parses and the client draws no model.
+
+Both used to degrade gracefully in the client (`chessAvatarUrl` returns `null`; no Spine means no model drawn), so a
+manifest without them was a missing-model operator, not a crash. The operator data itself was always complete: the 自选
+pool (`data/backups.json diy.ownedPool`), the band `band_clementia` and the kit
 (`server/sim/content/kits/ops/op-clemnt.js`) all carry the operator.
 
 ## Verification
