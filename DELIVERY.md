@@ -54,6 +54,19 @@
 | 对局 | 房主**重发开局**（`room.rerollSetup`/`g.rerollVote`）、**恢复本机对局**（`SESSION_IN_USE`）、AI 队友最后选择（`room.setAiPicksLast`） |
 | 规则 | 一大批官方修正（蕾缪安/死芒/塞雷娅/凯尔希/赤刃明霄陈/远牙/锤击/吟游者/传送门/胶囊计数…） |
 
+## 交付物（0.2.4-fusion-20p）
+
+| 文件 | 大小 | SHA-256 |
+|---|---|---|
+| `stronghold-0.2.4-fusion-20p-server.zip` | 21 MB（代码包，仅 174 个 git 跟踪素材） | `073914ce5d45a7b04a65631592310f497ca9700dbd9b8e8e8e80b3884f64d2d0` |
+| `stronghold-0.2.4-fusion-20p-full.zip` | **587 MB（完整包，含 13709 个素材文件 + 本地客户端素材）** | `d85c109d224e408aa47c1d8bb632e3c451ec1df4da59454904df28f3d845da0b` |
+| `android/app/build/outputs/apk/release/Stronghold-Protocol-release.apk` | 622 MB（`versionCode 23` / `versionName 0.2.4-fusion-20p`） | `d41a10f2a54e1e433eb81c72d275b2520894e576d986f5f72c42d8477e96e4f9` |
+
+- 三个产物均为 **0 个隐藏条目**；APK 内含 `assets/app_bundle.zip`（598 MB / 18095 个文件，含 1485 个本地素材）。
+- APK 签名证书 SHA-256：`0ac3456d69c7f73a68f6ed27c2b161b7d8b7495fab9af41ea65b12f9e56e78ba`（`CN=Stronghold Protocol 20p`，与上一版同一把签名密钥，可覆盖安装）。
+- 完整包与 APK **均含完整克莱门莎素材**（头像 / E2 头像 / 两张立绘 / 三个技能图标 / Front+Back 小人模型）。
+- `data/local-assets.json`（本机生成的本地素材清单）**只进完整包与 APK**，不进代码包 —— 代码包不含 `public/assets/local`，带上清单会指向不存在的文件。
+
 ## 仍然保留（Paper-Yuan 自有）
 
 20 人房间（`ROOM_CAPACITIES` 4/8/10/16/20，默认 8）+ `room.setCapacity` · 座位分组与分组机变 ·
