@@ -198,8 +198,18 @@ test('a single available supply item remains six separate cards in each independ
   assert.deepEqual(pages[1].cards.map((c) => c.idx), [0, 1, 2, 3, 4, 5]);
 });
 
-test('no group is silently omitted when card data cannot generate any reward', () => {
+test('a group with no eligible card is omitted so it cannot block the other groups', () => {
+  // 0.2.4 shared item stock (this branch: one stock per group). A group whose stock is exhausted must finish its
+  // empty page without consuming another group's turn, so generateGroupDrafts drops that group instead of failing
+  // the whole draft; MatchSpDraft turns the missing page into `cards: []` and marks the group done.
+  const gd = forcedData('supply', 3);
+  const pages = generateGroupDrafts(gd, createRng(3), 3, GROUPS.slice(0, 2), { ...OPTIONS, itemAvailable: (id, group) => group.id !== 2 });
+  assert.deepEqual(pages.map((d) => d.id), [1], 'only the group with stock keeps a page');
+  assert.equal(pages[0].cards.length, 6);
+});
+
+test('no eligible card at all yields an empty page list so the caller falls back instead of drafting nothing', () => {
   const gd = forcedData('supply', 3);
   gd.shopItemsByTier = {};
-  assert.equal(generateGroupDrafts(gd, createRng(3), 3, GROUPS, OPTIONS), null);
+  assert.deepEqual(generateGroupDrafts(gd, createRng(3), 3, GROUPS, OPTIONS), []);
 });

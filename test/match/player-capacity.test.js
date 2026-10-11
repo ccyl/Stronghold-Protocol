@@ -8,11 +8,11 @@ const GROUP_CASES = [[1, [1]], [2, [2]], [3, [3]], [4, [4]], [5, [5]], [6, [3, 3
   [8, [4, 4]], [9, [4, 5]], [10, [4, 3, 3]], [11, [4, 4, 3]], [12, [4, 4, 4]], [13, [5, 4, 4]],
   [14, [4, 4, 3, 3]], [15, [4, 4, 4, 3]], [16, [4, 4, 4, 4]], [17, [5, 4, 4, 4]],
   [18, [4, 4, 4, 3, 3]], [19, [4, 4, 4, 4, 3]], [20, [4, 4, 4, 4, 4]]];
-const ORIGINAL_CAPS = { 1: 12, 2: 14, 3: 18, 4: 16, 5: 8, 6: 5 };
-const FIVE_PLAYER_CAPS = { 1: 15, 2: 18, 3: 22, 4: 20, 5: 10, 6: 7 };
+const COOP_CAPS = { 1: 24, 2: 28, 3: 36, 4: 32, 5: 16, 6: 10 };
+const FIVE_PLAYER_CAPS = { 1: 30, 2: 35, 3: 45, 4: 40, 5: 20, 6: 13 };
 
 for (const [count, sizes] of GROUP_CASES) {
-  test(`${count} players: fixed pool groups ${sizes.join('+')}, including a complete original pool for three`, () => {
+  test(`${count} players: fixed pool groups ${sizes.join('+')}, including a complete co-op pool for three`, () => {
     const h = makeMatch({ humans: count, fake: true });
     const m = h.m;
     assert.deepEqual(poolGroupSizes(count), sizes);
@@ -22,8 +22,13 @@ for (const [count, sizes] of GROUP_CASES) {
       assert.equal(group.scale, poolCopyScale(group.playerIds.length));
       for (const [id, entry] of group.pool.entries) {
         const five = group.playerIds.length === 5;
-        const caps = five ? FIVE_PLAYER_CAPS : ORIGINAL_CAPS;
-        assert.equal(entry.cap, id === 'chess_char_6_11_a' ? (five ? 5 : 4) : caps[entry.tier], id);
+        const base = m.gd.poolCopies(id);
+        const scaled = base * group.scale;
+        const expected = five && entry.tier === 3 ? Math.floor(scaled) : Math.ceil(scaled);
+        assert.equal(entry.cap, expected, id);
+        if (!Object.hasOwn(m.gd.economy.poolCopiesOverrides || {}, id)) {
+          assert.equal(entry.cap, (five ? FIVE_PLAYER_CAPS : COOP_CAPS)[entry.tier], `${id} tier baseline`);
+        }
       }
       for (const id of group.playerIds) assert.equal(m.poolFor(id), group.pool);
     }
@@ -83,7 +88,7 @@ test('depleting one group leaves shop rolls and effect grants of the other group
   const held = p0.pool.take(id, 1000);
   assert.equal(p0.pool.roll(h.m.rngMeta, { filter: (x) => x === id }), null);
   assert.equal(p4.pool.roll(h.m.rngMeta, { filter: (x) => x === id }), id);
-  assert.equal(p4.pool.cap(id), h.m.gd.poolCopies(id), 'three-player group has the original amount');
+  assert.equal(p4.pool.cap(id), h.m.gd.poolCopies(id), 'three-player group has the full current co-op amount');
   p0.pool.give(id, held);
   h.invariants();
   h.m.dispose();

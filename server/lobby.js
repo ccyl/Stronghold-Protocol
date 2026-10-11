@@ -1357,8 +1357,11 @@ export class Lobby {
     }
     if (room.disposed) return; // onLeave may have ended the match and emptied the room
     if (room.hostId === playerId) {
-      this.matchmaker?.cancelRoomQueue(room);
+      // Migrate first: cancelRoomQueue() broadcasts a room.state, and it runs before this method's own broadcast —
+      // doing it after migrateHost keeps the departing player out of that frame's hostId (a client matching the
+      // first frame that shows the leaver disconnected would otherwise still read them as the host).
       this.migrateHost(room);
+      this.matchmaker?.cancelRoomQueue(room);
     }
     if (room.activeHumans().length === 0) this.disposeRoom(room, 'empty');
     else this.broadcastState(room);
