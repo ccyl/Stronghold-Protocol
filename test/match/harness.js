@@ -124,7 +124,7 @@ export function makeMatch(o = {}) {
         }
         if (m.phase === 'SP_DRAFT' && m.spTurn(ps.playerId) === ps.playerId) {
           const group = m.spGroup(ps.playerId);
-          const idx = group.cards.map((c) => c.idx).find((k) => group.taken[k] == null);
+          const idx = group.cards.find((c) => m.spCardAvailable(c, group))?.idx;
           if (idx != null) m.handle(ps.playerId, { t: 'g.choice', idx });
         }
         if (ready && m.phase === 'PREP' && ps.alive && !ps.ready) {
@@ -228,7 +228,8 @@ function legacyInvariants(m) {
   for (const { pool } of m.poolGroups) {
     const held = heldByPool.get(pool);
     for (const [base, e] of pool.entries) {
-      assert.ok(e.left >= 0 && e.left <= e.cap, `pool ${base} left ${e.left} cap ${e.cap}`);
+      assert.ok(Number.isInteger(e.left) && e.left <= e.cap, `pool ${base} balance ${e.left} cap ${e.cap}`);
+      assert.equal(pool.left(base), Math.max(0, e.left), 'overdrawn ownership never becomes a negative shop supply');
       assert.equal(e.left + (held.get(base) || 0), e.cap, `pool accounting ${base}: left ${e.left} + held ${held.get(base) || 0} != cap ${e.cap}`);
     }
     for (const [base, n] of held) if (!pool.has(base)) assert.equal(n, 0, `non-pool chess ${base} holds copies`);

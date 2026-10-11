@@ -8,14 +8,14 @@ import { DATA, makeMatch, give, checkInvariants, chessOfTier } from './harness.j
 
 const gdOf = (modeId = 'mode_multi_normal') => new GameData(DATA, modeId);
 
-test('pool caps follow config (12/14/18/16/8/5, 缪尔赛思 4) and only visible, unbanned chess enter', () => {
+test('co-op pool doubles the measured single-player capacities; only visible, unbanned chess enter', () => {
   const gd = gdOf();
   const pool = new SharedPool(gd, { banned: [] });
   const caps = { 1: 12, 2: 14, 3: 18, 4: 16, 5: 8, 6: 5 };
   assert.equal(pool.entries.size, gd.visibleChess.length);
   assert.equal(pool.entries.size, 112);
   for (const [id, e] of pool.entries) {
-    const expect = id === 'chess_char_6_11_a' ? 4 : caps[e.tier];
+    const expect = 2 * (DATA.config.economy.poolCopiesOverrides[id] ?? caps[e.tier]);
     assert.equal(e.cap, expect, id);
     assert.equal(e.left, e.cap);
     assert.ok(DATA.chess[id].visible && !DATA.chess[id].isGolden);
@@ -26,12 +26,14 @@ test('pool caps follow config (12/14/18/16/8/5, 缪尔赛思 4) and only visible
   assert.ok(!p2.has(banned[0]) && p2.left(banned[0]) === 0 && p2.take(banned[0]) === 0);
 });
 
-test('five-player pool: tier III has 22 copies, other tiers still round up and Muelsyse has 5', () => {
-  const pool = new SharedPool(gdOf(), { scale: 1.25 });
-  const caps = { 1: 15, 2: 18, 3: 22, 4: 20, 5: 10, 6: 7 };
+test('five-player pool: current co-op tier III has 45 copies, other tiers and identity overrides round up', () => {
+  const gd = gdOf(), pool = new SharedPool(gd, { scale: 1.25 });
+  const caps = { 1: 30, 2: 35, 3: 45, 4: 40, 5: 20, 6: 13 };
   for (const [id, entry] of pool.entries) {
-    const expected = id === 'chess_char_6_11_a' ? 5 : caps[entry.tier];
+    const scaled = gd.poolCopies(id) * 1.25;
+    const expected = entry.tier === 3 ? Math.floor(scaled) : Math.ceil(scaled);
     assert.equal(entry.cap, expected, id);
+    if (!Object.hasOwn(DATA.config.economy.poolCopiesOverrides, id)) assert.equal(entry.cap, caps[entry.tier], `${id} tier baseline`);
     assert.equal(pool.take(id, 100), expected, `${id}: only the expected copies are available`);
     assert.equal(pool.take(id), 0);
     assert.equal(pool.give(id, 100), expected, `${id}: returns clamp at the new cap`);

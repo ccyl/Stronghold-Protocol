@@ -3,7 +3,8 @@
 // (test/match/harness.js checkInvariants asserts the list is empty) and by tools/matchrun.mjs --check sweeps.
 //
 // collectViolations(m) → string[] (empty when every invariant holds):
-//   pool     0 ≤ left ≤ cap and left + Σ copies held by pieces == cap per base chess; non-pool chess hold 0 copies;
+//   pool     raw balance ≤ cap and raw balance + Σ copies held by pieces == cap (public availability is clamped at zero) per base chess; non-pool chess hold 0 copies;
+//            every capped shop item is held by at most its cap (normal occupies 1, upgraded 2; effect-only items have no cap)
 //            a player's 自选 stock (0.2.0, player/diy.js) the same against its own pieces of each slotted slot — a DIY
 //            piece is always a slotted slot of its owner's, and a DIY shop / reward card one of its stocked slots
 //   economy  funds / pendingFunds non-negative integers, LP finite, shop level in range, prices ≥ 0
@@ -188,7 +189,7 @@ export function collectViolations(m, { limit = 25 } = {}) {
     }
     // 自选 stock accounting (player/diy.js): left + held == cap per slotted slot; a slot without stock holds nothing
     for (const [base, e] of ps.diyStock ? ps.diyStock.entries : []) {
-      if (!(e.left >= 0 && e.left <= e.cap)) fail(`${id}: 自选 stock ${base}: left ${e.left} cap ${e.cap}`);
+      if (!(Number.isInteger(e.left) && e.left <= e.cap)) fail(`${id}: 自选 stock ${base}: balance ${e.left} cap ${e.cap}`);
       const h = diyHeld.get(base) || 0;
       if (e.left + h !== e.cap) fail(`${id}: 自选 stock ${base}: left ${e.left} + held ${h} != cap ${e.cap}`);
     }
@@ -199,11 +200,24 @@ export function collectViolations(m, { limit = 25 } = {}) {
   for (const { id, pool } of m.poolGroups) {
     const held = heldByPool.get(pool);
     for (const [base, e] of pool.entries) {
-      if (!(e.left >= 0 && e.left <= e.cap)) fail(`pool ${id}/${base}: left ${e.left} cap ${e.cap}`);
+      if (!(Number.isInteger(e.left) && e.left <= e.cap)) fail(`pool ${id}/${base}: balance ${e.left} cap ${e.cap}`);
       const h = held.get(base) || 0;
       if (e.left + h !== e.cap) fail(`pool ${id}/${base}: left ${e.left} + held ${h} != cap ${e.cap}`);
     }
     for (const [base, n] of held) if (!pool.has(base) && n !== 0) fail(`non-pool chess ${id}/${base} holds ${n} copies`);
+  }
+
+  // Shared shop equipment. The chess pool above may go negative (Mimic). Item stock may not: held ≤ cap.
+  for (const group of m.poolGroups) {
+    const stock = group.itemPool;
+    if (!stock || !gd.raw.items) continue;
+    for (const [id, rec] of Object.entries(gd.raw.items)) {
+      if (!rec || rec.isGolden) continue;
+      const cap = stock.cap(id);
+      if (!Number.isInteger(cap)) continue;
+      const h = stock.held(id);
+      if (h > cap) fail(`item group ${group.id}/${id}: held ${h} > cap ${cap}`);
+    }
   }
 
   // combat fields

@@ -402,6 +402,14 @@ export class Match {
     this.outcome = null;
     this._turnToken = 0;
   }
+
+  /** First-group compatibility for diagnostics; player transactions always select their fixed group. */
+  get itemPool() { return this.poolGroups[0]?.itemPool; }
+
+  itemPoolFor(player) {
+    const playerId = typeof player === 'string' ? player : player?.playerId;
+    return this.poolGroups.find((g) => g.playerIds.includes(playerId))?.itemPool || this.itemPool;
+  }
 }
 
 // the method modules, in this order (a name defined twice is an error, never a silent override)

@@ -22,6 +22,7 @@ export class MatchSpDraft {
     const active = groups.filter((g) => g.order.length).map((g) => ({ id: g.id, playerIds: g.order.slice() }));
     const pages = generateGroupDrafts(this.gd, this.rngDraft, this.round, active, {
       stageId: this.stageId, bondAvailable: (bondId, group) => this.bondLive(bondId, group.playerIds[0]),
+      itemAvailable: (id, group) => this.itemPoolFor(group.playerIds[0]).canGain(id),
     });
     if (!pages || !pages.length) { this.enterPrep(); return; }
     for (const g of groups) {
@@ -50,6 +51,11 @@ export class MatchSpDraft {
     return g && !g.done ? g.order[g.idx] ?? null : null;
   }
 
+  spCardAvailable(card, group = this.spGroup()) {
+    return !!card && !!group && group.taken[card.idx] == null &&
+      (card.kind !== 'item' || this.itemPoolFor(group.playerIds[0]).canGain(card.id));
+  }
+
   startSpTurn(group = this.spGroup()) {
     const s = this.sp;
     if (this.phase !== PHASE.SP_DRAFT || !s || !group) return;
@@ -61,7 +67,7 @@ export class MatchSpDraft {
       g.idx++;
     }
     this.prioritizeDraftOrder(g.order, g.idx);
-    const available = g.cards.map((c) => c.idx).filter((i) => g.taken[i] == null);
+    const available = g.cards.filter((c) => this.spCardAvailable(c, g)).map((c) => c.idx);
     g.done = g.idx >= g.order.length || !available.length;
     if (g.done) {
       this.syncDraftDeadline(s);
@@ -85,7 +91,7 @@ export class MatchSpDraft {
         if (this.phase !== PHASE.SP_DRAFT || this.sp !== s || token !== g.token) return;
         const ps = this.players.get(g.order[g.idx]);
         if (!ps) return;
-        const avail = g.cards.map((c) => c.idx).filter((i) => g.taken[i] == null);
+        const avail = g.cards.filter((c) => this.spCardAvailable(c, g)).map((c) => c.idx);
         if (!avail.length) { this.startSpTurn(g); return; }
         this._applyCard(ps, avail[Math.floor(this.rngDraft() * avail.length)]);
       });
@@ -105,8 +111,8 @@ export class MatchSpDraft {
       if (this.phase !== PHASE.SP_DRAFT || this.sp !== s || token !== g.token) return;
       const ps = this.players.get(g.order[g.idx]);
       if (!ps || !ps.botControlled) return;
-      const avail = g.cards.map((c) => c.idx).filter((i) => g.taken[i] == null);
-      if (!avail.length) return;
+      const avail = g.cards.filter((c) => this.spCardAvailable(c, g)).map((c) => c.idx);
+      if (!avail.length) { this.startSpTurn(g); return; }
       this._applyCard(ps, botPickCard(this, ps, g.cards, avail));
     });
   }
@@ -120,7 +126,7 @@ export class MatchSpDraft {
     if (this.sp.picks[ps.playerId] != null) return fail(ERR.ALREADY);
     if (this.spTurn(ps.playerId) !== ps.playerId) return fail(ERR.NOT_YOUR_TURN);
     if (!Number.isInteger(idx) || idx < 0 || idx >= g.cards.length) return fail(ERR.BAD_TARGET);
-    if (g.taken[idx] != null) return fail(ERR.SOLD_OUT);
+    if (!this.spCardAvailable(g.cards[idx], g)) return fail(ERR.SOLD_OUT);
     this._applyCard(ps, idx);
     return OK;
   }
@@ -128,7 +134,7 @@ export class MatchSpDraft {
   _applyCard(ps, idx) {
     const s = this.sp;
     const g = ps && this.spGroup(ps.playerId);
-    if (!s || !g || !ps.alive || ps.left || s.picks[ps.playerId] != null || g.taken[idx] != null) return;
+    if (!s || !g || !ps.alive || ps.left || s.picks[ps.playerId] != null || !this.spCardAvailable(g.cards[idx], g)) return;
     const card = g.cards[idx];
     if (!card) return;
     s.picks[ps.playerId] = idx;
@@ -139,6 +145,11 @@ export class MatchSpDraft {
     this.markPublic();
     onPickCard(this, ps, card); // AI bots say "思考" when they take a bounty (enabled by default; SP_BOT_EMOTES=0 silences it)
     this.startSpTurn(g);
+    // A team tactic can fill another group's stock. Finish an exhausted page immediately, including untimed rooms,
+    // while keeping every still-available group's existing turn and timer intact.
+    for (const other of s.groups) {
+      if (other !== g && !other.done && !other.cards.some((c) => this.spCardAvailable(c, other))) this.startSpTurn(other);
+    }
   }
 
   finishSpDraft() {
@@ -214,31 +225,28 @@ export class MatchSpDraft {
   }
 
   /** Random item id: a choices.json server pool ({ pool }), a tier, or ≤ maxTier shop-eligible items. */
-  rollItemId({ pool = null, tier = null, maxTier = 6, shopLevel = 6 } = {}) {
+  rollItemId({ pool = null, tier = null, maxTier = 6, shopLevel = 6, player = null } = {}) {
     const pools = this.gd.choices.pools && typeof this.gd.choices.pools === 'object' ? this.gd.choices.pools : {};
     const p = typeof pool === 'string' && Object.hasOwn(pools, pool) ? pools[pool] : null;
     const rng = this.rngMeta;
+    const stock = this.itemPoolFor(player);
     const tierList = (lo, hi) => { const out = []; for (let t = lo; t <= hi; t++) for (const id of this.gd.shopItemsByTier[t] || []) out.push(id); return out; };
     if (p && p.kind === 'equip') {
       if (Array.isArray(p.weighted) && p.weighted.length) {
-        const pairs = p.weighted.filter((x) => Array.isArray(x) && this.gd.item(x[0]));
-        let total = 0;
-        for (const [, w] of pairs) total += Math.max(0, Number(w) || 0);
-        let r = rng() * total;
-        for (const [id, w] of pairs) { r -= Math.max(0, Number(w) || 0); if (r < 0) return id; }
-        return pairs.length ? pairs[pairs.length - 1][0] : null;
+        const pairs = p.weighted.filter((x) => Array.isArray(x) && this.gd.item(x[0]) && stock.canGain(x[0]));
+        return stock.pick(rng, pairs.map(x => x[0]), new Map(pairs));
       }
       if (Array.isArray(p.items) && p.items.length) {
         const items = p.items.filter((id) => this.gd.item(id));
-        return items.length ? items[Math.floor(rng() * items.length)] : null;
+        return stock.pick(rng, items);
       }
       let list;
       if (Array.isArray(p.tiers) && p.tiers.length) list = p.tiers.flatMap((t) => this.gd.shopItemsByTier[t] || []);
       else list = tierList(1, p.maxTier === 'shopLevel' ? Math.max(1, Math.min(6, shopLevel)) : 6);
-      return list.length ? list[Math.floor(rng() * list.length)] : null;
+      return stock.pick(rng, list);
     }
     const list = Number.isInteger(tier) ? tierList(tier, tier) : tierList(1, Math.max(1, Math.min(6, maxTier)));
-    return list.length ? list[Math.floor(rng() * list.length)] : null;
+    return stock.pick(rng, list);
   }
 
   /**
@@ -256,7 +264,7 @@ export class MatchSpDraft {
     if (!p || typeof p !== 'object') return null;
     const lvl = Math.max(1, Math.min(6, Number.isInteger(shopLevel) ? shopLevel : 6));
     if (p.kind === 'equip') {
-      const id = this.rollItemId({ pool: poolId, shopLevel: lvl });
+      const id = this.rollItemId({ pool: poolId, shopLevel: lvl, player });
       return id ? { kind: 'item', id } : null;
     }
     if (p.kind !== 'chess') return null;
