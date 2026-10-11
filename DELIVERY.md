@@ -1,15 +1,49 @@
-# 交付说明 · 0.2.3-fusion-20p（20 人房间 + 官方 v0.2.3 自制分支）
+# 交付说明 · 0.2.4-fusion-20p（20 人房间 + 官方 v0.2.4 自制分支）
 
 ## 这是什么
 
-在 **0.2.1-fusion-20p**（Paper-Yuan fusion + LongQianChen 20 人房间）之上，合并了**官方 v0.2.3**（含 v0.2.2）。
+在 **0.2.1-fusion-20p**（Paper-Yuan fusion + LongQianChen 20 人房间）之上，先后合并了**官方 v0.2.3**（含 v0.2.2）与**官方 v0.2.4**。
 
-- 分支/提交：`fusion-20p`，合并提交 `6a1644d7`（父提交 `be662a22` + 官方 `1db8e510`）
-- 版本号：`0.2.3-fusion-20p`
+- 分支/提交：`fusion-20p`，本次合并提交 `993e1b3e`（父提交 `31f245ff` + 官方 `bc50cac0`），随后 `ed8d97bd` 修复合并暴露的问题
+- 版本号：`0.2.4-fusion-20p`
 - 工作目录：`/home/ccyl/stronghold/fusion-20p`
-- 测试端口：**3010**（3000 仍为 Paper-Yuan 生产服，未受影响）
+- 测试端口：**3010**（3000 仍为 Paper-Yuan 生产服 `0.2.3-fusion-20p`，未受影响）
 
-## 本次合并带来（官方 v0.2.2 / v0.2.3）
+## 本次合并带来（官方 v0.2.4）
+
+| 类别 | 内容 |
+|---|---|
+| 规则（核心） | **共享卡池与装备库存按官方补齐**：同盟干员份数为单人 2 倍（部分低阶例外）；装备也有全队共享库存，普通 / 进阶分别占 1 / 2 份，商店展示不占份数、购买时再查一次，机变卡用尽不能再选，消耗 / 销毁 / 出售 / 淘汰都会归还份数 |
+| 规则 | 突袭成员复活后按嘲讽优先重新选落点、首领战可跳空半场（#475）；浊心斯卡蒂一技能 × 坚守 伤害互相反弹的死循环修复；克莱门莎二技能溅射修正（#467）；哈洛德 / 涤火杰西卡 / 家族徽章 / 松果 / 琳琅诗怀雅香槟炸弹 / 白面鸮复制 等社区修正 |
+| 界面 | 大厅标题栏改版、自选编队详情与干员调配共用同一套数值 / 技能 / 练度显示、日语界面改用官方日服用语（#448）、渲染资源加载失败自动重试并可恢复 3D 画面 |
+| 人机 | AI 队友买高阶卡时减少与队友抢开局盟约；有真人参与时发送有限表情（`SP_BOT_EMOTES=0` 关闭） |
+
+### 分组库存适配（本分支关键改动）
+
+官方 v0.2.4 的共享库存是**全局一份**；本分支的 20 人房间把玩家分成固定组，库存必须落在**每组一份**上，否则一个组会把别人的份数吃掉：
+
+- `createPoolGroups()` 为每组各建一个 `SharedPool` + **`SharedItemPool`**，份数按组人数缩放（`shared/playerCapacity.js` 的 `poolGroupSizes` / `poolCopyScale`，`poolCopyScale = max(1, 组人数 / 4)`）。
+- `Match` 暴露 `get itemPool()`（第一组，仅供诊断）与 **`itemPoolFor(player)`**（按玩家所在组取库存）；`player/economy.js`、`player/acquire.js`、`player/prep.js`、`match/views.js`、`match/spDraft.js`、`invariants.js` 全部改用「按玩家的库存」。
+- 机变草稿按组校验装备库存（`spCardAvailable`）；某组库存用尽时**立即结束该组页面**，不影响其余各组的回合与计时（`choices.js generateGroupDrafts` 由 `return null` 改为 `continue` 省略该组）。
+- 组内份数与官方一致：四人组 = 单人原始量、三人组 = 当前同盟基准、五人组另有三阶下限规则。
+
+## 合并过程与冲突处理
+
+本次合并 **17 个文件冲突**。处理原则：**本分支与 LongQianChen 基线 `9815b3af` 逐字节相同的文件，直接采用其合并后版本 `2e12cdfe`**（我们的 20p 移植正源自该基线，其合并提交已完成同样的库存适配）；有自有改动的文件先取其版本、再重新施加本分支的改动。
+
+| 文件 | 处理 |
+|---|---|
+| `server/match/pool.js`、`choices.js`、`invariants.js`、`effectsMeta.js`、`player/economy.js`、`player/acquire.js`、`player/prep.js`、`test/match/{pool,shared-stock}.test.js` 等 | **直接采用其合并后版本**（含分组库存适配） |
+| `server/match/Match.js`、`match/spDraft.js`、`match/views.js` | 采用其版本 **+** 重新施加本分支的 `aiPicksLast`（官方开关语义）与皮肤字段（`skins` / `skin`） |
+| `public/js/screens/lobby.js` | 采用官方标题栏改版（设置 / 说明 / 添加到桌面 移入左侧工具栏，博士名片成为统计入口）**+** 保留本分支的延迟波动读数与在线人数；移除因此重复的「统计」按钮 |
+| `public/js/screens/diy.js` | 两边 import 合并（保留 `useData`，加入官方 `skillTags`） |
+| `shared/constants.js`、`package.json`、`package-lock.json` | 版本号统一为 `0.2.4-fusion-20p` |
+| `CHANGELOG.md` / `README.md` / `docs/DESIGN.md` | 保留本分支条目与 Capacity 段，补入官方 0.2.4 说明（DESIGN §29） |
+| `data/assets.json` | 保留本分支清单（含皮肤与语音），不改用官方版 |
+
+## 上一轮：官方 v0.2.2 / v0.2.3
+
+- 合并提交 `6a1644d7`（父提交 `be662a22` + 官方 `1db8e510`），版本号 `0.2.3-fusion-20p`。
 
 | 类别 | 内容 |
 |---|---|
@@ -142,14 +176,19 @@ PORT=3010 HOST=0.0.0.0 ADMIN_SECRET=你的密钥 node server/index.js
 
 ## 已知遗留问题（均为**合并前既有**，非本次引入）
 
-| 测试 | 现象 | 根因 |
-|---|---|---|
-| `test/es2020-syntax.test.js` | 1 失败（21 处 `??=` / 顶层 await） | Paper-Yuan 分支本就失败（原分支实测同样 1 失败） |
-| `test/android-blackscreen.test.js` | 1 失败（`server/sim/` 里的 `??=`） | 同上（原分支实测同样 1 失败） |
-| `test/client-static.test.js` | 挂起（未决 Promise） | 原分支同样挂起，会让整套测试不退出 |
-| `test/assets.test.js` / `assets-diy.test.js` | 若干失败 | 素材清单陈旧，需 `npm run assets` 重新生成（实测：ours 原清单 9 失败、合并版 7 失败） |
-| `test/docs-consistency.test.js` | 1 失败（语音 URL 语言不匹配，710 条用 `jp` 而非 `cn`） | **生成数据策略差异**：Paper-Yuan 默认日语语音、官方默认中文语音；需用统一策略重新生成 `data/assets.json` |
-| `test/i18n.test.js` | 1 失败（部分 Paper-Yuan 文案未包装） | 官方 i18n 门禁是合并引入的新测试；Paper-Yuan 自有文案未 i18n 化（已修复大部分，见下） |
+合并后逐项与合并前 `31f245ff` 对比确认，**无新增失败**（`assets.test.js` 反而由 5 失败降到 2 失败）：
+
+| 测试 | 现象 | 与合并前对比 | 根因 |
+|---|---|---|---|
+| `test/match/ai-picks-last.test.js` | 3 失败（选项关闭 / 托管 / 跳过的顺序语义） | 同样 3 失败 | **有意分歧**：本分支保留 `prioritizeDraftOrder` + lone-human 守卫，官方期望 `humansFirst` 分区；这是 20 人固定池分组的地基 |
+| `test/ui/audio.test.js` | 4 失败（S3 技能攻击 / 命中音库） | 同样 4 失败 | 清单里缺 `attacks` / `hits` 表（官方清单同样缺） |
+| `test/ui/text-scale.test.js` | 3 失败 | 同样 3 失败 | 本分支 UI 选择器与 `theme.css` 根字号（24px vs 官方 40px）不同，排除表未同步 |
+| `test/ui/standin-ui.test.js`、`test/ui/match-info.test.js` | 各 1 失败 | 同样各 1 失败 | 既有 |
+| `test/es2020-syntax.test.js`、`test/android-blackscreen.test.js` | 1 / 2 失败（`??=`、顶层 await） | 同样 | 本分支自有代码使用较新语法，旧版 Android WebView 门禁 |
+| `test/assets.test.js`、`test/assets-diy.test.js` | 2 / 2 失败 | **5 → 2 失败（改善）** | 素材清单与磁盘的差异（含克莱门莎缺口，见下） |
+| `test/feedback7-voices.test.js` | 1 失败 | 同样 1 失败 | 磁盘日语语音 191 个干员 vs 官方 192（同一素材源滞后） |
+| `test/client-static.test.js` | 挂起（未决 Promise） | 原分支同样 | 会让整套测试不退出，需单独排除 |
+| `test/docs-consistency.test.js`、`test/i18n.test.js`、`test/docs-paths.test.js` | **全部通过** | 24/24、10/10、7/7 | 0.2.3 轮已修复 |
 
 ### 已知素材缺口：克莱门莎 `char_4231_clemnt`（上游素材库未更新，非代码问题）
 
@@ -176,6 +215,31 @@ PORT=3010 HOST=0.0.0.0 ADMIN_SECRET=你的密钥 node server/index.js
 
 另一个同类缺口：`char_1052_kalts2`（凯尔希·思衡托）有头像与立绘，但 Spine 被剔除 —— 其 atlas 声明了第二张贴图页
 `char_1052_kalts22.png`，上游 dump 没有该页。
+
+### 本次合并（0.2.4）修复与验证
+
+- **房主离开时广播了旧房主的 `room.state`**（本次合并暴露的真实缺陷）：本分支独有的 `matchmaker.cancelRoomQueue()`
+  内部会 `broadcastState()`，而它原先排在 `migrateHost()` **之前** —— 于是先广播了一帧「房主仍是将离开者」的状态；
+  客户端若匹配「第一帧显示该玩家已断线」的状态，就会读到旧房主。已改为**先迁移房主、再取消排队**。
+  修好后官方新测试 `test/match/leaver-isolation-ws.test.js` 由 **3 失败 → 6/6 通过**。
+- **分组草稿的 0.2.4 空页契约**：`generateGroupDrafts` 在 LongQianChen 的合并里由 `return null` 改为 `continue`
+  （某组库存用尽时省略该组，不阻塞其他组），但他的分支**漏改了对应测试**（那边同样失败）。本分支更新该测试为
+  新契约并补上「部分组被省略、其余组保留」的用例 → `test/match/group-draft-generation.test.js` **14/14 通过**。
+- **`test/match/player-capacity.test.js`**：期望值是 0.2.4 之前的（同盟未翻倍），改用其更新后的期望
+  （同盟份数为单人 2 倍）→ **30/30 通过**。
+
+### 验证结果（合并后）
+
+| 套件 | 结果 |
+|---|---|
+| `test/match/*` | **915 通过 / 3 失败**（3 个为既有的有意分歧，见下；合并前同样 3 个） |
+| `test/sim/*` | **850 通过 / 0 失败** |
+| `test/content/*` | **2207 通过 / 0 失败** |
+| `test/ui/*` | **753 通过 / 9 失败**（与合并前逐项一致，均为既有失败） |
+| `npm run golden` | **全部匹配**（49+46+22+20+10+140 场景） |
+| `npm run lint` / `check:imports` / `typecheck` | **0 errors / exit 0** |
+| 客户端 htm 模板 `<div>` 平衡扫描 | 143 个文件**全部平衡**（此前 `h.push` 崩溃的根因） |
+| 3010 实机 | 20 人房间、房间聊天、`room.skins`、容量收缩/恢复、AI 补满 20 座、第 21 个 `ROOM_FULL`、有占用时拒绝收缩、开局 `INFO_CHECK` ✓ |
 
 ### 本次修复的问题
 - **`/sim/simdata.js` 浏览器安全转换丢失**（真实回归）：模块化服务端把静态处理移到 `server/http/static.js`，
