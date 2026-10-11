@@ -58,14 +58,28 @@
 
 | 文件 | 大小 | SHA-256 |
 |---|---|---|
-| `stronghold-0.2.4-fusion-20p-server.zip` | 21 MB（代码包，仅 174 个 git 跟踪素材） | `073914ce5d45a7b04a65631592310f497ca9700dbd9b8e8e8e80b3884f64d2d0` |
-| `stronghold-0.2.4-fusion-20p-full.zip` | **587 MB（完整包，含 13709 个素材文件 + 本地客户端素材）** | `d85c109d224e408aa47c1d8bb632e3c451ec1df4da59454904df28f3d845da0b` |
-| `android/app/build/outputs/apk/release/Stronghold-Protocol-release.apk` | 622 MB（`versionCode 23` / `versionName 0.2.4-fusion-20p`） | `d41a10f2a54e1e433eb81c72d275b2520894e576d986f5f72c42d8477e96e4f9` |
+| `stronghold-0.2.4-fusion-20p-update.zip` | **12 MB（增量包，0.2.3 → 0.2.4）** | `0abf395e3173c85582fc0f067af8cfdc1d10d01a5f439e19adcdae7c20a8b6a1` |
+| `stronghold-0.2.4-fusion-20p-server.zip` | 21 MB（代码包，仅 174 个 git 跟踪素材） | `e8a2da8549a13005d061c8619a34ee5a0d32fec77fa210eafb7f9035afacf4b1` |
+| `stronghold-0.2.4-fusion-20p-full.zip` | **587 MB（完整包，含 13709 个素材文件 + 本地客户端素材）** | `37ada16eb6273b01646bc1ddecab91088278c58805c7306d8c27a9aafc1eb9f3` |
+| `android/app/build/outputs/apk/release/Stronghold-Protocol-release.apk` | 622 MB（`versionCode 23` / `versionName 0.2.4-fusion-20p`） | `9240fda9fd05339455d7aec454a4c14e6f857ac1918b82a3fcfa2c40e8caf90f` |
 
-- 三个产物均为 **0 个隐藏条目**；APK 内含 `assets/app_bundle.zip`（598 MB / 18095 个文件，含 1485 个本地素材）。
+- 四个产物均为 **0 个隐藏条目**；APK 内含 `assets/app_bundle.zip`（598 MB / 18095 个文件，含 1482 个本地素材）。
 - APK 签名证书 SHA-256：`0ac3456d69c7f73a68f6ed27c2b161b7d8b7495fab9af41ea65b12f9e56e78ba`（`CN=Stronghold Protocol 20p`，与上一版同一把签名密钥，可覆盖安装）。
 - 完整包与 APK **均含完整克莱门莎素材**（头像 / E2 头像 / 两张立绘 / 三个技能图标 / Front+Back 小人模型）。
-- `data/local-assets.json`（本机生成的本地素材清单）**只进完整包与 APK**，不进代码包 —— 代码包不含 `public/assets/local`，带上清单会指向不存在的文件。
+- `data/local-assets.json`（本机生成的本地素材清单）**只进完整包、增量包与 APK**，不进代码包 —— 代码包不含 `public/assets/local`，带上清单会指向不存在的文件。
+
+### 增量包（`-update.zip`）—— 0.2.3 的玩家用这个更新
+
+面向**已经装过 0.2.3-fusion-20p** 的玩家：解压覆盖到安装目录即可，**存档 / 配置 / 已下载的素材缓存 / `node_modules` 全部保留**。
+
+- 内容：相对 `stronghold-v0.2.3-fusion-20p-full.zip` **新增 647 个、变更 430 个、删除 0 个**文件（共 1077 个），压缩后 12 MB。
+- 素材只补**新增/修正**的部分（克莱门莎 13 个文件、343 个规范化后的皮肤 atlas、131 个模组图标、补齐的音效），**不需要重下整套素材**。
+- 本版**没有任何文件需要删除**，所以增量包不附带删除清单；包内 `如何更新.txt` 写了步骤。
+- 生成方式：`/tmp/make-delta.mjs` 用 `unzip -v` 取旧包的 size+CRC32、用 `zlib.crc32` 算新树，得出差异清单再打包。
+  **为什么不用项目自带的 `tools/package.mjs --update`**：它要求基准包带 `MANIFEST.json` 且是 `Stronghold-Protocol/` 嵌套布局，而我们历次发布的是**扁平 zip**（且没有 `MANIFEST.json`），直接用它会对不上玩家的目录结构。
+- **端到端验证**：把 `v0.2.3 完整包` 解压后叠加本增量包，与 `v0.2.4 完整包` **逐文件 CRC 比对 —— 缺失 0、内容不同 0**（只多出 `如何更新.txt` 本身）；再补上 `node_modules` 启动，版本 `0.2.4-fusion-20p`、克莱门莎素材 200、本地素材清单 1481 条、清单 210 人，日志无错误。
+
+## 仍然保留（Paper-Yuan 自有）
 
 ## 仍然保留（Paper-Yuan 自有）
 
@@ -230,8 +244,15 @@ PORT=3010 HOST=0.0.0.0 ADMIN_SECRET=你的密钥 node server/index.js
 
 ### 本次合并（0.2.4）修复与验证
 
-### 本次合并（0.2.4）修复与验证
-
+- **「统计数据 → 对局记录」只收录前 6 名玩家**（玩家反馈）：`public/js/ui/stats.js` 的 `MAX_PLAYERS = 6` 是官方
+  4 人时代的记录上限，归一化时 `.slice(0, MAX_PLAYERS)` 把第 7 名起整行丢掉。已改为 `MAX_SEATS`（本分支 20 座）。
+  实测 4/6/7/15/20 人记录现在都能完整保留。
+- **`b.result` 的 `RESULT_LIMITS.players = 4`**（同一类遗漏，一并修）：本分支 `e32edbb0`（20 人容量）只把
+  `sources` 提到了 `MAX_SEATS`，漏了 `players` —— 后果是**任何超过 4 人的房间**，客户端权威结算都会被
+  `isBattleResult()` 判为非法、`runner.js` 置 `wire = null` 并**静默降级为服务端重算（`b.yield`）**。已改为
+  `MAX_SEATS`。
+- 官方的 `test/ui/stats.test.js`（写死「保留 6 人 / < 40000 字符」）按本分支 20 座适配为 `MAX_SEATS` 与其比例上限，
+  **44/44 通过**；真实 20 人记录约 24 KB，仍远低于 `MAX_CHARS`(800 KB) 存储预算。
 - **房主离开时广播了旧房主的 `room.state`**（本次合并暴露的真实缺陷）：本分支独有的 `matchmaker.cancelRoomQueue()`
   内部会 `broadcastState()`，而它原先排在 `migrateHost()` **之前** —— 于是先广播了一帧「房主仍是将离开者」的状态；
   客户端若匹配「第一帧显示该玩家已断线」的状态，就会读到旧房主。已改为**先迁移房主、再取消排队**。
@@ -249,11 +270,14 @@ PORT=3010 HOST=0.0.0.0 ADMIN_SECRET=你的密钥 node server/index.js
 | `test/match/*` | **915 通过 / 3 失败**（3 个为既有的有意分歧，见下；合并前同样 3 个） |
 | `test/sim/*` | **850 通过 / 0 失败** |
 | `test/content/*` | **2207 通过 / 0 失败** |
-| `test/ui/*` | **753 通过 / 9 失败**（与合并前逐项一致，均为既有失败） |
+| `test/ui/*` | **761 通过 / 5 失败**（剩余 5 个为既有失败：text-scale 3、standin-ui 1、match-info 1；素材补齐另修好了 4 个音效测试） |
+| `test/assets.test.js`、`test/assets-diy.test.js` | **54/0、6/0 全部通过**（合并后曾为 52/2、4/2；联网补素材 + atlas 规范化后转绿） |
+| `test/docs-consistency.test.js`、`test/i18n.test.js`、`test/docs-paths.test.js` | **24/0、10/0、7/0** |
 | `npm run golden` | **全部匹配**（49+46+22+20+10+140 场景） |
 | `npm run lint` / `check:imports` / `typecheck` | **0 errors / exit 0** |
 | 客户端 htm 模板 `<div>` 平衡扫描 | 143 个文件**全部平衡**（此前 `h.push` 崩溃的根因） |
 | 3010 实机 | 20 人房间、房间聊天、`room.skins`、容量收缩/恢复、AI 补满 20 座、第 21 个 `ROOM_FULL`、有占用时拒绝收缩、开局 `INFO_CHECK` ✓ |
+| 增量包端到端 | 旧完整包 + 增量包 与 新完整包**逐文件 CRC 一致**（缺 0 / 差 0），启动后版本与素材均正确 ✓ |
 
 ### 本次修复的问题
 - **`/sim/simdata.js` 浏览器安全转换丢失**（真实回归）：模块化服务端把静态处理移到 `server/http/static.js`，
