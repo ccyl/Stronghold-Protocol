@@ -299,7 +299,7 @@ export function TitleScreen() {
         <${ResumeMatchButton} />
         <${PwaInstallButton} />
         <${PreloadPill} onClick=${() => setPreloadOpen(true)} />
-        <a class="title-repo" href="https://github.com/ccyl/Stronghold-Protocol" target="_blank" rel="noopener noreferrer">${t('项目仓库')}</a>
+        <a class="title-repo" href="https://github.com/sganggs/Stronghold-Protocol" target="_blank" rel="noopener noreferrer">${t('项目仓库')}</a>
         <${MicroLabel}>v${APP_VERSION} · WEB SIMULATION<//>
         ${DEV_BUILD ? html`<span class="title-dev" role="note">${t('开发版 · 不稳定，请勿用于公开服务器')}</span>` : null}
       </div>
