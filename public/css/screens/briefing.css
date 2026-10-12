@@ -92,6 +92,15 @@
 .brief-bond__ban { position: absolute; top: max(-.12rem, -5px); right: calc(50% - var(--brief-disc) / 2 - 2px); z-index: 1; display: inline-flex; align-items: center; justify-content: center; gap: .01rem; font-size: max(calc(.12 * var(--t)), 10px); min-width: max(.24rem, 18px); font-weight: 700; padding: 0 max(.03rem, 2px); background: var(--red); color: #fff; line-height: 1.3; box-shadow: 0 0 0 1px #000; }
 .brief-bond__ban .icon { width: max(.10rem, 8px); height: max(.10rem, 8px); flex: none; }
 .brief-bond.is-partial .bond__core { box-shadow: 0 0 0 2px rgba(255, 84, 84, .5); }
+/* the box beside a bond's tooltip (matchInfo.js BondBannedAside): its banned members with avatar, name and bonds */
+.brief-bantip { display: flex; flex-direction: column; gap: .06rem; }
+.brief-bantip__h { font-size: calc(.12 * var(--t)); font-weight: 700; letter-spacing: .06em; color: var(--red); }
+.brief-bantip__op { display: flex; align-items: center; gap: .08rem; }
+.brief-bantip__op .uthumb { flex: none; }
+.brief-bantip__txt { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
+.brief-bantip__txt b { font-size: calc(.14 * var(--t)); color: var(--text-hi); }
+.brief-bantip__txt > span { font-size: calc(.12 * var(--t)); color: var(--text-lo); }
+.brief-bantip__txt .is-this { color: var(--mint-400); }
 .brief-legend { display: flex; align-items: center; gap: .08rem; flex-wrap: wrap; font-size: calc(.14 * var(--t)); color: var(--text-dim); margin-top: -.06rem; }
 .brief-legend__off { width: .16rem; height: .16rem; border-radius: 50%; background: #3a403d; border: 2px solid #555; }
 .brief-legend__ban { display: inline-grid; place-items: center; width: .2rem; height: .18rem; background: var(--red); color: #fff; }

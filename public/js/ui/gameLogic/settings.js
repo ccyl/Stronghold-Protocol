@@ -25,15 +25,16 @@ export const TEXT_SIZES = Object.freeze(['sm', 'md', 'lg', 'xl']);
 
 /** keys: the in-match shortcuts' key map (ui/gameLogic/shortcuts.js; settings → 快捷键). voiceLang: VOICE_LANGS.
  *  textSize: TEXT_SIZES (css/theme.css `--t`, applied by ui/settings.js applyTextSize). board: BOARDS (the DOM
- *  fallback board; 'auto' follows the 3D probe). highRefresh: the Android shell's dynamic refresh rate. */
-export const DEFAULT_SETTINGS = Object.freeze({ bgm: 0.6, sfx: 0.8, voice: 0.8, voiceLang: 'jp', voiceOverrides: Object.freeze({}), muted: false, damageNumbers: true, quality: 'high', textSize: 'sm', board: 'auto', highRefresh: true, keys: DEFAULT_HOTKEYS });
+ *  fallback board; 'auto' follows the 3D probe). highRefresh: the Android shell's dynamic refresh rate.
+ *  officialDamageNumbers: 0.2.5 — show only PRTS red crits + dodged MISS instead of every hit. */
+export const DEFAULT_SETTINGS = Object.freeze({ bgm: 0.6, sfx: 0.8, voice: 0.8, voiceLang: 'jp', voiceOverrides: Object.freeze({}), muted: false, damageNumbers: true, officialDamageNumbers: false, quality: 'high', textSize: 'sm', board: 'auto', highRefresh: true, keys: DEFAULT_HOTKEYS });
 const QUALITIES = ['high', 'medium', 'low'];
 const BOARDS = ['auto', '3d', '2d'];
 
 /**
  * Sanitize persisted settings.
  * @param {any} raw
- * @returns {{ bgm: number, sfx: number, voice: number, voiceLang: 'jp'|'cn', voiceOverrides: Record<string, string>, muted: boolean, damageNumbers: boolean,
+ * @returns {{ bgm: number, sfx: number, voice: number, voiceLang: 'jp'|'cn', voiceOverrides: Record<string, string>, muted: boolean, damageNumbers: boolean, officialDamageNumbers: boolean,
  *   quality: 'high'|'medium'|'low', textSize: 'sm'|'md'|'lg'|'xl', board: 'auto'|'3d'|'2d',
  *   highRefresh: boolean, keys: Record<'refresh'|'freeze'|'levelUp'|'retreat'|'sell'|'ready', string> }}
  */
@@ -49,6 +50,7 @@ export function sanitizeSettings(raw) {
     voiceOverrides: sanitizeVoiceOverrides(r.voiceOverrides),
     muted: typeof r.muted === 'boolean' ? r.muted : DEFAULT_SETTINGS.muted,
     damageNumbers: typeof r.damageNumbers === 'boolean' ? r.damageNumbers : DEFAULT_SETTINGS.damageNumbers,
+    officialDamageNumbers: typeof r.officialDamageNumbers === 'boolean' ? r.officialDamageNumbers : false,
     quality: QUALITIES.includes(r.quality) ? r.quality : DEFAULT_SETTINGS.quality,
     textSize: TEXT_SIZES.includes(r.textSize) ? r.textSize : DEFAULT_SETTINGS.textSize,
     board: BOARDS.includes(r.board) ? r.board : DEFAULT_SETTINGS.board,
