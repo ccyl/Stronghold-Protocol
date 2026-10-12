@@ -37,13 +37,26 @@ v0.2.5 恰好改动了我们为 20 人房间适配过的共享库存文件，本
 
 | 文件 | 大小 | SHA-256 |
 |---|---|---|
-| `stronghold-0.2.5-fusion-20p-update.zip` | **2.2 MB（增量包，0.2.4 → 0.2.5）** | `164fa8bbb9d83b72ac8c577a6595e5c884bc927095f9a2641c14458959ef5fe4` |
-| `stronghold-0.2.5-fusion-20p-server.zip` | 21 MB（代码包） | `c942166e0ebefd0e6557856f3a8f53a561c4b2d1fa375caa323943d5684c3254` |
-| `stronghold-0.2.5-fusion-20p-full.zip` | 587 MB（完整包） | `bb7113ece2e14b836401075d3f6d4b61133656261f19fca147281038b7bca272` |
+| `stronghold-0.2.5-fusion-20p-update.zip` | **45 MB（增量包，0.2.4 → 0.2.5）** | `1ed2ff907ff0dc548fdba922d6f61204db216d2524b26a8d9baeb866ce5acd9f` |
+| `stronghold-0.2.5-fusion-20p-server.zip` | 21 MB（代码包） | `dbe1f7e2f7a1955e062182dca2a33a2ba2c0644416f5b95e7cc2999434784049` |
+| `stronghold-0.2.5-fusion-20p-full.zip` | 630 MB（完整包，含 11 个战场场景） | `d55eac8616f533e77d4c38ba869c578817192440ada2cb163202a0f51769688b` |
+| `android/.../Stronghold-Protocol-release.apk` | 664 MB（`versionCode 24` / `versionName 0.2.5-fusion-20p`） | `940870e8d8ec0c8c9b2550fc42138c3c7447b1435ab8f5992513fca9603ba51c` |
 
-- 三者均 **0 个隐藏条目**，版本 `0.2.5-fusion-20p`
-- **增量包**：相对 `stronghold-0.2.4-fusion-20p-full.zip` **新增 10 / 变更 149 / 删除 0** 个文件；v0.2.5 几乎不动素材，所以只有 2.2 MB
+- 四者均 **0 个隐藏条目**，版本 `0.2.5-fusion-20p`；APK 签名证书 SHA-256 仍为 `0ac3456d…78ba`（与上一版同一把密钥，可覆盖安装），内含 92 个场景条目
+- **增量包**：相对 `stronghold-0.2.4-fusion-20p-full.zip` **新增 105 / 变更 151 / 删除 0** 个文件（其中 92 个是战场场景）；场景贴图占了大头，所以从「纯代码」的 2.2 MB 涨到 45 MB
 - **端到端验证**：0.2.4 完整包解压 + 增量包叠加，与 0.2.5 完整包**逐文件 CRC 一致**（缺失 0 / 内容不同 0，只多出 `如何更新.txt`）；补 `node_modules` 启动 → 版本 `0.2.5-fusion-20p`、首页 200、克莱门莎素材 200、`/dev/sim-check.html` 200、清单 210 人、日志 0 错误
+
+### 战场场景（3D 棋盘）
+
+11 个战场的官方场景已提取（本机没有游戏客户端，所以走 CDN 下载 + 本机提取）：
+
+- 场景包 33 个（`fetch_scenes.py`，版本 `26-04-13-12-31-42_e9b560`）+ 场景依赖的 11 个 theme bundle（材质/贴图，
+  清单里同样有 md5 可校验），全部从官方 CDN `ak.hycdn.cn` 下载，约 52 MB，**逐个 md5 校验通过**
+- 提取依赖 `.venv-extract`（UnityPy 1.25.4 / lz4 / Pillow；`tpk_ar` 只有 sdist 且本机 setuptools 的 `os.rename`
+  被沙箱拒绝，改为手动 vendor 纯 Python 包）
+- 产物：`public/assets/local/scene/<stageId>/{scene.json,scene.bin,lm*.png,lm*.webp}` + `scene/tex/`（30 个贴图），
+  共 62 MB；`data/local-assets.json` 由 1481 → **1538 条**（新增 12 个 scene 组）
+- 3010 实测：`scene.json` / `scene.bin` / `lm0.webp` / `tex/*.webp` 全部 HTTP 200
 
 ## 生产部署记录（2026-10-11，端口 3000 → 0.2.4-fusion-20p）
 
