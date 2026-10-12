@@ -75,7 +75,21 @@ v0.2.5 恰好改动了我们为 20 人房间适配过的共享库存文件，本
 **回滚**：`backup/code-0.2.3-fusion-20p-20261011-131322/ROLLBACK.md` 写了两条路径（重新解压旧完整包 / 仅回滚代码）。
 素材该轮只做「新增 + 给 atlas 补 `size:` 行」，对旧代码无害，所以只回滚代码也是安全的。
 
-> 3000 尚未升级到 0.2.5 —— 本次按你的要求只做了 3010 测试与打包。
+## 生产部署记录（2026-10-12，端口 3000 → 0.2.5-fusion-20p）
+
+在 0.2.4 的基础上用**增量包**再次升级（`stronghold-0.2.5-fusion-20p-update.zip`，新增 105 / 变更 151 / 删除 0）：
+
+1. **停机前广播**维护提示（管理端 `/api/admin/broadcast`，`ADMIN_SECRET`）；当时 6 名真人在大厅等待房（`inMatch=false`）
+2. 备份：`/home/ccyl/stronghold/backup/code-0.2.4-fusion-20p-20261012-143802/`（`code.tar.gz` 7 MB + `ROLLBACK.md`）
+3. **精确识别 PID**：`ps -eo pid,args | awk '$2=="node" && $3=="server/index.js"'`（0.2.4 那次用 `grep server/index.js` 误取了残留的 `bash -c` 父进程，导致「磁盘新、进程旧」；这次按 cmdline 完全匹配，并用「杀掉后 3010 仍存活」交叉验证）
+4. 停服 → `unzip -o …-update.zip -d /home/ccyl/stronghold/server` → 用**原命令原样**启动
+5. 验证：`/healthz` = `0.2.5-fusion-20p`；首页 / `shared/constants.js` / `/dev/sim-check.html` 均 200；
+   **场景素材** `scene.json` / `scene.bin` / `lm0.webp` / `tex/*.webp` 均 200；本地素材清单 `local-client / 1538 条`、12 个 scene 组；
+   清单 210 名干员；**生产目录与 0.2.5 完整包逐文件 CRC 一致（14838/14838，0 差异）**
+6. 实机自检（**不开局**，避免留下幽灵对局）：20 人房间创建、房间聊天、`room.skins`、容量 20→16、`room.leave` →
+   房间正常回收，未留幽灵对局
+
+**回滚**：`backup/code-0.2.4-fusion-20p-20261012-143802/ROLLBACK.md`（仅回滚代码 / 完整回滚两条路径）。
 
 ## 上一轮：本次合并带来（官方 v0.2.4）
 
