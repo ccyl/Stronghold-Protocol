@@ -1,4 +1,5 @@
-// Player settings (BGM/SFX/voice volume, the voice dub 语音语言, mute, damage numbers, render quality, 文字大小, the
+// Player settings (BGM/SFX/voice volume, the voice dub 语音语言, mute, damage numbers, the optional 弹药数量 under an ammo
+// skill's bar — not in the official HUD, off by default, PR #552 —, render quality, 文字大小, the
 // shortcut keys): a tiny observable store persisted in localStorage (`sp.pref.settings`), applied to the audio manager
 // and to the document on every change, plus the settings modal — which also holds the language switch (ui/lang.js; kept
 // apart in `sp.pref.lang`; under it a note while the current language's pack is a machine translation,
@@ -34,7 +35,7 @@ if (typeof globalThis.AndroidNative?.isHighRefresh === 'function') {
   initialPref.highRefresh = globalThis.AndroidNative.isHighRefresh();
 }
 
-/** Settings store: { bgm, sfx, voice, voiceLang, voiceOverrides, muted, damageNumbers, quality, textSize, board, highRefresh, keys }. */
+/** Settings store: { bgm, sfx, voice, voiceLang, voiceOverrides, muted, damageNumbers, officialDamageNumbers, ammoCount, quality, textSize, board, highRefresh, keys }. */
 export const settingsStore = createStore(initialPref);
 
 /**
@@ -307,6 +308,8 @@ export function SettingsModal({ open, onClose }) {
       <${Toggle} label=${t('显示伤害数字')} micro="DAMAGE NUMBERS" value=${s.damageNumbers} onChange=${(v) => updateSettings({ damageNumbers: v })} />
       <${Toggle} label=${t('官方伤害数字')} micro="OFFICIAL NUMBERS" value=${s.officialDamageNumbers} onChange=${(v) => updateSettings({ officialDamageNumbers: v })} />
       <p class="set-hint">${t('只显示达到官方暴击条件的红色数字。关闭时仍显示每一次命中。')}</p>
+      <${Toggle} label=${t('弹药数量')} micro="AMMO COUNT" value=${s.ammoCount} onChange=${(v) => updateSettings({ ammoCount: v })} />
+      <p class="set-hint">${t('弹药类技能开启时，在弹药条下方显示剩余弹药 / 总弹药数（如 13/14）。官方界面没有这个数字。')}</p>
       <div class="set-row">
         <span class="set-row__label">${t('画面质量')}<${MicroLabel}>QUALITY<//></span>
         <div class="set-seg" role="radiogroup">
