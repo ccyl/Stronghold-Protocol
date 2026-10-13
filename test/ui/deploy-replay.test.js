@@ -69,14 +69,15 @@ describe('roundStartReplay — once per round, in 回合开始, on the own board
 
   test('screens/game.js asks after the wiring effect and marks the round only once the view took the sequence', () => {
     const src = readFileSync(path.join(ROOT, 'public/js/screens/game.js'), 'utf8');
-    const wiring = src.indexOf('}, [view, showPrep, priv, editable, field, combat, mode, watchingOther, watching, holdSeq]);');
+    // this branch adds `gd.ready` to the wiring effect's deps (8e37a65f: it must re-run once the game data is ready)
+    const wiring = src.indexOf('}, [view, showPrep, priv, editable, field, combat, mode, watchingOther, watching, holdSeq, gd.ready]);');
     const replay = src.indexOf('const plan = roundStartReplay(');
     assert.ok(wiring > 0 && replay > wiring, 'the replay effect runs after setPrep in the same commit');
     assert.match(src, /roundStartReplay\(\{ phase, round: pub\?\.round, replayed: replayedRef\.current, ownBoard: showPrep && alive && !spectator, board: priv\?\.board \}\)/);
     assert.match(src, /if \(plan && view && view\.replayDeploys\?\.\(plan\.uids\) > 0\) replayedRef\.current = plan\.round;/);
     assert.doesNotMatch(src, /deployPiece|deploySequence/, 'no landing at the wheel\'s confirm: the state that shows the move lands the piece once');
     const host = readFileSync(path.join(ROOT, 'public/js/ui/fieldHost.js'), 'utf8');
-    assert.match(host, /'stripesUnder', 'replayDeploys'\]/, 'an optional view method (the simplified board has none)');
+    assert.match(host, /'stripesUnder', 'setThermalThrottle', 'replayDeploys'\]/, 'an optional view method (the simplified board has none; this branch adds setThermalThrottle, the Android shell\'s rate)');
   });
 });
 
