@@ -23,7 +23,7 @@ import { openStats } from './stats.js';
 import { SettingsButton } from '../ui/settings.js';
 import { LoadoutButton } from './loadout.js';
 import { ChatBox } from '../ui/chatBox.js';
-import { net } from '../net.js';
+import { net, serverOrigin } from '../net.js';
 import { store, useStore, shallowEqual, emptyMatch, isSpectating } from '../store.js';
 import { difficultyInfo } from './lobby.js';
 import { t, tc } from '../../../shared/i18n.js';
@@ -86,10 +86,15 @@ export function aiLastOption(room, myId) {
   return { on: room.aiPicksLast === true, editable: room.hostId != null && room.hostId === myId };
 }
 
-/** Invite link for a room code (current page URL with ?room=CODE). */
+/** Invite link for a room code (on the server this client is actually connected to, with ?room=CODE). */
 export function inviteLink(code) {
   const loc = globalThis.location;
-  const base = loc ? `${loc.origin}${loc.pathname}` : '';
+  // The page may be served from somewhere else than the server we play on (launcher's local server + the
+  // `sp_ws_url` override): take the origin from the live connection, the path from the page. The pages.dev
+  // demo keeps its own URL — there the frontend and the game server are the deployment a player was given.
+  const pageHost = loc?.host || '';
+  const origin = (!pageHost.endsWith('.pages.dev') && serverOrigin()) || (loc ? loc.origin : '');
+  const base = origin ? `${origin}${loc ? loc.pathname : '/'}` : '';
   return `${base}?room=${encodeURIComponent(code)}`;
 }
 

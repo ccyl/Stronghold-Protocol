@@ -109,6 +109,22 @@ export function defaultWsUrl(loc = globalThis.location) {
   return `${loc.protocol === 'https:' ? 'wss' : 'ws'}://${loc.host}/ws`;
 }
 
+/**
+ * The page origin of the server this client is actually connected to (`https://host:port`), for links handed
+ * to other people (invite links). The page is not always served by the server we play on — the launcher loads
+ * its own local server and `sp_ws_url` / `?ws=` points the game at a remote one — in which case
+ * `location.origin` would hand out a link nobody else can open.
+ * @param {string} [wsUrl] socket URL in effect (default: the one `defaultWsUrl()` resolves)
+ * @returns {string} origin, or '' when the socket URL names no usable http(s) host
+ */
+export function serverOrigin(wsUrl = defaultWsUrl()) {
+  try {
+    const u = new URL(wsUrl);
+    const proto = u.protocol === 'wss:' ? 'https:' : u.protocol === 'ws:' ? 'http:' : u.protocol;
+    return proto === 'http:' || proto === 'https:' ? `${proto}//${u.host}` : '';
+  } catch { return ''; }
+}
+
 const WS_OPEN = 1;
 const WS_CONNECTING = 0;
 
