@@ -53,7 +53,7 @@ export function bindCandidates(host) {
 
 /**
  * The directories the static server reads (packsDir: the pack folders, server/packs.js).
- * @param {{ publicDir?: string, dataDir?: string, sharedDir?: string, packsDir?: string }} opts
+ * @param {{ publicDir?: string, dataDir?: string, sharedDir?: string, packsDir?: string, updateDir?: string }} opts
  */
 export function serveDirs(opts) {
   return {
@@ -61,6 +61,9 @@ export function serveDirs(opts) {
     dataDir: opts.dataDir || path.join(ROOT, 'data'),
     sharedDir: opts.sharedDir || path.join(ROOT, 'shared'),
     packsDir: opts.packsDir || path.join(ROOT, 'packs'),
+    // 更新源目录（版本自检 / 自更新，server/http/update.js）：默认 <ROOT>/updates，蓝绿部署时用 SP_UPDATE_DIR
+    // 指到安装目录之外，否则 hot-swap 会把发布目录一起换掉。
+    updateDir: opts.updateDir || process.env.SP_UPDATE_DIR || path.join(ROOT, 'updates'),
   };
 }
 

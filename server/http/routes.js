@@ -69,15 +69,23 @@ export function healthReport({ startedAt, network, registry, lobby }) {
  * @param {{ serveStatic: (req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse,
  *             rawPath: string, query: string) => Promise<void>,
  *           health: Parameters<typeof healthReport>[0], log: object,
- *           admin?: import('../admin.js').AdminService | null }} deps
+ *           admin?: import('../admin.js').AdminService | null,
+ *           update?: ((req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse,
+ *             rawPath: string, query: string) => Promise<void>) | null }} deps
  * @returns {(req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse) => void}
  */
-export function createRequestHandler({ serveStatic, health, log, admin = null }) {
+export function createRequestHandler({ serveStatic, health, log, admin = null, update = null }) {
   async function handleRequest(req, res) {
     const url = req.url || '/';
     if (url.length > MAX_URL_LENGTH) { sendError(req, res, 414, '请求地址过长 · URI too long'); return; }
     const parts = splitUrl(url);
     if (!parts) { sendError(req, res, 400, '请求地址无效 · Bad request'); return; }
+    // 更新源（版本自检 / 自更新，server/http/update.js）：/update/latest.json、/update/MANIFEST.json、
+    // /update/<name>.zip、/update/file?path=<受管路径> —— 由 SP_UPDATE_DIR 指到发布目录，不在安装目录里。
+    if (update && (parts.rawPath === '/update' || parts.rawPath.startsWith('/update/'))) {
+      await update(req, res, parts.rawPath, parts.query);
+      return;
+    }
     // 管理端 (Paper-Yuan fusion): the dashboard page and its API live before the GET/HEAD-only gate (the API POSTs)
     if (admin && (parts.rawPath === '/admin' || parts.rawPath === '/admin/')) {
       await serveStatic(req, res, '/admin/index.html', parts.query);

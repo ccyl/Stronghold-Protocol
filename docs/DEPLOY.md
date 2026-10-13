@@ -149,6 +149,15 @@ powershell -ExecutionPolicy Bypass -File scripts\install-service-windows.ps1 -Re
 - **精简包装的也能用**：程序部分与完整包完全相同；更新包带着完整包里改动过的素材，其余素材仍由 setup 补齐。如果更新包带来了新的本地客户端素材清单（`data/local-assets.json`）而这台电脑没有对应的素材，启动时会提示：从同一版本的完整包复制 `public/assets/local/`（第 6 节），或运行 `node tools/setup.mjs --local` 提取，不需要时删掉 `data/local-assets.json` 即可。
 - 更新包不联网、不会自动更新，和完整包一样从 Releases 手动下载。`npm run doctor` 的「文件校验 MANIFEST.json」一行随时显示全部程序文件是否与这个版本一致（源码目录没有这个文件，不做校验）。
 
+#### 服务器自带更新源：玩家不用自己去 Releases 下载（可选，见 [UPDATE.md](UPDATE.md)）
+
+上面两种更新都要玩家自己动手（`git pull` 或下更新包）。仓库另带一套**服务端自带更新源**的方案，适合「玩家连你的服务器、由你发版」的部署：
+
+- 服务端多出 `/update/` 端点族：`latest.json`（版本、order、内容摘要、适用来源、更新包名与 sha256，**带 ed25519 签名**）、`MANIFEST.json`（受管文件大小与 sha256）、`/update/<名字>.zip`（增量包，支持 Range 断点续传）、`/update/file?path=`（按受管路径取单文件）。发布目录由 `SP_UPDATE_DIR` 指定，**建议放在安装目录之外**（否则蓝绿/热切换会把发布目录一起换掉）。
+- 发布侧：`node tools/make-update.mjs --to <新版本树> --from <旧客户端目录>… --out <发布目录> --order <YYYYMMDDNN> --key <发布私钥>` 生成上述产物（不依赖 git，可直接从服务器全量树发版）。
+- 客户端侧：`node tools/update.mjs check|apply` 自检与更新；Windows 玩家可用 `启动器/` 里的薄壳（状态栏自检、一键更新）。自签证书链路上 `--insecure` 必须与 `--pubkey` 同时给。
+- 与手动更新的关系：两套互不冲突。不需要它的部署什么都不用配（没有 `SP_UPDATE_DIR` 时 `/update/` 只是 404）；用了它，玩家仍然可以照上面的办法手动覆盖。
+
 不用更新包也可以：停止服务器，把新版本的整合包解压到新目录后从那里启动（完整包已含素材；装了开机自启的，在新目录重新运行一次 `install-service-windows.ps1`）。用精简包或 GitHub「Download ZIP」源码包的：解压新版本后，把旧目录里的 `public\assets`、`public\fonts`、`.cache` 和 `data\local-assets.json`（若有）复制过去，可避免重新下载（setup 只补下新增的素材）。
 
 ## 2. 让不在同一网络的朋友加入
@@ -222,6 +231,17 @@ server {
 **HTTP/2**：客户端由数百个小脚本模块组成（0.2.0 起进入对局时约 340 个），隔着公网时建议让代理以 HTTP/2 提供页面：所有模块走同一条连接，远距离玩家首次进入对局明显更快。Caddy 默认就是 HTTP/2；Nginx 见上面的 `http2`。服务器本身只说 HTTP/1.1，局域网或本机游玩不受影响。
 
 https / wss 说明：页面通过 https 打开时客户端自动连接 `wss://同一域名/ws`；http 时用 `ws://`。服务器本身只提供 http，证书由代理 / 隧道负责。代理与服务器在同一台机器或内网时，`TRUST_PROXY=auto` 会信任它的 `X-Forwarded-For` / `X-Real-IP`；代理在公网另一台机器上时设 `TRUST_PROXY=1`（同时确保游戏端口只对代理开放）。
+
+### 2.5 隧道只放行 TLS 时：TLS 前端
+
+有些内网穿透节点（实测 SakuraFrp 免费节点）会对 TCP 隧道里的**明文 HTTP** 做内容合规拦截，直接返回 `501`，而**非 HTTP 的字节能正常穿过**。这时服务器本身没问题、隧道也通，只是明文 HTTP 进不来；客户端会看到 `ERR_SSL_PROTOCOL_ERROR` 或 `SSL connect error`。
+
+两种解法：
+
+- **面板侧「自动 HTTPS」**（如果节点提供）：TLS 在节点侧用正式证书终止，本地端口继续指向游戏服务端。最省事、客户端无证书提示。
+- **本仓库的 TLS 前端**（`deploy/tls-front-end/`）：在游戏服务端前面放一个极小的 TLS 终结器（`tls.createServer` 解开后按字节管道给明文服务端，HTTP 响应与 WebSocket 升级共用同一条管道）。不需要动面板、不依赖节点功能，代价是自签证书 → 浏览器首次提示一次、`启动器/` 问一次并记入 `trustedHosts`、命令行要 `--insecure --pubkey`。
+
+做法：游戏服务端改听回环的另一个端口（如 `PORT=3001`），TLS 前端监听 `0.0.0.0:3000`（与 `3443`，隧道的「本地端口」写哪个都行）转发到它；证书用 `openssl req -x509 -addext "subjectAltName=DNS:<你用的域名>"` 自签，SAN 要把节点给的各线路域名都写上。完整步骤与自测命令见 `deploy/tls-front-end/README.md`，systemd 用户单元在同目录的 `stronghold-tls.service`。
 
 ## 3. Docker
 

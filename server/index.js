@@ -31,6 +31,7 @@ import { createPackRegistry } from './packs.js';
 import { MIME, COMPRESSIBLE, acceptsGzip, parseRange } from './http/files.js';
 import { BUILD_INPUTS, computeBuildTag, buildTag, resetBuildTag } from './http/buildTag.js';
 import { createRequestHandler } from './http/routes.js';
+import { checkUpdateFeed, createUpdateHandler } from './http/update.js';
 import { answerClientError } from './http/common.js';
 import { lanUrls, displayHost, isProcessEntry, runMain } from './http/boot.js';
 import { AdminService, recordAdminLog } from './admin.js';
@@ -65,7 +66,13 @@ export async function startServer(opts = {}) {
   log.info = (...args) => { recordAdminLog('info', args.map(String).join(' ')); return origInfo?.apply(log, args); };
   log.warn = (...args) => { recordAdminLog('warn', args.map(String).join(' ')); return origWarn?.apply(log, args); };
   log.error = (...args) => { recordAdminLog('error', args.map(String).join(' ')); return origError?.apply(log, args); };
-  const { publicDir, dataDir, sharedDir, packsDir } = serveDirs(opts);
+  const { publicDir, dataDir, sharedDir, packsDir, updateDir } = serveDirs(opts);
+  // 更新源（版本自检 / 自更新）: /update/latest.json、/update/MANIFEST.json、/update/<name>.zip、/update/file?path=
+  // —— 发布目录由 SP_UPDATE_DIR 指定（默认 <ROOT>/updates；蓝绿部署建议放 /opt/stronghold-updates，别放进安装目录）。
+  const serveUpdate = createUpdateHandler({ dir: updateDir, root: ROOT, log });
+  const feed = checkUpdateFeed(updateDir);
+  if (feed.state === 'ok') log.info(`[update] 更新源 ${updateDir}：v${feed.feed.app}（order ${feed.feed.order}）`);
+  else if (feed.state === 'broken') log.warn(`[update] 更新源 ${updateDir} 的 latest.json 读不了：${feed.error}`);
 
   // The process-wide singleton serves the default data dir; a custom dir (tests) gets its own copy.
   const data = opts.dataDir ? loadData(dataDir, { log }) : getData({ dir: dataDir, log });
@@ -86,7 +93,7 @@ export async function startServer(opts = {}) {
     secret: opts.adminSecret || process.env.ADMIN_SECRET,
   });
 
-  const server = http.createServer(createRequestHandler({ serveStatic, health: { startedAt, network, registry, lobby }, log, admin }));
+  const server = http.createServer(createRequestHandler({ serveStatic, health: { startedAt, network, registry, lobby }, log, admin, update: serveUpdate }));
   server.on('clientError', answerClientError);
   const wss = attachWebSocket(server, { network, log });
 

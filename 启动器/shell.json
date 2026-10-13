@@ -1,0 +1,5 @@
+{
+  "gameRoot": "../app",
+  "port": 3000,
+  "updateSource": ""
+}
