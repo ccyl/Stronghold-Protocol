@@ -155,7 +155,7 @@ powershell -ExecutionPolicy Bypass -File scripts\install-service-windows.ps1 -Re
 
 - 服务端多出 `/update/` 端点族：`latest.json`（版本、order、内容摘要、适用来源、更新包名与 sha256，**带 ed25519 签名**）、`MANIFEST.json`（受管文件大小与 sha256）、`/update/<名字>.zip`（增量包，支持 Range 断点续传）、`/update/file?path=`（按受管路径取单文件）。发布目录由 `SP_UPDATE_DIR` 指定，**建议放在安装目录之外**（否则蓝绿/热切换会把发布目录一起换掉）。
 - 发布侧：`node tools/make-update.mjs --to <新版本树> --from <旧客户端目录>… --out <发布目录> --order <YYYYMMDDNN> --key <发布私钥>` 生成上述产物（不依赖 git，可直接从服务器全量树发版）。
-- 客户端侧：`node tools/update.mjs check|apply` 自检与更新；Windows 玩家可用 `启动器/` 里的薄壳（状态栏自检、一键更新）。自签证书链路上 `--insecure` 必须与 `--pubkey` 同时给。
+- 客户端侧：`node tools/update.mjs check|apply` 自检与更新；Windows 玩家可用 `启动器/` 里的薄壳（状态栏自检、一键更新）。自签证书链路上 `--insecure` 必须与公钥同给；**公钥随客户端包分发**（包根或 `启动器/` 下的 `update-pubkey.d/*.pem`，可放多把 = 多发布方共存，任一把验过即通过），刻意不从服务器取。
 - 与手动更新的关系：两套互不冲突。不需要它的部署什么都不用配（没有 `SP_UPDATE_DIR` 时 `/update/` 只是 404）；用了它，玩家仍然可以照上面的办法手动覆盖。
 
 不用更新包也可以：停止服务器，把新版本的整合包解压到新目录后从那里启动（完整包已含素材；装了开机自启的，在新目录重新运行一次 `install-service-windows.ps1`）。用精简包或 GitHub「Download ZIP」源码包的：解压新版本后，把旧目录里的 `public\assets`、`public\fonts`、`.cache` 和 `data\local-assets.json`（若有）复制过去，可避免重新下载（setup 只补下新增的素材）。

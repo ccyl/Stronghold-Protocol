@@ -213,13 +213,38 @@ export function signFeed(feed, privateKey) {
   return crypto.sign(null, Buffer.from(feedSignatureText(feed), 'utf8'), key).toString('base64');
 }
 
-/** 校验最新发布信息的签名（公钥 PEM）。 */
-export function verifyFeed(feed, publicKey) {
-  if (!feed || typeof feed.sig !== 'string' || !feed.sig) return false;
+/** 公钥指纹：SHA-256(SPKI DER) 前 16 位十六进制 —— 用来在日志/界面里指认"是哪把钥匙验过的"。 */
+export function keyFingerprint(publicKey) {
   try {
-    const key = crypto.createPublicKey(publicKey);
-    return crypto.verify(null, Buffer.from(feedSignatureText(feed), 'utf8'), key, Buffer.from(feed.sig, 'base64'));
-  } catch { return false; }
+    const der = crypto.createPublicKey(publicKey).export({ type: 'spki', format: 'der' });
+    return crypto.createHash('sha256').update(der).digest('hex').slice(0, 16);
+  } catch { return ''; }
+}
+
+/**
+ * 多信任根：依次试每一把公钥，返回**第一把验过的**那串 PEM（调用方据此指认签发者），都不通过则 null。
+ * @param {object} feed
+ * @param {string|string[]} publicKey 单把 PEM，或 PEM 数组（包内可放多把：自己的服 + 上游/官方服等）
+ * @returns {string|null}
+ */
+export function verifyFeedBy(feed, publicKey) {
+  if (!feed || typeof feed.sig !== 'string' || !feed.sig) return null;
+  const keys = Array.isArray(publicKey) ? publicKey : [publicKey];
+  const text = Buffer.from(feedSignatureText(feed), 'utf8');
+  const sig = Buffer.from(feed.sig, 'base64');
+  for (const pem of keys) {
+    if (typeof pem !== 'string' || !pem.trim()) continue;
+    try {
+      const key = crypto.createPublicKey(pem);
+      if (crypto.verify(null, text, key, sig)) return pem;
+    } catch { /* 换下一把 */ }
+  }
+  return null;
+}
+
+/** 校验最新发布信息的签名（公钥 PEM，或一组公钥 —— 多信任根：任一把通过即算通过）。 */
+export function verifyFeed(feed, publicKey) {
+  return verifyFeedBy(feed, publicKey) !== null;
 }
 
 /** latest.json 的文本 → 校验过的对象，或抛出原因。 */

@@ -3,7 +3,7 @@
 //
 //   node tools/update.mjs check [--root <安装目录>] [--source <http(s)://主机:端口 | 本地目录>] [--json] [--deep]
 //   node tools/update.mjs apply [--root <安装目录>] [--source <…>] [--json] [--mode auto|zip|files]
-//        [--zip <本地更新包.zip>] [--pubkey <公钥.pem>] [--insecure] [--no-setup] [--force] [--progress]
+//        [--zip <本地更新包.zip>] [--pubkey <公钥.pem|目录>]… [--insecure] [--no-setup] [--force] [--progress]
 //
 // 干什么：
 //   check —— 读本机版本 + 受管集合的内容摘要（server/updateSet.js），拉 <source>/update/latest.json，给出四种结论：
@@ -20,9 +20,11 @@
 //   收尾：重算摘要与发布方比对；然后（默认）跑 node tools/setup.mjs --quiet 补素材 —— 素材不进摘要，
 //   更新包与逐文件同步都不搬 public/assets（那是 setup 的活）。
 //
-// 安全：latest.json 用发布方的 ed25519 公钥验签（--pubkey，或环境变量 SP_UPDATE_PUBKEY，或安装目录里的
-// update-pubkey.pem）；每个文件另有 sha256 校验。自签证书（SakuraFrp 之类的隧道）要用 --insecure 时必须同时给公钥 ——
-// 传输不可信就只剩签名这一道门。（--insecure 只影响 TLS 校验，不改任何其它行为。）
+// 安全：latest.json 用发布方的 ed25519 公钥验签；每个文件另有 sha256 校验。**公钥可放多把（多信任根，
+// 任一把验过即通过）**，按这个顺序取：`--pubkey`（可重复，文件或目录）→ `SP_UPDATE_PUBKEY`（可多个，用
+// 路径分隔符）→ **安装目录之外**的 `update-pubkey.d/*.pem` 与 `update-pubkey.pem`（app 的上一级 = 客户端包
+// 根目录）。自签证书（SakuraFrp 之类的隧道）要用 --insecure 时必须同时给公钥 —— 传输不可信就只剩签名这一道门。
+// （--insecure 只影响 TLS 校验，不改任何其它行为。）
 //
 // 不用 --root 时，安装目录 = 本文件所在目录的上一级（tools/ 在安装根里）。
 
@@ -35,19 +37,19 @@ import { readZip } from './package-update.mjs';
 import { applyPendingUpdate, deleteRemoved, parseManifest, pathProblem } from '../server/update.js';
 import {
   FEED_URL, MANIFEST_URL, FILE_URL,
-  artState, diffState, fmtBytes, isNewer, loadFeed, localStateFor, readVersion, stateDigest, verifyFeed, walkTree, writeFileAtomic,
+  artState, diffState, fmtBytes, isNewer, keyFingerprint, loadFeed, localStateFor, readVersion, stateDigest, verifyFeedBy, walkTree, writeFileAtomic,
 } from '../server/updateSet.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const USAGE = `usage:
   node tools/update.mjs check [--root <安装目录>] [--source <http(s)://主机:端口|目录>] [--json] [--deep]
   node tools/update.mjs apply [--root <安装目录>] [--source …] [--mode auto|zip|files] [--zip <更新包.zip>]
-       [--pubkey <公钥.pem>] [--insecure] [--no-setup] [--force] [--json]`;
+       [--pubkey <公钥.pem|目录>]… [--insecure] [--no-setup] [--force] [--json]`;
 
 export function parseArgs(argv) {
   const o = {
     cmd: argv[0] && !argv[0].startsWith('-') ? argv[0] : 'check',
-    root: null, source: null, pubkey: null, zip: null, mode: 'auto', json: false, deep: false,
+    root: null, source: null, pubkey: [], zip: null, mode: 'auto', json: false, deep: false,
     force: false, insecure: false, setup: true, progress: false, timeout: 20000, keepZip: null, help: false,
   };
   const rest = o.cmd === argv[0] ? argv.slice(1) : argv;
@@ -58,8 +60,8 @@ export function parseArgs(argv) {
     else if (a.startsWith('--root=')) o.root = a.slice(7);
     else if (a === '--source') o.source = val();
     else if (a.startsWith('--source=')) o.source = a.slice(9);
-    else if (a === '--pubkey') o.pubkey = val();
-    else if (a.startsWith('--pubkey=')) o.pubkey = a.slice(9);
+    else if (a === '--pubkey') o.pubkey.push(val());
+    else if (a.startsWith('--pubkey=')) o.pubkey.push(a.slice(9));
     else if (a === '--zip') o.zip = val();
     else if (a.startsWith('--zip=')) o.zip = a.slice(6);
     else if (a === '--mode') o.mode = val();
@@ -200,17 +202,40 @@ export async function downloadTo(source, relPath, destAbs, { sha256 = null, size
 }
 
 /**
- * 公钥：--pubkey / SP_UPDATE_PUBKEY / **安装目录之外**的 update-pubkey.pem（app 的上一级）。
- * 刻意不读安装目录里的那一份：那份会被更新本身覆盖，等于让更新源自己给自己发通行证。
- * （启动器会显式传 --pubkey，它读自己目录旁的 update-pubkey.pem。）
+ * 公钥（信任根，可多把）：`--pubkey`（可重复，文件或目录）/ `SP_UPDATE_PUBKEY`（可多个，用路径分隔符）/
+ * **安装目录之外**的 `update-pubkey.d/*.pem` 与 `update-pubkey.pem`（app 的上一级 = 客户端包根目录）。
+ * 刻意不读安装目录（app）里的那一份：那份会被更新本身覆盖，等于让更新源自己给自己发通行证。
+ * 多把时**任一把验过即通过**（自己的服 + 上游/官方服各一把，互不影响）。
+ * @param {string} root 安装目录（app 目录）
+ * @param {string|string[]|null} [cli] --pubkey 的值（文件或目录，可多个）
+ * @returns {Array<{ path: string, pem: string }>} 按内容去重后的公钥列表
  */
-export function readPubkey(root, cli) {
-  const files = [cli, process.env.SP_UPDATE_PUBKEY, path.join(path.dirname(root), 'update-pubkey.pem')].filter(Boolean);
-  for (const f of files) {
-    try { return fs.readFileSync(f, 'utf8'); } catch { /* next */ }
-  }
-  return null;
+export function readPubkeys(root, cli) {
+  const out = [];
+  const seen = new Set();
+  const add = (p) => {
+    if (!p) return;
+    try {
+      if (fs.statSync(p).isDirectory()) {
+        for (const f of fs.readdirSync(p).filter((n) => n.toLowerCase().endsWith('.pem')).sort()) add(path.join(p, f));
+        return;
+      }
+    } catch { return; }                        // 路径不存在：跳过
+    try {
+      const pem = fs.readFileSync(p, 'utf8');
+      if (!seen.has(pem)) { seen.add(pem); out.push({ path: p, pem }); }
+    } catch { /* 读不了：跳过 */ }
+  };
+  for (const c of Array.isArray(cli) ? cli : [cli].filter(Boolean)) add(c);
+  for (const c of String(process.env.SP_UPDATE_PUBKEY || '').split(path.delimiter).filter(Boolean)) add(c);
+  const parent = path.dirname(root);
+  add(path.join(parent, 'update-pubkey.d'));
+  add(path.join(parent, 'update-pubkey.pem'));
+  return out;
 }
+
+/** 兼容旧签名：只要第一把。新代码用 readPubkeys()。 */
+export const readPubkey = (root, cli) => readPubkeys(root, cli)[0]?.pem ?? null;
 
 // ---------------------------------------------------------------------------------------------------
 // 自检
@@ -237,15 +262,16 @@ export async function localServerAlive(root, { timeout = 800 } = {}) {
 
 /**
  * 一次版本自检。
- * @param {{ root: string, source: string, pubkey?: string|null, timeout?: number, insecure?: boolean, deep?: boolean }} o
+ * @param {{ root: string, source: string, pubkeys?: Array<{path: string, pem: string}>|string|null, timeout?: number, insecure?: boolean, deep?: boolean }} o
  * @returns {Promise<object>} 扁平结果（每个值都是字符串 / 数字 / 布尔 —— 启动器的简易 JSON 解析就能读）
  */
-export async function check({ root, source, pubkey = null, timeout = 20000, insecure = false, deep = false }) {
+export async function check({ root, source, pubkeys = null, timeout = 20000, insecure = false, deep = false }) {
   const { version, declared, mismatch } = readVersion(root);
   const out = {
     ok: true, state: 'unknown', app: version || '', declared: declared || '', versionMismatch: !!mismatch,
     digest: '', files: 0, bytes: 0, latest: '', order: 0, from: '', inFrom: false,
     zipCovers: false, zipName: '', zipSize: 0, zipUrl: '', manifestUrl: '', source, signed: false, signatureOk: false,
+    signatureKeys: 0, signatureBy: '', signatureKeyPath: '',
     missing: 0, changed: 0, extra: 0, samples: '', notes: '', drift: 0,
     artFiles: 0, artBytes: 0, artDrift: 0,
   };
@@ -269,9 +295,16 @@ export async function check({ root, source, pubkey = null, timeout = 20000, inse
   out.manifestUrl = manifestRef(feed);
   out.bytes = feed.bytes || 0;
   out.signed = !!feed.sig;
-  if (pubkey) {
-    out.signatureOk = verifyFeed(feed, pubkey);
-    if (!out.signatureOk) { out.ok = false; out.state = 'error'; out.notes = '发布信息的签名不对（更新源不可信或公钥不匹配）'; return out; }
+  if (pubkeys) {
+    // 多信任根：包内可以放多把公钥，任一把验过即通过（并报告是哪一把、指纹是多少）
+    const list = (Array.isArray(pubkeys) ? pubkeys : [{ path: '', pem: pubkeys }]).filter((k) => k && k.pem);
+    out.signatureKeys = list.length;
+    const matched = verifyFeedBy(feed, list.map((k) => k.pem));
+    if (!matched) { out.ok = false; out.state = 'error'; out.notes = '发布信息的签名不对（更新源不可信或公钥不匹配）'; return out; }
+    out.signatureOk = true;
+    out.signatureBy = keyFingerprint(matched);
+    const hit = list.find((k) => k.pem === matched);
+    out.signatureKeyPath = hit ? hit.path : '';
   } else if (feed.sig) {
     out.signatureOk = false;
   }
@@ -339,8 +372,8 @@ function manifestRef(feed) {
  * @param {object} o see check() plus { zip, mode, setup, force, dryRun }
  */
 export async function apply(o) {
-  const { root, source, pubkey = null, timeout = 20000, insecure = false, log = () => {} } = o;
-  const before = await check({ root, source, pubkey, timeout, insecure });
+  const { root, source, pubkeys = null, timeout = 20000, insecure = false, log = () => {} } = o;
+  const before = await check({ root, source, pubkeys, timeout, insecure });
   const res = { ...before, applied: false, mode: '', wrote: 0, removed: 0, setup: 'skipped', after: '', error: '' };
   if (!before.ok) return res;
   if (before.state === 'current') { res.notes = '已经是最新，什么都不做'; return res; }
@@ -428,7 +461,7 @@ export async function apply(o) {
         res.setup = r.status === 0 ? 'ok' : `exit ${r.status}`;
       } else res.setup = 'missing';
     }
-    const after2 = await check({ root, source, pubkey, timeout, insecure });
+    const after2 = await check({ root, source, pubkeys, timeout, insecure });
     // 报告里的"本机状态"要反映更新之后（否则 app / digest 会自相矛盾：版本还是旧的、摘要却是新的）
     res.state = after2.state;
     res.digest = after2.digest;
@@ -489,13 +522,13 @@ async function main(argv) {
   if (o.help) { console.log(USAGE); return 0; }
   const root = path.resolve(o.root || path.join(HERE, '..'));
   const source = resolveSource(root, o.source);
-  const pubkey = readPubkey(root, o.pubkey);
-  if (o.insecure && !pubkey) { console.error('update: --insecure 必须与 --pubkey 一起用（传输不可信时只剩签名这道门）'); return 2; }
+  const pubkeys = readPubkeys(root, o.pubkey);
+  if (o.insecure && !pubkeys.length) { console.error('update: --insecure 必须至少配一把公钥（--pubkey，或包内 update-pubkey.d/*.pem）—— 传输不可信时只剩签名这道门'); return 2; }
   const log = (s) => { if (!o.json) console.log(s); };
 
   try {
     if (o.cmd === 'apply') {
-      const r = await apply({ ...o, root, source, pubkey, log });
+      const r = await apply({ ...o, root, source, pubkeys, log });
       if (o.json) console.log(JSON.stringify(flat(r)));
       else {
         console.log(r.error ? `\n✗ ${r.error}` : `\n✓ v${r.after || r.app}（${r.mode === 'zip' ? '更新包' : '逐文件同步'}：写入 ${r.wrote} 个文件，删除 ${r.removed} 个）`);
@@ -504,7 +537,7 @@ async function main(argv) {
       }
       return r.ok ? 0 : 1;
     }
-    const r = await check({ ...o, root, source, pubkey });
+    const r = await check({ ...o, root, source, pubkeys });
     if (o.json) console.log(JSON.stringify(flat(r)));
     else printCheck(r, root, source);
     return r.ok ? 0 : 1;
@@ -530,6 +563,8 @@ function printCheck(r, root, source) {
   const label = { current: '已是最新', outdated: '有新版本', drifted: '内容漂移', 'server-behind': '本机更新', unknown: '内容未知', error: '检查失败' }[r.state] || r.state;
   console.log(`本机：v${r.app}${r.versionMismatch ? `（package.json 与 APP_VERSION 不一致：${r.declared}）` : ''}  受管文件 ${r.files} 个 ${fmtBytes(r.bytes)}`);
   console.log(`发布方：v${r.latest}  适用版本 from ${r.from || '—'}${r.zipCovers ? '（含本机 → 可用更新包）' : ''}`);
+  if (r.signatureOk) console.log(`签名：通过（公钥 ${r.signatureKeyPath || '（内联）'}，指纹 ${r.signatureBy || '—'}；候选 ${r.signatureKeys} 把）`);
+  else if (r.signed) console.log('签名：未校验（没有配公钥 ⇒ 只剩 sha256 这一道门；建议在包内放 update-pubkey.d/*.pem）');
   console.log(`更新源：${source}`);
   console.log(`结论：${label}${r.drift ? `（缺 ${r.missing}，内容不同 ${r.changed}${r.extra ? `，本机多出 ${r.extra}` : ''}）` : ''}`);
   if (r.artDrift) console.log(`  素材：与发布方不一致（本机 ${r.artFiles} 个 / 指纹不同）—— 素材归 setup 管，更新包不会搬 public/assets`);

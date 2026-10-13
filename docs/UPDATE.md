@@ -36,10 +36,12 @@
 ## 2. 发布（维护者的机器上）
 
 ```bash
-# 1) 一次性：生成发布密钥（公钥随启动器/客户端分发，私钥只留在发布机）
+# 1) 一次性：生成发布密钥（私钥只留在发布机；公钥随客户端包分发 —— 见第 3 节的 update-pubkey.d）
 node -e "const c=require('node:crypto'),fs=require('node:fs');const{publicKey,privateKey}=c.generateKeyPairSync('ed25519');
 fs.writeFileSync('release-private.pem',privateKey.export({type:'pkcs8',format:'pem'}));
 fs.writeFileSync('update-pubkey.pem',publicKey.export({type:'spki',format:'pem'}));"
+#    把 update-pubkey.pem 复制进客户端包的 update-pubkey.d\（文件名随你，*.pem 都读）；
+#    同一个目录里可以放多把（多发布方），客户端任一把验过即通过。
 
 # 2) 每个版本：从"新版本树"生成发布目录（--from 必须是你自己渠道发出去的包/目录）
 node tools/make-update.mjs \
@@ -70,7 +72,7 @@ curl -s https://你的服务器:端口/update/latest.json | head -c 400
 ## 3. 客户端（玩家机器上）
 
 ```bash
-node tools/update.mjs check  [--root <app目录>] [--source <主机:端口|目录>] [--pubkey update-pubkey.pem] [--json] [--deep]
+node tools/update.mjs check  [--root <app目录>] [--source <主机:端口|目录>] [--pubkey <公钥.pem|目录>]… [--json] [--deep]
 node tools/update.mjs apply  [同上] [--mode auto|zip|files] [--no-setup] [--force] [--dry-run]
 ```
 
@@ -97,8 +99,22 @@ node tools/update.mjs apply  [同上] [--mode auto|zip|files] [--no-setup] [--fo
 - 菜单：`设置 → 检查更新…` / `设置 → 一键更新到最新…`。
 - 命令行（无窗口，写 JSON 报告）：`启动游戏.exe --check-update --game <app目录> --update-source <地址> --pubkey update-pubkey.pem --smoke-out <报告.json>`
   / `启动游戏.exe --update [--update-no-setup] …`。
-- 配置（`shell.json`）：`updateSource`（不写就取"当前连的服务器 / 记住的服务器"）、`updatePubkey`；
-  公钥也可以直接放 `启动器\update-pubkey.pem`。环境变量：`SP_UPDATE_SOURCE`。
+- 配置（`shell.json`）：`updateSource`（不写就取"当前连的服务器 / 记住的服务器"）、`updatePubkey`（可多个，用 `;` `|` `,` 分隔）。
+  环境变量：`SP_UPDATE_SOURCE`。
+
+**信任根（公钥）放哪** —— 可放**多把**（多发布方共存，任一把验过即通过），查找顺序：
+
+| 顺序 | 位置 |
+|---|---|
+| 1 | `--pubkey`（可重复；给**文件**或**目录**都行） |
+| 2 | 环境变量 `SP_UPDATE_PUBKEY`（可多个，用系统路径分隔符） |
+| 3 | `启动器\update-pubkey.d\*.pem`（按文件名排序）与 `启动器\update-pubkey.pem` |
+| 4 | **客户端包根目录**（= `app` 的上一级）的 `update-pubkey.d\*.pem` 与 `update-pubkey.pem` |
+
+刻意**不读**安装目录（`app`）里的那一份：更新包会覆盖安装目录，等于让更新源自己给自己发通行证。
+包里默认可只带**你自己服务器**那一把；想同时接受上游/官方服的发布，把他们的 `update-pubkey.pem`
+也丢进同一个 `update-pubkey.d\`（文件名随意）即可。自检报告会写清是**哪一把**验过的：
+`签名：通过（公钥 …\update-pubkey.d\stronghold.pem，指纹 407a92fe…；候选 N 把）`。
 
 ## 4. 安全
 
@@ -109,6 +125,13 @@ node tools/update.mjs apply  [同上] [--mode auto|zip|files] [--no-setup] [--fo
   更新通道不继承这套豁免）。
 - `/update/file` 只服务发布清单里列出的路径，路径穿越与非受管路径一律 403；服务端文件与清单大小不一致时 503
   （部署做到一半时宁可不给字节，客户端会重试）。
+- **信任根不从服务器取**：公钥只随客户端包分发。若允许服务器下发公钥，能改这条链路的人（隧道节点、机房、
+  被入侵的服务器）就能同时换掉公钥与内容 —— 签名退化成"自证"，等于任意代码执行通道。
+- **多把公钥 = 多发布方**：任一把验过即通过；包里没有的那一家签的 `latest.json` 一律拒绝
+  （实测：只放无关公钥时报 `发布信息的签名不对（更新源不可信或公钥不匹配）`）。新增发布方 = 往
+  `update-pubkey.d\` 丢一个 `.pem`，不用改代码。
+- 一把公钥都没有时只做 sha256 校验（弱一档）：启动器记日志「没有公钥：只报警，不自动接受」，`--insecure`
+  链路直接拒绝运行。发行包务必带上公钥。
 
 ## 5. 回环测试（本地就能跑完的验收）
 

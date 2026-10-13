@@ -53,7 +53,7 @@ namespace StrongholdShell
         public bool DoUpdate;           // --update：一键更新后退出
         public bool UpdateNoSetup;      // --update-no-setup：更新完不跑 setup（补素材）
         public string UpdateSource;     // --update-source <http(s)://主机:端口 | 目录>
-        public string UpdatePubkey;     // --pubkey <ed25519 公钥.pem>
+        public List<string> UpdatePubkeys = new List<string>();   // --pubkey <ed25519 公钥.pem|目录>（可重复：多信任根）
     }
 
     internal static class Program
@@ -92,8 +92,8 @@ namespace StrongholdShell
                 else if (a == "--update-no-setup") o.UpdateNoSetup = true;
                 else if (a == "--update-source" && i + 1 < argv.Length) o.UpdateSource = argv[++i];
                 else if (a.StartsWith("--update-source=")) o.UpdateSource = a.Substring(16);
-                else if (a == "--pubkey" && i + 1 < argv.Length) o.UpdatePubkey = argv[++i];
-                else if (a.StartsWith("--pubkey=")) o.UpdatePubkey = a.Substring(9);
+                else if (a == "--pubkey" && i + 1 < argv.Length) o.UpdatePubkeys.Add(argv[++i]);
+                else if (a.StartsWith("--pubkey=")) o.UpdatePubkeys.Add(a.Substring(9));
             }
             return o;
         }
@@ -370,7 +370,7 @@ namespace StrongholdShell
         private System.Windows.Forms.Timer retryTimer;
         // 版本自检 / 一键更新（tools/update.mjs；服务端 /update/ 端点）
         private string updateSource = "";        // 更新源（--update-source > 环境变量 > shell.json > 连的服务器）
-        private string updatePubkey = "";        // 发布方 ed25519 公钥文件（自签证书的链路上必须有）
+        private List<string> updatePubkeys = new List<string>();   // 发布方 ed25519 公钥（可多把，任一把验过即通过）
         private string updateState = "";         // current / outdated / drifted / server-behind / error / unknown
         private string updateLatest = "";        // 发布方版本
         private string updateDrift = "";         // 不一致的文件数
@@ -526,20 +526,59 @@ namespace StrongholdShell
             return "";
         }
 
-        /// <summary>发布方公钥：--pubkey &gt; shell.json updatePubkey &gt; exe 旁的 update-pubkey.pem。</summary>
-        private string ResolveUpdatePubkey()
+        /// <summary>
+        /// 发布方公钥（信任根，**可多把**，任一把验过即通过）：
+        /// --pubkey（可重复，文件或目录）&gt; shell.json 的 updatePubkey（可多个，用 ; | , 分隔）
+        /// &gt; exe 旁的 update-pubkey.d\*.pem 与 update-pubkey.pem &gt; app 上一级（客户端包根目录）的同样两处。
+        /// 刻意不看安装目录（app）里的那一份：那份会被更新本身覆盖，等于让更新源自己给自己发通行证。
+        /// </summary>
+        private List<string> ResolveUpdatePubkeys()
         {
-            if (!string.IsNullOrEmpty(opt.UpdatePubkey)) return opt.UpdatePubkey;
+            var seeds = new List<string>();
+            foreach (string c in opt.UpdatePubkeys) seeds.Add(c);
             string s = Program.JsonStringValue(Path.Combine(exeDir, "shell.json"), "updatePubkey");
-            if (!string.IsNullOrEmpty(s)) return Path.IsPathRooted(s) ? s : Path.Combine(exeDir, s);
-            string p = Path.Combine(exeDir, "update-pubkey.pem");
-            if (File.Exists(p)) return p;
+            if (!string.IsNullOrEmpty(s))
+            {
+                string[] parts = s.Split(new char[] { ';', '|', ',' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string one in parts)
+                {
+                    string t = one.Trim();
+                    if (t.Length > 0) seeds.Add(Path.IsPathRooted(t) ? t : Path.Combine(exeDir, t));
+                }
+            }
+            seeds.Add(Path.Combine(exeDir, "update-pubkey.d"));
+            seeds.Add(Path.Combine(exeDir, "update-pubkey.pem"));
             if (!string.IsNullOrEmpty(gameRoot))
             {
-                p = Path.Combine(Path.GetDirectoryName(gameRoot), "update-pubkey.pem");
-                if (File.Exists(p)) return p;
+                string parent = Path.GetDirectoryName(gameRoot);
+                seeds.Add(Path.Combine(parent, "update-pubkey.d"));
+                seeds.Add(Path.Combine(parent, "update-pubkey.pem"));
             }
-            return "";
+
+            var list = new List<string>();
+            foreach (string p in seeds)
+            {
+                if (string.IsNullOrEmpty(p)) continue;
+                string full = p;
+                try { full = Path.GetFullPath(p); } catch { /* 保持原样 */ }
+                try
+                {
+                    if (Directory.Exists(full))
+                    {
+                        string[] files = Directory.GetFiles(full, "*.pem");
+                        Array.Sort(files, StringComparer.OrdinalIgnoreCase);
+                        foreach (string f in files)
+                        {
+                            string ff = Path.GetFullPath(f);
+                            if (!list.Contains(ff)) list.Add(ff);
+                        }
+                        continue;
+                    }
+                }
+                catch { continue; }
+                if (File.Exists(full) && !list.Contains(full)) list.Add(full);
+            }
+            return list;
         }
 
         /// <summary>跑一次 node（tools/update.mjs），拿回 stdout。超时也会返回已经读到的内容。</summary>
@@ -577,11 +616,12 @@ namespace StrongholdShell
             string args = "\"" + Path.Combine(gameRoot, "tools", "update.mjs") + "\" " + (apply ? "apply" : "check")
                 + " --root \"" + gameRoot + "\" --json";
             if (updateSource.Length > 0) args += " --source \"" + updateSource + "\"";
-                        if (updatePubkey.Length > 0) args += " --pubkey \"" + updatePubkey + "\"";
-                        // 自签证书的隧道（SakuraFrp 之类）默认校验不过：更新通道的可信度由发布方签名保证，
-                        // 所以 https 源只要配了公钥就跳过 TLS 校验（update.mjs 也不允许只 --insecure 不给公钥）。
-                        if (updateSource.StartsWith("https://", StringComparison.OrdinalIgnoreCase) && updatePubkey.Length > 0) args += " --insecure";
-                        if (apply && opt.UpdateNoSetup) args += " --no-setup";
+            // 信任根可以有多把（自己的服 + 上游/官方服各一把）：逐个传 --pubkey，客户端任一把验过即通过
+            foreach (string k in updatePubkeys) args += " --pubkey \"" + k + "\"";
+            // 自签证书的隧道（SakuraFrp 之类）默认校验不过：更新通道的可信度由发布方签名保证，
+            // 所以 https 源只要配了公钥就跳过 TLS 校验（update.mjs 也不允许只 --insecure 不给公钥）。
+            if (updateSource.StartsWith("https://", StringComparison.OrdinalIgnoreCase) && updatePubkeys.Count > 0) args += " --insecure";
+            if (apply && opt.UpdateNoSetup) args += " --no-setup";
             return args;
         }
 
@@ -834,7 +874,7 @@ namespace StrongholdShell
                         if (opt.CheckUpdate || opt.DoUpdate)
                         {
                             updateSource = ResolveUpdateSource();
-                            updatePubkey = ResolveUpdatePubkey();
+                            updatePubkeys = ResolveUpdatePubkeys();
                             AppendLog("[update] source = " + (updateSource.Length == 0 ? "(空)" : updateSource));
                             await RunUpdateCliAsync();
                             return;
@@ -919,10 +959,10 @@ namespace StrongholdShell
             {
             // 版本自检：静默（更新源挂了、连不上都不该影响玩）
             updateSource = ResolveUpdateSource();
-            updatePubkey = ResolveUpdatePubkey();
+            updatePubkeys = ResolveUpdatePubkeys();
             if (updateSource.Length > 0)
             {
-            AppendLog("[update] source = " + updateSource + (updatePubkey.Length > 0 ? "，公钥 " + updatePubkey : "（没有公钥：只报警，不自动接受）"));
+            AppendLog("[update] source = " + updateSource + (updatePubkeys.Count > 0 ? "，公钥 " + updatePubkeys.Count + " 把：" + string.Join(" | ", updatePubkeys.ToArray()) : "（没有公钥：只报警，不自动接受）"));
             await CheckUpdateAsync();
             }
             else AppendLog("[update] 没有更新源，跳过版本自检（连一次服务器，或在 shell.json 写 updateSource）");
@@ -1415,7 +1455,7 @@ namespace StrongholdShell
               .Append(", \"state\": ").Append(Json(updateState))
               .Append(", \"driftFiles\": ").Append(Json(updateDrift))
               .Append(", \"artDrift\": ").Append(Json(updateArtDrift))
-              .Append(", \"pubkey\": ").Append(Json(updatePubkey.Length > 0 ? "有" : "无"))
+              .Append(", \"pubkey\": ").Append(Json(updatePubkeys.Count > 0 ? "有（" + updatePubkeys.Count + " 把）" : "无"))
               .Append(" }");
             sb.Append(",\n  \"screenshot\": ").Append(pngOk ? Json(png) : "null");
             sb.Append(",\n  \"screenshotChrome\": ").Append(chromeOk ? Json(chromePng) : "null");
