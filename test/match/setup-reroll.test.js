@@ -98,6 +98,27 @@ test('four humans must agree; rerolls the entire official setup and stock, prese
   assert.equal(m.phase, PHASE.BAND_DRAFT);
 });
 
+test('reroll rebuilds every chess pool group, so the shop and promotion reward draw with the new bans', (t) => {
+  const h = makeMatch({ humans: 4, difficulty: 'NORMAL', seed: 27 }).start();
+  t.after(() => h.m.dispose());
+  const m = h.m;
+  const oldGroups = m.poolGroups;
+  assert.deepEqual(m.requestSetupReroll('p_0', 0), { ok: true });
+  for (const p of m.order.slice(1)) assert.deepEqual(approve(m, p.playerId), { ok: true });
+  assert.equal(m.setupRevision, 1);
+  assert.equal(m.setupVote, null);
+  // replicate the reroll's own RNG stream (setupMatchWaves first, then the bans — completeSetupReroll's order)
+  const rng = createRng(deriveSeed(m.seed, 'reroll-setup:1'));
+  setupMatchWaves(m.gd, rng);
+  const bans = drawDisabledBonds(m.gd, rng).banned;
+  assert.deepEqual(m.bannedChess, bans);
+  assert.notEqual(m.poolGroups, oldGroups, 'pool groups are rebuilt, not just the compat singleton');
+  for (const g of m.poolGroups) for (const id of m.gd.visibleChess) assert.equal(g.pool.has(id), !bans.includes(id), `${id} in group ${g.id}`);
+  for (const ps of m.order) for (const id of m.gd.visibleChess) assert.equal(ps.pool.has(id), !bans.includes(id), `${id} for ${ps.playerId}`);
+  assert.ok(m.order.every((ps) => m.poolFor(ps) === ps.pool));
+  h.invariants();
+});
+
 test('reject/cancel restores exact remaining countdown and keeps setup and ready flags', (t) => {
   const h = makeMatch({ humans: 2, timerScale: 0.5 }).start();
   t.after(() => h.m.dispose());
