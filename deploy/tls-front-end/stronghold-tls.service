@@ -1,0 +1,25 @@
+[Unit]
+Description=Stronghold Protocol: Alliance — TLS front end for a tunnel that only passes TLS (HTTPS/WSS → 127.0.0.1:3001)
+Documentation=file:/opt/stronghold-tls/README.md
+After=network-online.target stronghold.service
+Wants=network-online.target
+PartOf=stronghold.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/stronghold-tls
+Environment=TLS_PORT=3000,3443
+Environment=TLS_BIND=0.0.0.0
+Environment=TARGET_HOST=127.0.0.1
+Environment=TARGET_PORT=3001
+Environment=TLS_CERT=/opt/stronghold-tls/tls.crt
+Environment=TLS_KEY=/opt/stronghold-tls/tls.key
+# 换成你自己的 node（which node）
+ExecStart=/usr/bin/node /opt/stronghold-tls/tls-proxy.mjs
+Restart=always
+RestartSec=3
+StandardOutput=append:/opt/stronghold-tls/tls-proxy.log
+StandardError=append:/opt/stronghold-tls/tls-proxy.log
+
+[Install]
+WantedBy=default.target
