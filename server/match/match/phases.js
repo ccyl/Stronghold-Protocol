@@ -320,6 +320,10 @@ export class MatchPhases {
     if (d.picks[ps.playerId]) return fail(ERR.ALREADY);
     if (this.draftTurn(ps.playerId) !== ps.playerId) return fail(ERR.NOT_YOUR_TURN);
     if (!(g.skipsLeft[ps.playerId] > 0)) return fail(ERR.ALREADY, 'no skip left');
+    // nobody is left after me at all — the final unpicked player (GitHub #546): the plain message
+    if (!g.order.slice(g.idx + 1).some((pid) => !d.picks[pid])) return fail(ERR.BAD_TARGET, 'nobody to pass to');
+    // someone is left, but none of them can still choose manually (only bots / autoplay seats) — a skip yields to
+    // a manual teammate only (this branch's manual-draft priority)
     if (!g.order.slice(g.idx + 1).some((pid) => !d.picks[pid] && this.manualDraftPicker(this.players.get(pid)))) {
       return fail(ERR.BAD_TARGET, 'no manual teammate to pass to');
     }
