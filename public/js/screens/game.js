@@ -86,6 +86,7 @@ import { EmoteWheel } from '../ui/emotes.js';
 import { ChatBox } from '../ui/chatBox.js';
 import { EffectsList } from '../ui/effectsList.js';
 import { CombatHud } from '../ui/combatHud.js';
+import { CombatMetricsPanel } from '../ui/combatMetrics.js';
 import { SettingsModal, settingsStore } from '../ui/settings.js';
 import { ExitModal, AwayOverlay, awayStore } from '../ui/matchChrome.js';
 import { openGuide } from '../ui/guide.js';
@@ -192,7 +193,9 @@ function MatchScreen() {
   const [refreshBusy, setRefreshBusy] = useState(false);
   useEffect(() => onRefreshBusy(setRefreshBusy), []);
   const [rewardMin, setRewardMin] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
+const [chatOpen, setChatOpen] = useState(false);
+  // 作战统计 (battle/metrics.js): a client-only local damage/healing panel — never uploaded to the server
+  const [metricsOpen, setMetricsOpen] = useState(false);
   const [emoteOpen, setEmoteOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [exitOpen, setExitOpen] = useState(false);
@@ -1553,8 +1556,17 @@ function MatchScreen() {
       <${Ticker} />
 
       <div class="gm__corner">
+        ${metricsOpen && !spectator ? html`<${CombatMetricsPanel} myId=${myId} onClose=${() => setMetricsOpen(false)} />` : null}
         <button type="button" class=${`gm__gear gm__chat ${chatOpen ? 'is-on' : ''}`} aria-label=${t('发言')} title=${t('发言')} onClick=${() => setChatOpen((v) => !v)}><${GIcon} name="chat" /></button>
         ${spectator ? null : html`<${EmoteWheel} compact=${true} open=${emoteOpen} onToggle=${setEmoteOpen} onSend=${(id) => actions.emote(id)} disabled=${conn.status !== 'online'} />`}
+        ${spectator ? null : html`<button type="button" class="gm__gear gm__metrics" aria-label=${t('作战统计')} title=${t('作战统计')} aria-expanded=${metricsOpen}
+          aria-controls="combat-metrics-panel" onKeyDown=${(e) => { if (e.key === ' ') e.stopPropagation(); }} onClick=${() => {
+            setMetricsOpen(!metricsOpen);
+            setEmoteOpen(false);
+            setDetail(null);
+            setSel(null);
+            setBondOpen(null);
+          }}><${Icon} name="signal" /></button>`}
         <button type="button" class="gm__gear" aria-label=${t('设置')} title=${t('设置')} onClick=${() => setSettingsOpen(true)}><${GIcon} name="gear" /></button>
         <button type="button" class="gm__gear gm__guide" aria-label=${t('玩法说明')} title=${t('玩法说明')} onClick=${() => openGuide(0)}><${Icon} name="book" /></button>
         <${FullscreenButton} class="gm__gear gm__fs" />
