@@ -7,7 +7,8 @@
 在 **0.2.1-fusion-20p**（Paper-Yuan fusion + LongQianChen 20 人房间）之上，先后合并了
 **官方 v0.2.3**（含 v0.2.2）、**官方 v0.2.4**、**官方 v0.2.5**，以及本次的**官方 v0.2.6**。
 
-- 分支 / 提交：`fusion-20p`，HEAD `cdaf7e77`（合并提交 `065b154c`，基线官方 `488db49f` = `v0.2.6`）
+- 分支 / 提交：`fusion-20p`，HEAD `23b337ff`（合并提交 `065b154c`，基线官方 `488db49f` = `v0.2.6`）
+  —— 发布后又补了 3 个提交：`7491bdce`（交付文档）、`23b337ff`（安卓版本号），**tag 未移动**
 - 版本号：`0.2.6-fusion-20p`（`package.json` / `package-lock.json` / `shared/constants.js APP_VERSION` 三处一致）
 - Git tag：`v0.2.6-fusion-20p` → `cdaf7e77`（annotated）
 - 工作目录：`/home/ccyl/stronghold/fusion-20p`（源码）· `/home/ccyl/stronghold/server`（生产）
@@ -23,6 +24,7 @@
 | `stronghold-0.2.6-fusion-20p-update.zip`（玩家增量） | 0.6 MB | `815c6d015ed919159de38a1f55ad0e6625a89b28a66b281e324b6aa9134c83d1` |
 | `stronghold-0.2.6-fusion-20p-server.zip` | 20.2 MB | `d9c710d878256aab79481a35ac84395e66bf902946edf30c39cd83bd9feec56d` |
 | `stronghold-0.2.6-fusion-20p-server-update.zip`（服务端增量） | 2.3 MB | `633d51902ffca08581cad8492baecf4d2611d656a50f609e3e471f86f4ca1732` |
+| `Stronghold-Protocol-v0.2.6-fusion-20p-android.apk`（安卓端） | 664 MB | `04a0773c48abba994d9cd685693807ac802aac16dd08887532f4cb9cab7b79c8` |
 
 本机留档：`/home/ccyl/stronghold/release/0.2.6-fusion-20p/`（含 `更新源-客户端渠道/` 与两份说明文档）。
 
@@ -146,9 +148,29 @@ Stronghold-Protocol-Windows\
    `android/` 曾超时并留下半成品）。大目录操作前先确认。
 5. **更新源渠道必须与客户端形态一致**：服务端全树（含 `test/` `docs/`）当发布源会让客户端「检查更新」
    把 800+ 个开发文件补进 `app\`。发布源要用客户端渠道生成。
+6. **Gradle 的家目录必须在可写位置**：本机沙箱只允许写 `/home/ccyl/stronghold`，而 Gradle 默认用 `~/.gradle`，
+   wrapper 会在建锁文件时报 `FileNotFoundException: gradle-8.0.2-all.zip.lck (Permission denied)`。
+   解法：`export GRADLE_USER_HOME=/home/ccyl/stronghold/.gradle-home`，并先把 `~/.gradle/{caches,wrapper}`
+   复制过去（1.1 GB，7 秒，省掉重新下载）。
+7. **安卓端需要完整 JDK**：系统自带的 `/usr/lib/jvm/zulu21-ca-amd64` **只有 `java`/`keytool`，没有 `javac`**，
+   Android 构建会失败。本机可用的完整 JDK 是 `/home/ccyl/jdk/jdk-17.0.20.1+1`（JDK 17，配 Gradle 8.0.2 + AGP 正合适），
+   构建前须 `export JAVA_HOME=... PATH="$JAVA_HOME/bin:$PATH"`。
+
+## 安卓端（APK）
+
+- **版本号需手动同步**：`android/app/build.gradle` 的 `versionCode` / `versionName` 不受 `package.json` 驱动，
+  合并上游时要单独改（`chore(android): 版本号 …（versionCode N）`，本版 24 → **25**）。
+- 构建：`JAVA_HOME=… GRADLE_USER_HOME=… node scripts/build-android.mjs --release`
+  —— 脚本会校验 4 个原生库 sha256（arm64-v8a + x86_64 的 `libnode.so` / `libc++_shared.so`）、
+  打包 `app_bundle.zip`（**639.92 MB**，含语音 5348/5348 条门禁）、跑 `assembleRelease`、
+  **P0-1 门禁**（构建不得污染 git 工作树）、zipalign + apksigner 签名并 verify。
+- 产物：`android/app/build/outputs/apk/release/Stronghold-Protocol-release.apk`
+  —— **663.88 MB**，`versionCode 25` / `versionName 0.2.6-fusion-20p`，
+  签名证书 SHA-256 `0ac3456d69c7f73a68f6ed27c2b161b7d8b7495fab9af41ea65b12f9e56e78ba`
+  （`CN=Stronghold Protocol 20p`，**与 0.2.5 同一把密钥 → 可直接覆盖安装**）。
+- 内含 `assets/app_bundle.zip`（671 MB）+ `assets/bundle.sha256` = `0.2.6-fusion-20p-…`。
 
 ## 尚未做 / 下一步
 
-- **安卓 APK**：按要求跳过（0.2.5 的 APK 仍在旧 Release；Android 工程在 `android/`）
 - `-server.zip` **不含 `node_modules`**，新机器首次需 `npm ci --omit=dev`（Node ≥ 22）
 - 客户端包尚未做代码签名（Windows SmartScreen 可能提示）；如需可加 `signtool`
