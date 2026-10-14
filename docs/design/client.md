@@ -234,8 +234,9 @@ fight keeps playing behind it, ✕ / Esc closes it, and the next frame's prep ke
 battle runner — `battle/metrics.js` (`trackCombat`) attaches to every Battle the runner builds (`prepare`), and
 `combatMetrics({ scope: 'battle' | 'match', ownerId })` sits beside `currentBattle()` on the runner. A row is one
 operator: the effective HP the sim's own counters lost (mitigation, silent damage and DoTs included; overkill, element
-gauge fill and friendly damage excluded), the HP a heal actually restored (overheal and shields excluded), the local
-battle seconds, and dps / hps; the bar under the name is segmented by damage type (物理 / 法术 / 真实 / 元素) and rows
+gauge fill and friendly damage excluded), the HP a heal actually restored (overheal and shields excluded), the kills
+credited by the engine (a `death` listener counts the `killer` once per genuine kill, summons attributed to their owner),
+the local battle seconds, and dps / hps; the bar under the name is segmented by damage type (物理 / 法术 / 真实 / 元素) and rows
 sort by damage. Same-name operators merge per player (`combineCombat`), summons count toward their owner, and the panel
 passes `myId` — it shows the own player only. 本局累计 keeps the last snapshot of every locally simulated battle
 (evicted replicas included; a replayed battle replaces its snapshot, never adds a second) until the match really

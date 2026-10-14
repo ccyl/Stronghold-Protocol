@@ -22,7 +22,7 @@ export function trackCombat(battle) {
     const key = JSON.stringify([u.ownerId, u.uid != null ? `uid:${u.uid}` : `unit:${u.id}:${u.defId}`]);
     if (!rows.has(key)) rows.set(key, {
       key, ownerId: u.ownerId, uid: u.uid, defId: u.defId, name: u.name, kind: u.kind,
-      damage: 0, healing: 0, types: Object.fromEntries(DAMAGE_TYPES.map((t) => [t, 0])),
+      damage: 0, healing: 0, kills: 0, types: Object.fromEntries(DAMAGE_TYPES.map((t) => [t, 0])),
     });
     return rows.get(key);
   }
@@ -40,6 +40,13 @@ export function trackCombat(battle) {
     row.damage += delta;
     row.types[DAMAGE_TYPES.includes(type) ? type : 'true'] += delta;
   }, { priority: Number.MAX_VALUE });
+  // Kills: the engine credits `killer.stats.kills++` before the `death` event (deploy.js), so one read-only listener
+  // counts exactly one per genuine kill; summons resolve to their owner operator via rowOf.
+  battle.on('death', ({ reason, killer }) => {
+    if (reason !== 'killed') return;
+    const row = rowOf(killer);
+    if (row) row.kills += 1;
+  });
   // The heal hook is before mitigation/overheal. The return value is the actual restored HP, including silent regen.
   const heal = battle.heal;
   battle.heal = function (source, target, amount, opts) {
@@ -71,13 +78,14 @@ export function combineCombat(records, ownerId = null) {
       const key = JSON.stringify([r.ownerId, r.kind, r.name || r.defId]);
       let row = rows.get(key);
       if (!row) {
-        row = { ...r, key, damage: 0, healing: 0, types: Object.fromEntries(DAMAGE_TYPES.map((t) => [t, 0])) };
+        row = { ...r, key, damage: 0, healing: 0, kills: 0, types: Object.fromEntries(DAMAGE_TYPES.map((t) => [t, 0])) };
         rows.set(key, row);
       }
       // Use the latest encountered definition for the combined row's portrait.
       Object.assign(row, { defId: r.defId, name: r.name, kind: r.kind });
       row.damage += r.damage;
       row.healing += r.healing;
+      row.kills += r.kills || 0;
       for (const t of DAMAGE_TYPES) row.types[t] += r.types[t] || 0;
     }
     for (const owner of owners) elapsed.set(owner, (elapsed.get(owner) || 0) + positive(record.seconds));
@@ -86,5 +94,5 @@ export function combineCombat(records, ownerId = null) {
     const seconds = elapsed.get(r.ownerId) || 0;
     return { ...r, seconds, dps: seconds > 0 ? r.damage / seconds : 0, hps: seconds > 0 ? r.healing / seconds : 0 };
   }).sort((a, b) => b.damage - a.damage || b.healing - a.healing || a.key.localeCompare(b.key));
-  return { rows: list, damage: list.reduce((n, r) => n + r.damage, 0), healing: list.reduce((n, r) => n + r.healing, 0) };
+  return { rows: list, damage: list.reduce((n, r) => n + r.damage, 0), healing: list.reduce((n, r) => n + r.healing, 0), kills: list.reduce((n, r) => n + r.kills, 0) };
 }

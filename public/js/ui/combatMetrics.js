@@ -64,7 +64,7 @@ export function CombatMetricsPanel({ myId, onClose, runner = battleRunner }) {
       viewport?.removeEventListener('scroll', measure);
     };
   }, []);
-  const result = (myId ? runner?.combatMetrics({ scope, ownerId: myId }) : null) || { rows: [], damage: 0, healing: 0 };
+  const result = (myId ? runner?.combatMetrics({ scope, ownerId: myId }) : null) || { rows: [], damage: 0, healing: 0, kills: 0 };
   const maximum = Math.max(1, ...result.rows.map((r) => r.damage));
   return html`<section ref=${panelRef} id="combat-metrics-panel" class="combat-metrics brackets" role="dialog" aria-label=${t('作战统计')}
       onKeyDown=${(e) => { if (e.key === 'Escape') onClose(); e.stopPropagation(); }}>
@@ -80,7 +80,7 @@ export function CombatMetricsPanel({ myId, onClose, runner = battleRunner }) {
     </header>
     <div class="combat-metrics__body" tabindex="0">
     <div class="combat-metrics__totals">
-      <span>${t('总伤害')} <b>${number(result.damage)}</b></span><span>${t('总治疗')} <b>${number(result.healing)}</b></span>
+      <span>${t('总伤害')} <b>${number(result.damage)}</b></span><span>${t('总治疗')} <b>${number(result.healing)}</b></span><span>${t('击杀')} <b>${number(result.kills)}</b></span>
     </div>
     <div class="combat-metrics__legend" aria-label=${t('伤害类型图例')}>
       ${TYPES.map((type) => html`<span key=${type.id} class=${`combat-metrics__type combat-metrics__type--${type.id}`}>${t(type.label)}</span>`)}
@@ -101,6 +101,7 @@ export function CombatMetricsPanel({ myId, onClose, runner = battleRunner }) {
             <div class="combat-metrics__values">
               <span><small>${t('伤害')}</small><b>${number(r.damage)}</b></span>
               <span><small>DPS</small><b>${rate(r.dps)}</b></span>
+              <span><small>${t('击杀')}</small><b>${number(r.kills)}</b></span>
               <span class="combat-metrics__heal"><small>${t('治疗')}</small><b>${number(r.healing)}</b></span>
               <span class="combat-metrics__heal"><small>HPS</small><b>${rate(r.hps)}</b></span>
             </div>

@@ -141,3 +141,21 @@ test('same-name copies combine damage types, healing and rates in both battle an
   assert.equal(match.rows[0].hps, 24);
   assert.equal(battle.rows[0].damage, 400, 'grouping never changes individual snapshots');
 });
+
+test('kills count once per genuine kill; a summon kill is attributed to its owner operator', () => {
+  const { b, u, e, read } = rig();
+  const token = new Unit({ id: 900, kind: 'token', side: 'ally', ownerId: u.ownerId, ownerUnit: u, defId: 'test_token' });
+  e.hp = 10;
+  b.dealDamage(token, e, { amount: 1000, type: 'true' });
+  assert.equal(e.alive, false, 'enemy is killed');
+  assert.equal(read().rows.length, 1, 'summon merged into its owner operator');
+  assert.equal(read().rows[0].kills, 1, 'the kill is credited to the owner operator');
+  assert.equal(token.stats.kills, 1);
+  assert.equal(u.stats.kills, 0, 'the operator did not land the blow itself');
+});
+
+test('non-lethal damage and non-killed removals add no kills', () => {
+  const { b, u, e, read } = rig();
+  b.dealDamage(u, e, { amount: 500, type: 'phys' });
+  assert.equal(read().rows[0].kills, 0, 'mere damage is no kill');
+});
