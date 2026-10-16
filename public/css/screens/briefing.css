@@ -37,6 +37,8 @@
 /* Both columns scroll independently: the left one holds the leader's abilities, and a long description used to push
    战场 / 特训敌人 out of the clipped bottom of the row (min-height: 0 alone only shrinks the box). */
 .brief__left { display: flex; flex-direction: column; gap: .2rem; min-height: 0; overflow: auto; padding-right: .06rem; overscroll-behavior: contain; }
+/* a match with gameplay plugins (DESIGN §32.6): the unofficial mark under the step header */
+.brief__modmark { position: relative; z-index: 2; align-self: flex-start; margin: .06rem .5rem 0; }
 .brief__left > * { flex-shrink: 0; }
 .brief__right { display: flex; flex-direction: column; gap: .2rem; min-height: 0; overflow: auto; padding-right: .06rem; }
 

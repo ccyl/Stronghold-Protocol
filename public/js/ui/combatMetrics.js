@@ -101,9 +101,9 @@ export function CombatMetricsPanel({ myId, onClose, runner = battleRunner }) {
             <div class="combat-metrics__values">
               <span><small>${t('伤害')}</small><b>${number(r.damage)}</b></span>
               <span><small>DPS</small><b>${rate(r.dps)}</b></span>
-              <span><small>${t('击杀')}</small><b>${number(r.kills)}</b></span>
               <span class="combat-metrics__heal"><small>${t('治疗')}</small><b>${number(r.healing)}</b></span>
               <span class="combat-metrics__heal"><small>HPS</small><b>${rate(r.hps)}</b></span>
+              <span><small>${t('击杀')}</small><b>${number(r.kills)}</b></span>
             </div>
           </div>
         </li>`;

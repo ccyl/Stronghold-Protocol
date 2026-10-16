@@ -6,8 +6,9 @@
 //   * DEBUG → the console logger's debug level;
 //   * SP_ASSET_INDEX=0 (or the `assetIndex: false` option) → no content-hash index: plain asset URLs, size-mtime ETags
 //     (assetIndex.js); the index of the default public/ persists in .cache/asset-hashes.json;
-//   * the served directories (public/, data/, shared/ and the content packs' packs/ of this repository unless the
-//     options name others), and which startServer() options are handed on to net.js Network and lobby.js Lobby.
+//   * the served directories (public/, data/, shared/, the content packs' packs/ and the plugins' plugins/ of this
+//     repository unless the options name others), and which startServer() options are handed on to net.js Network and
+//     lobby.js Lobby.
 
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -54,15 +55,19 @@ export function bindCandidates(host) {
 }
 
 /**
- * The directories the static server reads (packsDir: the pack folders, server/packs.js).
- * @param {{ publicDir?: string, dataDir?: string, sharedDir?: string, packsDir?: string, updateDir?: string }} opts
+ * The directories the static server reads (packsDir: the pack folders, server/packs.js; pluginsDir: the plugin folders —
+ * server/plugins/registry.js; default: the plugins/ folder beside packsDir, so a server given its own packs folder —
+ * a test — never reads this checkout's plugins). updateDir: the update-source folder (server/http/update.js).
+ * @param {{ publicDir?: string, dataDir?: string, sharedDir?: string, packsDir?: string, pluginsDir?: string, updateDir?: string }} opts
  */
 export function serveDirs(opts) {
+  const packsDir = opts.packsDir || path.join(ROOT, 'packs');
   return {
     publicDir: opts.publicDir || path.join(ROOT, 'public'),
     dataDir: opts.dataDir || path.join(ROOT, 'data'),
     sharedDir: opts.sharedDir || path.join(ROOT, 'shared'),
     packsDir: opts.packsDir || path.join(ROOT, 'packs'),
+    pluginsDir: opts.pluginsDir || path.join(path.dirname(path.resolve(packsDir)), 'plugins'),
     // 更新源目录（版本自检 / 自更新，server/http/update.js）：默认 <ROOT>/updates，蓝绿部署时用 SP_UPDATE_DIR
     // 指到安装目录之外，否则 hot-swap 会把发布目录一起换掉。
     updateDir: opts.updateDir || process.env.SP_UPDATE_DIR || path.join(ROOT, 'updates'),
