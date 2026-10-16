@@ -33,7 +33,7 @@ import { validateSkillSpec, matchesSchema, MODS_SCHEMA } from '../../../shared/p
 import { withUnitLoadouts } from '../simdata.js';
 import { isPotential } from '../../../shared/potential.js';
 
-import { KITS } from './kits/index.js';
+import { KITS, KIT_FILES, STANDIN_KIT_FILES, OPERATOR_KIT_FILES } from './kits/index.js';
 import * as tokens from './tokens.js';
 import * as devices from './devices.js';
 import * as enemies from './enemies.js';
@@ -87,7 +87,7 @@ function registeredKit(def, reg) {
 /** Official kit key or file stem; no path supplied by a plugin is ever imported. */
 export function officialKit(ref) {
   if (Object.hasOwn(KITS, ref)) return KITS[ref];
-  const file = Object.values(KIT_REGISTRY.KIT_FILES || {}).flat().concat(KIT_REGISTRY.STANDIN_KIT_FILES || [], KIT_REGISTRY.OPERATOR_KIT_FILES || [])
+  const file = Object.values(KIT_FILES || {}).flat().concat(STANDIN_KIT_FILES || [], OPERATOR_KIT_FILES || [])
     .find(f => f.replace(/\.js$/, '') === ref);
   if (!file) return undefined;
   const stem = file.replace(/\.js$/, '');
