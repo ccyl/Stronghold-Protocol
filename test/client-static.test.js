@@ -507,12 +507,15 @@ describe('net.js', () => {
     await p;
   });
 
-  test('drop → pending rejects, reconnect with backoff, hello again', async () => {
+  test('drop → in-flight requests survive a recoverable close, reconnect with backoff, hello again', async () => {
     const { net, ws, sockets, timers } = await onlineNet();
     const p = net.request('room.leave', {});
     ws().drop();
-    await assert.rejects(p, (e) => e.code === 'DISCONNECTED');
+    // This branch keeps an in-flight request for the reconnect (net.js `_failPending` preserveInFlight): a socket
+    // that may still come back must not reject what it carried. The upstream test asserted a DISCONNECTED rejection
+    // here, which this branch's net.js no longer does — awaiting it hung the whole file.
     assert.equal(net.status, 'reconnecting');
+    assert.equal(net.pendingCount, 1, 'the request waits for the reconnect instead of being rejected');
     assert.equal(net.attempt, 1);
     assert.equal(sockets.length, 1);
     timers.advance(499);
@@ -528,6 +531,11 @@ describe('net.js', () => {
     ws().recv({ t: 'welcome', rid: ws().last('hello').rid, playerId: 'p_1', token: 't', name: '凯尔希', serverNow: 1 });
     assert.equal(net.attempt, 0);
     assert.equal(net.status, 'online');
+    // the kept request is flushed once the session is back
+    const sent = ws().last('room.leave');
+    assert.ok(sent, 'the retained request is re-sent after the welcome');
+    ws().recv({ t: 'ok', rid: sent.rid });
+    await p;
   });
 
   test('pong gives latency and clock offset', async () => {

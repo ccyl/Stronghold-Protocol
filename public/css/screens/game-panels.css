@@ -398,12 +398,12 @@ button.bpop__harmony:hover { border-style: solid; color: #fff; }
 .spov__turntxt.is-done { color: var(--mint-400); }
 .spov__groups { display: flex; flex: none; gap: .08rem; overflow-x: auto; padding: .02rem 0; scrollbar-width: thin; }
 .spov__group-tab { display: flex; flex: none; align-items: center; gap: .07rem; min-height: max(.38rem, 24px); padding: .04rem .12rem;
-  color: var(--text-md); background: rgba(8, 13, 11, .75); border: 1px solid color-mix(in srgb, var(--pool-group-color) 40%, transparent);
+  color: var(--text-md); background: rgba(8, 13, 11, .75); border: 1px solid rgba(255, 255, 255, .18); border: 1px solid color-mix(in srgb, var(--pool-group-color) 40%, transparent);
   font-size: max(.14rem, 10px); }
 .spov__group-tab > b { display: grid; place-items: center; width: max(.2rem, 13px); height: max(.2rem, 13px);
   color: #101719; background: var(--pool-group-color); font-family: var(--font-num); }
 .spov__group-tab .icon { width: max(.15rem, 10px); height: max(.15rem, 10px); color: var(--pool-group-color); }
-.spov__group-tab.is-active { border-color: var(--pool-group-color); background: color-mix(in srgb, var(--pool-group-color) 14%, #0b100e); color: var(--text-hi); }
+.spov__group-tab.is-active { border-color: var(--pool-group-color); background: #131815; background: color-mix(in srgb, var(--pool-group-color) 14%, #0b100e); color: var(--text-hi); }
 .spov__group-tab.is-own { font-weight: 700; }
 .spov__readonly { display: flex; align-items: center; gap: .12rem; flex: none; font-size: max(.14rem, 10px); color: var(--text-lo); }
 .spov__readonly button { border: 1px solid var(--mint-800); color: var(--mint-400); background: rgba(8, 13, 11, .75); padding: .02rem .1rem; font-size: inherit; }

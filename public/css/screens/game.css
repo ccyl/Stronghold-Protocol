@@ -409,8 +409,8 @@
 .team__pool-group { position: relative; isolation: isolate; }
 .team__pool-group::before {
   content: ''; position: absolute; inset: -.06rem; z-index: -1; pointer-events: none;
-  border: 1px solid color-mix(in srgb, var(--pool-group-color) 38%, transparent);
-  background: color-mix(in srgb, var(--pool-group-color) 7%, transparent);
+  border: 1px solid rgba(255, 255, 255, .18); border: 1px solid color-mix(in srgb, var(--pool-group-color) 38%, transparent);
+  background: rgba(255, 255, 255, .05); background: color-mix(in srgb, var(--pool-group-color) 7%, transparent);
 }
 .team--many { bottom: 1.12rem; width: max-content; max-width: 3.1rem; }
 /* Leave the boss pair frame's .07rem outset inside the scroll viewport. */

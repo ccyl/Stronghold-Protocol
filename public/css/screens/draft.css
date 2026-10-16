@@ -10,7 +10,7 @@
 .draft-order__list { display: flex; flex-direction: column; gap: .1rem; flex: 1; min-height: 0; overflow-y: auto; padding-right: .06rem; scrollbar-width: thin; }
 .draft-order__list .dorder { flex: none; }
 .draft-order__group { position: relative; display: flex; flex: none; flex-direction: column; gap: .1rem; }
-.draft-order__group--framed { gap: .06rem; padding: .04rem; border: 1px solid color-mix(in srgb, var(--pool-group-color) 38%, transparent); background: color-mix(in srgb, var(--pool-group-color) 4%, transparent); }
+.draft-order__group--framed { gap: .06rem; padding: .04rem; border: 1px solid rgba(255, 255, 255, .18); border: 1px solid color-mix(in srgb, var(--pool-group-color) 38%, transparent); background: rgba(255, 255, 255, .05); background: color-mix(in srgb, var(--pool-group-color) 4%, transparent); }
 .dorder__avatar { position: relative; display: block; }
 .dorder__group-badge { position: absolute; left: 0; bottom: 0; z-index: 2; display: grid; place-items: center;
   min-width: max(.18rem, 12px); height: max(.18rem, 12px); font: 700 max(.12rem, 9px)/1 var(--font-num);
@@ -57,7 +57,7 @@
 .dband__groups { position: absolute; right: .03rem; top: .09rem; display: flex; flex-direction: column; gap: max(.02rem, 1px); pointer-events: none; }
 .dband__group { display: grid; place-items: center; width: max(.15rem, 9px); height: max(.15rem, 9px);
   font: 700 max(.11rem, 8px)/1 var(--font-num); color: var(--pool-group-color); border: 1px solid var(--pool-group-color);
-  background: color-mix(in srgb, var(--pool-group-color) 15%, #0b100e); }
+  background: #131815; background: color-mix(in srgb, var(--pool-group-color) 15%, #0b100e); }
 .draft-grid--grouped .dband .bandicon { width: min(1.1rem, calc(100% - max(.15rem, 9px))); height: auto; aspect-ratio: 1; align-self: flex-start; }
 .draft-grid--grouped .dband__who { right: max(.22rem, 13px); }
 .dband.is-sel { border-color: var(--mint-400); background: linear-gradient(180deg, rgba(78, 216, 175, .18), rgba(12, 15, 14, .85)); box-shadow: 0 0 0 1px var(--mint-400), 0 0 .24rem rgba(23, 249, 183, .2); }
