@@ -158,12 +158,12 @@ export function formModes(idx, unitKey) {
   for (const n of nodes) {
     const r = n.reborn;
     if (isObj(r) && hasMode(r.mode)) {
-      if (n.class === 'ManualTriggerRebornTalent') { if (hasMode(n.mode)) out.husk ??= n.mode; out.revived ??= r.mode; }
-      else if (n.class === 'RebornTalent') out.form2 ??= r.mode;
+      if (n.class === 'ManualTriggerRebornTalent') { if (hasMode(n.mode)) out.husk = out.husk ?? n.mode; out.revived = out.revived ?? r.mode; }
+      else if (n.class === 'RebornTalent') out.form2 = out.form2 ?? r.mode;
     }
     const fatal = (n.triggers || []).some((t) => t?.event === 'ON_BEFORE_TRY_SET_HP_ZERO');
     const sw = (n.switchMode || []).find((x) => hasMode(x?.mode));
-    if (fatal && sw) out.doll ??= sw.mode;
+    if (fatal && sw) out.doll = out.doll ?? sw.mode;
   }
   return out;
 }

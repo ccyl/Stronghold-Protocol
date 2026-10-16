@@ -102,7 +102,7 @@ export class WorkerSimHost {
   }
   fail(err) { if (this.stopped) return; this.stop(err); this.onFailure(err); }
   async load(cs, content = null) {
-    content ||= await this.contentFor?.(cs);
+    content = content || await this.contentFor?.(cs);
     if (!content || content.cs !== cs || !content.data) throw failure('PLUGIN_WORKER_FAILED', 'no checked content set');
     this.cs = cs;
     const ready = await this.rpc('load', [{ ...content, cs }], this.loadTimeoutMs);

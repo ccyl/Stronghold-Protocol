@@ -57,9 +57,9 @@ export const MAX_RECORDS = 1000;
 /** The newest records that keep their full rows (lineups, bonds, teammates) — what the settlement replay reads. */
 export const FULL_KEEP = 30;
 /** Budget of the stored JSON in characters (a character costs up to 2 bytes of the browser's ~5 MB quota): the oldest records go first. */
-export const MAX_CHARS = 800_000;
+export const MAX_CHARS = 800000;
 /** Largest export file the page reads. */
-export const IMPORT_MAX_CHARS = 8_000_000;
+export const IMPORT_MAX_CHARS = 8000000;
 
 const FULL_KEY = `sp.pref.${STATS_PREF_KEY}`;
 const DAMAGED_KEY = `${FULL_KEY}.damaged`;
@@ -290,7 +290,7 @@ export function migrateStats(raw) {
   const kept = normalized.slice(0, MAX_RECORDS);
   const dropped = records.length - kept.length;
   // storage is rewritten (self-healed) when a row went, the order changed or an id-less row got its content id
-  changed ||= dropped > 0 || kept.some((rec, i) => !isObj(records[i]) || rec.id !== records[i].id);
+  changed = changed || dropped > 0 || kept.some((rec, i) => !isObj(records[i]) || rec.id !== records[i].id);
   return { stats: { v: STATS_VERSION, records: kept }, changed, newer: false, dropped };
 }
 
@@ -818,7 +818,7 @@ export function aggregateStats(records, { modded: withModded = false } = {}) {
     if (rec.end !== 'quit' && rec.roomMode === 'coop' && Number.isFinite(self?.trophies)) out.trophies += Math.max(0, self.trophies);
 
     const d = rec.difficulty || 'UNKNOWN';
-    const bd = (out.byDifficulty[d] ||= { games: 0, wins: 0, hiddenCleared: 0 });
+    const bd = (out.byDifficulty[d] || (out.byDifficulty[d] = { games: 0, wins: 0, hiddenCleared: 0 }));
     bd.games++;
     if (won) bd.wins++;
     if (rec.hiddenCleared) bd.hiddenCleared++;
@@ -832,13 +832,13 @@ export function aggregateStats(records, { modded: withModded = false } = {}) {
 
     const titleId = self?.title?.id;
     if (titleId) {
-      const t = (out.titles[titleId] ||= { count: 0 });
+      const t = (out.titles[titleId] || (out.titles[titleId] = { count: 0 }));
       t.count++;
     }
 
     const bandId = self?.bandId;
     if (bandId) {
-      const b = (out.bands[bandId] ||= { games: 0, wins: 0 });
+      const b = (out.bands[bandId] || (out.bands[bandId] = { games: 0, wins: 0 }));
       b.games++;
       if (won) b.wins++;
     }
@@ -846,7 +846,7 @@ export function aggregateStats(records, { modded: withModded = false } = {}) {
     // [ASSUMED] Usage means active in the self player's settlement; once per match, irrespective of layers.
     if (rec.end !== 'quit') {
       for (const id of usedBondIdsOf(self)) {
-        const bond = (out.bonds[id] ||= { games: 0 });
+        const bond = (out.bonds[id] || (out.bonds[id] = { games: 0 }));
         bond.games++;
       }
     }

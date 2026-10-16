@@ -153,7 +153,7 @@ export class BattleTiles {
    */
   groundPathTiles() {
     const ver = this.grid.version ?? 0;
-    const used = (this._pathRoutesUsed ??= new Set());
+    const used = (this._pathRoutesUsed ?? (this._pathRoutesUsed = new Set()));
     const before = used.size;
     for (const p of this._pending || []) if (!p.route && Number.isInteger(p.routeIndex)) used.add(p.routeIndex);
     if (this._pathTiles && this._pathTilesVer === ver && used.size === before) return this._pathTiles;

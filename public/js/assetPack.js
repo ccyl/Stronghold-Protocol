@@ -13,13 +13,13 @@
 // [ASSUMED] One prefix is chosen for the whole pack. A path the manifest does not list is skipped, not failed.
 // An incomplete Spine group is not stored under the model URL. A member that also has its own file-hash URL can
 // still match that URL. Paths are case-sensitive. Empty files are rejected. ZIP64 entry counts and offsets are
-// read; multi-disk archives are not. Caps: 500_000 entries, 64 MB central directory, 256 MB per entry.
+// read; multi-disk archives are not. Caps: 500000 entries, 64 MB central directory, 256 MB per entry.
 
 import { splitHashedPath } from '../../shared/assetPaths.js';
 import { mediaUrl } from './media.js';
 import { IMPORTED_ASSET_CACHE, addImportedPaths, putImportedAsset } from './assetCache.js';
 
-export const MAX_ZIP_ENTRIES = 500_000;
+export const MAX_ZIP_ENTRIES = 500000;
 export const MAX_ENTRY_BYTES = 256 * 1024 * 1024;
 export const MAX_CD_BYTES = 64 * 1024 * 1024;
 

@@ -324,8 +324,8 @@ function readLangFields(m, fileLang, out, list) {
     // anything but true reads as false: say so when another value was meant
     const mt = m.machineTranslated;
     if (mt !== undefined && typeof mt !== 'boolean') list.warning('PLUGIN_LANG', `"machineTranslated": ${short(mt)} is not true or false (read as false)`, { at: ['machineTranslated'] });
-    out.name ||= languageName(code);
-    out.englishName ||= languageName(code, 'en');
+    out.name = out.name || languageName(code);
+    out.englishName = out.englishName || languageName(code, 'en');
   }
 }
 
@@ -386,8 +386,8 @@ export function readPackManifest(raw, ctx) {
     authors: authorsOf(m.authors), credits: str(m.credits, 500), license: str(m.license, 100), files: {}, ...v2Defaults(cls),
   };
   if (type === 'lang') readLangFields(m, ctx.lang, out, list);
-  out.name ||= id;
-  out.englishName ||= out.name;
+  out.name = out.name || id;
+  out.englishName = out.englishName || out.name;
   if (ctx.folder && kind && kind.files) readFileRoles(m, `a ${type} pack`, 'pack', out, list);
   return { manifest: list.problems.length ? null : out, problems: list.problems, warnings: list.warnings, issues: list.issues };
 }
@@ -744,8 +744,8 @@ export function readPluginManifest(raw, ctx) {
     readLangFields(m, undefined, out, list);
     readFileRoles(m, 'a lang plugin', 'plugin', out, list, true);
   }
-  out.name ||= id;
-  out.englishName ||= out.name;
+  out.name = out.name || id;
+  out.englishName = out.englishName || out.name;
   return done(list.problems.length ? null : out, out);
 }
 

@@ -177,7 +177,7 @@ export function noteAttackCommit(b, dt) {
     // acquireTargets writes `_fortressMelee` on the profile it is given; keep that off the live profile
     const targets = acquireTargets(b, u, Object.assign({}, prof));
     if (!targets.length) continue;
-    (map ??= new Map()).set(u.id, targets.filter((t) => t && t.alive));
+    (map ?? (map = new Map())).set(u.id, targets.filter((t) => t && t.alive));
   }
   b._attackCommit = map;
 }

@@ -436,7 +436,7 @@ function raidPoll(battle, st) {
     if (!(revived || ready || idleOk)) continue;
     // 「若范围内没有敌人」: a targetable enemy, or a 隐匿 ground one (the owner's decision of 2026-10-08, raidGroundEnemy)
     if (!revived && (battle.enemiesInKeys(u.rangeKeys || [], u, u.profile).length || raidStealthInRange(battle, u))) continue;
-    const list = revived ? (taunted ??= raidTargets(battle, u, st.pid, { taunt: true })) : (plain ??= raidTargets(battle, u, st.pid));
+    const list = revived ? (taunted ?? (taunted = raidTargets(battle, u, st.pid, { taunt: true }))) : (plain ?? (plain = raidTargets(battle, u, st.pid)));
     if (!list.length) continue;
     // either trigger: raidTile only offers tiles with the target in range (without that a ready skill that finds no
     // target would redeploy — firing every 部署时 effect — at every poll; the idle trigger, which lacked it up to

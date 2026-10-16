@@ -1321,7 +1321,7 @@ export function bindingEffects(idx, bind) {
 /** The fx kinds whose binding names no owner ('skill'), by kind → the skill ids that bind it. */
 export const BOUND_BY_SKILL = Object.freeze((() => {
   const out = {};
-  for (const [sid, kinds] of Object.entries(FX_BINDINGS)) for (const [kind, b] of Object.entries(kinds)) if (b.owner === 'skill') (out[kind] ||= []).push(sid);
+  for (const [sid, kinds] of Object.entries(FX_BINDINGS)) for (const [kind, b] of Object.entries(kinds)) if (b.owner === 'skill') (out[kind] || (out[kind] = [])).push(sid);
   return out;
 })());
 

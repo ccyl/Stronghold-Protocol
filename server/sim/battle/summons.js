@@ -126,7 +126,7 @@ export class BattleSummons {
         // (does not block) — the match lets ranged operators deploy there (deployTiles.rangedOnly).
         if (!this.grid.inRect(d.row, d.col)) continue;
         this.grid.setObstacle(d.row, d.col, true);
-        (this._elevated ??= new Set()).add(d.row * COLS + d.col);
+        (this._elevated ?? (this._elevated = new Set())).add(d.row * COLS + d.col);
         continue;
       }
       const spec = OBSTACLE_DEVICES[d.key] ?? (d.role === 'crate' ? { hp: d.stats?.maxHp ?? 100, name: d.name } : null);

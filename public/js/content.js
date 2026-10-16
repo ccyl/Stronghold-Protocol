@@ -605,5 +605,5 @@ export function hasScriptConsent(cs, storage) {
 }
 export function rememberScriptConsent(cs, accept, storage) {
   if (accept) pageConsent.add(cs); else pageConsent.delete(cs);
-  try { storage ??= globalThis.localStorage; if (accept) storage?.setItem('sp.plugin.consent.'+cs,'yes'); else storage?.removeItem('sp.plugin.consent.'+cs); } catch { /* storage unavailable */ }
+  try { storage = storage ?? globalThis.localStorage; if (accept) storage?.setItem('sp.plugin.consent.'+cs,'yes'); else storage?.removeItem('sp.plugin.consent.'+cs); } catch { /* storage unavailable */ }
 }

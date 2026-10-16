@@ -154,7 +154,7 @@ const TREE = (() => {
   const root = {};
   for (const c of ASSET_CONTAINERS) {
     let node = root;
-    c.path.forEach((k, i) => { node = node[k] ||= (i === c.path.length - 1 ? { $container: c } : {}); });
+    c.path.forEach((k, i) => { node = node[k] = node[k] || (i === c.path.length - 1 ? { $container: c } : {}); });
   }
   return root;
 })();

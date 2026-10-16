@@ -134,7 +134,7 @@ export class BattleQueries {
   /** Register (`on`) or drop an ally target (allyTargetsInKeys); one off the field is skipped while registered. */
   setAllyTarget(unit, on = true) {
     if (!unit || unit.side !== 'ally') return false;
-    if (on) (this._allyTargets ??= new Set()).add(unit);
+    if (on) (this._allyTargets ?? (this._allyTargets = new Set())).add(unit);
     else if (this._allyTargets) this._allyTargets.delete(unit);
     return true;
   }
