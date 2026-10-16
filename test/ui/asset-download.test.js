@@ -352,6 +352,36 @@ test('a Spine model whose repository copy does not match the model hash comes fr
   assert.deepEqual(served.sort(), [`${dir}/c.atlas`, `${dir}/c.png`, `${dir}/c.skel`]);
 });
 
+test('a source list is a ladder: the first address that answers wins and is remembered for the files after it', async () => {
+  const enc = (s) => new TextEncoder().encode(s);
+  const oneHash = await sha256Hex16(enc('one'));
+  const twoHash = await sha256Hex16(enc('two'));
+  const one = `/assets/~${oneHash}/char/one.png`;
+  const two = `/assets/~${twoHash}/char/two.png`;
+  // The raw.githubusercontent.com address first, the jsDelivr backup the generator adds after it (tools/fetch-assets.mjs).
+  const sources = {
+    'assets/char/one.png': ['https://blocked.test/one.png', 'https://backup.test/one.png'],
+    'assets/char/two.png': ['https://blocked.test/two.png', 'https://backup.test/two.png'],
+  };
+  const hits = [];
+  const queue = createAssetDownload({
+    concurrency: 1,
+    lookupImported: async () => new Set(),
+    cachesApi: () => fakeCaches().api,
+    fetch: fixture({ one, two }, async (url) => {
+      hits.push(url);
+      if (url.startsWith('https://blocked.test/')) return new Response('', { status: 503 });
+      if (url.startsWith('https://backup.test/')) return new Response(url.includes('one') ? enc('one') : enc('two'), { headers: { 'content-type': 'application/octet-stream' } });
+      return file();
+    }, { groups: {} }, null, { version: 1, sources }),
+  });
+  await queue.start();
+  assert.equal(queue.get().phase, 'complete', JSON.stringify(queue.get().failures));
+  assert.equal(queue.get().fromSource, 2, 'both files came from the backup address');
+  assert.equal(hits.filter((u) => u.startsWith('https://blocked.test/')).length, 1, 'the dead address is tried once, not per file');
+  assert.deepEqual(hits.filter((u) => u.startsWith('https://backup.test/')).length, 2);
+});
+
 /** A CacheStorage stub: the remote path stores bodies and the import index through it. */
 function fakeCaches() {
   const entries = new Map();

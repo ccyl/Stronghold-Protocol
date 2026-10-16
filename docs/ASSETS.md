@@ -187,11 +187,15 @@ Outputs:
 - `data/assets.json`: the manifest (committed).
 - `data/asset-sources.json`: where every file of the manifest can be downloaded from — the community client dumps of
   `docs/research/07-assets.json`, `{ '<rel under public/>': [url, …] }` (committed; written with the manifest, or alone
-  with `--write-source-map[=PATH]`). The client's predownload reads it at `/data/asset-sources.json` so the browser can
-  fetch the art from those repositories (each file checked against the sha256 in its served URL, then stored under the
-  served URL in the import cache) instead of the host's own upstream; a rel it does not name — a locally generated font,
-  a local-client extraction — is still downloaded from the server (`docs/PLAYING.md`, `public/js/assetDownload.js`). The
-  full file is about 3.2 MB, 165 KB gzipped.
+  with `--write-source-map[=PATH]`). Each list is a ladder, in the server's own order (`docs/DEPLOY.md`): the GitHub raw
+  address first, then its **jsDelivr backup address** (`cdn.jsdelivr.net/gh/…`) where one exists — no third-party proxy,
+  and none for the ArknightsAssets2 `voice` branch, which jsDelivr does not serve. The client's predownload reads it at
+  `/data/asset-sources.json` so the browser can fetch the art from those repositories (each file checked against the
+  sha256 in its served URL, then stored under the served URL in the import cache) instead of the host's own upstream;
+  it tries the ladder in order and remembers the address that answered, so a blocked raw host costs one failed attempt
+  rather than one per file. A rel it does not name — a locally generated font, a local-client extraction — is still
+  downloaded from the server (`docs/PLAYING.md`, `public/js/assetDownload.js`). The full file is about 3.5 MB, 170 KB
+  gzipped, 20,744 URLs over 16,342 files.
 - `public/assets/**`: art and audio (git-ignored).
 - `public/fonts/*`: fonts and `fonts.css`.
 - `.cache/assets-report.json`: misses, fallbacks, `droppedLeaves` (the leaves left out of the manifest for having no file

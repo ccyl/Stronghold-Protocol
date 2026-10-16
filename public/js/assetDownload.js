@@ -72,6 +72,12 @@ export function createAssetDownload({ fetch: doFetch = (...args) => globalThis.f
   let files = null, running = null, controller = null, paused = false, lastNotice = 0;
   /** The served manifests read this run: the source plan is built from the very objects the queue was filled from. */
   let manifests = null;
+  /**
+   * The source host that last answered: tried first for every file after it. A raw.githubusercontent.com blocked on
+   * this network then costs one failed attempt, not one per file (the jsDelivr backup address in data/asset-sources.json
+   * takes over), which is what keeps a 16k-file predownload usable behind a slow or filtered link.
+   */
+  let preferredHost = '';
   const complete = new Set(), failures = new Map(), listeners = new Set();
   const emit = (force = false) => {
     if (!force && Date.now() - lastNotice < 100) return;
@@ -146,9 +152,17 @@ export function createAssetDownload({ fetch: doFetch = (...args) => globalThis.f
     } catch { return null; }
   }
 
+  /** Host of a URL, or '' when it is not one. */
+  function hostOf(url) {
+    try { return new URL(url).host; } catch { return ''; }
+  }
+
   /** Bytes from the first source URL that answers with a full body, or null (a 404 moves on to the next source). */
   async function fetchFromSource(urls) {
-    for (const url of urls) {
+    const ordered = preferredHost
+      ? [...urls.filter((u) => hostOf(u) === preferredHost), ...urls.filter((u) => hostOf(u) !== preferredHost)]
+      : urls;
+    for (const url of ordered) {
       const abort = new AbortController();
       const cancel = () => abort.abort();
       controller.signal.addEventListener('abort', cancel, { once: true });
@@ -159,6 +173,7 @@ export function createAssetDownload({ fetch: doFetch = (...args) => globalThis.f
         if (!response.ok) { await response.body?.cancel(); continue; }
         const bytes = new Uint8Array(await response.arrayBuffer());
         if (!bytes.byteLength) continue;
+        preferredHost = hostOf(url);
         return bytes;
       } catch {
         if (paused) return null;
@@ -340,7 +355,7 @@ export function createAssetDownload({ fetch: doFetch = (...args) => globalThis.f
       controller = new AbortController();
       // A new check after completion revalidates the manifest and all files through the HTTP cache.
       if (state.phase === 'complete') {
-        files = null; manifests = null; complete.clear();
+        files = null; manifests = null; preferredHost = ''; complete.clear();
         state = { phase: 'idle', total: 0, done: 0, bytes: 0, failures: [], localMissing: false, cached: 0, fromSource: 0 };
       }
       running = run().finally(() => { running = null; });
