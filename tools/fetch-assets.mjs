@@ -83,6 +83,7 @@ const ASSETS = join(ROOT, 'public', 'assets');
 const FONTS = join(ROOT, 'public', 'fonts');
 const CACHE = join(ROOT, '.cache');
 const MANIFEST = join(ROOT, 'data', 'assets.json');
+const SOURCE_MAP = join(ROOT, 'data', 'asset-sources.json');
 const REPORT = join(CACHE, 'assets-report.json');
 /**
  * The local-client model overlays (spineLocal): the committed metadata file, where extract.py writes the models (under
@@ -129,6 +130,11 @@ const HELP = `Usage: node tools/fetch-assets.mjs [options]
   --local-spines    rewrite ${LOCAL_ENEMY_SPINES_FILE} and ${LOCAL_TOKEN_SPINES_FILE} from the
                     enemy and token models extracted by tools/local-extract/extract.py
                     (public/assets/local/spine/enemy/, public/assets/local/spine/token/)
+  --write-source-map[=PATH]
+                    write data/asset-sources.json (or PATH) — where every file of data/assets.json
+                    can be downloaded from, the same URLs the plan resolves — and exit; the client's
+                    predownload reads it so a browser can fetch the art from the source repositories
+                    instead of this server (also refreshed by every run that writes the manifest)
   --help            this text
 Environment: SP_ASSET_SOURCE sets the default source; SP_GITHUB_PROXY sets the
 HTTPS mirror prefix (default https://gh-proxy.com/; empty disables the proxy);
@@ -149,10 +155,10 @@ function envFlag(value) {
 /**
  * Parse CLI flags.
  * @param {string[]} argv
- * @returns {{concurrency:number, force:boolean, offline:boolean, dryRun:boolean, refreshIndex:boolean, prune:boolean, allowShrink:boolean, strict:boolean, addOnly:boolean, localSpines:boolean, voiceLang:string, voiceAll:boolean, optionalVoice:boolean, help:boolean, source:string, sourceSnapshot:string}}
+ * @returns {{concurrency:number, force:boolean, offline:boolean, dryRun:boolean, refreshIndex:boolean, prune:boolean, allowShrink:boolean, strict:boolean, addOnly:boolean, localSpines:boolean, voiceLang:string, voiceAll:boolean, optionalVoice:boolean, help:boolean, source:string, sourceSnapshot:string, sourceMap:string|boolean|null}}
  */
 export function parseArgs(argv) {
-  const o = { concurrency: 16, force: false, offline: false, dryRun: false, refreshIndex: false, prune: false, allowShrink: false, strict: envFlag(process.env.SP_ASSETS_STRICT), addOnly: false, localSpines: false, voiceLang: 'cn', voiceAll: false, optionalVoice: true, help: false, source: process.env.SP_ASSET_SOURCE || 'direct', sourceSnapshot: '' };
+  const o = { concurrency: 16, force: false, offline: false, dryRun: false, refreshIndex: false, prune: false, allowShrink: false, strict: envFlag(process.env.SP_ASSETS_STRICT), addOnly: false, localSpines: false, voiceLang: 'cn', voiceAll: false, optionalVoice: true, help: false, source: process.env.SP_ASSET_SOURCE || 'direct', sourceSnapshot: '', sourceMap: null };
   for (const a of argv) {
     const [k, v] = a.split('=');
     if (k === '--concurrency') o.concurrency = Math.max(1, Math.min(64, parseInt(v, 10) || 16));
@@ -167,6 +173,7 @@ export function parseArgs(argv) {
     else if (k === '--strict') o.strict = true;
     else if (k === '--add-only') o.addOnly = true;
     else if (k === '--local-spines') o.localSpines = true;
+    else if (k === '--write-source-map') o.sourceMap = v ? a.slice(k.length + 1) : true;
     else if (k === '--voice-lang') { if (!VOICE_DIRS[v]) throw new Error(`unknown --voice-lang ${v} (cn | jp | en | kr)`); o.voiceLang = v; }
     else if (k === '--voice-all') o.voiceAll = true;
     else if (k === '--no-optional-voice') o.optionalVoice = false;
@@ -289,6 +296,51 @@ async function writeJsonAtomic(path, value, indent) {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path + '.tmp', JSON.stringify(value, null, indent) + '\n');
   await rename(path + '.tmp', path);
+}
+
+/**
+ * Where every file `data/assets.json` names can be downloaded from: the community client dumps the asset plan
+ * resolves (`docs/research/07-assets.json`), as `{ '<rel under public/>': [url, …] }` keyed the way the client's
+ * importer reads a served URL (`public/js/assetPack.js` plainRel: `assets/…`, `fonts/…`).
+ *
+ * The client's predownload (`public/js/assetDownload.js`) reads it at `/data/asset-sources.json`, so a browser can
+ * fetch the art straight from the source repositories — verifying each file's sha256 against the hash in the served
+ * URL — instead of taking the host's upstream. A rel the map does not name (a locally generated file: `fonts.css`,
+ * the WOFF2 conversions, the local-client extractions) still downloads from the server.
+ *
+ * Regenerated with the manifest: run `node tools/fetch-assets.mjs --write-source-map` to rewrite it alone.
+ * @param {{ models: Map<string, any> }} plan the built plan (models carry their own skel / atlas / pngs)
+ * @param {{ leaf: any }[]} leaves collectLeaves(plan.template)
+ */
+export function buildSourceMap(plan, leaves) {
+  const sources = new Map();
+  const add = (rel, urls) => {
+    if (typeof rel !== 'string' || !rel || !Array.isArray(urls)) return;
+    const list = sources.get(rel) || [];
+    for (const url of urls) if (typeof url === 'string' && url && !list.includes(url)) list.push(url);
+    if (list.length) sources.set(rel, list);
+  };
+  for (const { leaf } of leaves) for (const alt of leaf.alts || []) add(`assets/${alt.rel}`, alt.urls);
+  for (const model of plan.models.values()) {
+    // A part the pipeline rewrites locally is left out: its `mutable` atlas gets the `size:` (and `pma`) lines added
+    // after the download, so the repository's bytes are not the ones this server serves and cannot be checked against
+    // them. The client reads such a part from the server instead (public/js/assetDownload.js).
+    for (const part of [model.skel, model.atlas, ...(Array.isArray(model.pngs) ? model.pngs : [])]) {
+      if (part && part.mutable !== true) add(`assets/${part.rel}`, part.urls);
+    }
+  }
+  for (const f of fontJobs()) add(`fonts/${f.rel}`, f.urls);
+  const sorted = {};
+  for (const rel of [...sources.keys()].sort()) sorted[rel] = sources.get(rel);
+  return {
+    version: 1,
+    about: 'Download sources of the files data/assets.json names: the community client dumps of docs/research/07-assets.json. '
+      + 'Read by the client predownload (public/js/assetDownload.js, /data/asset-sources.json) so a browser can fetch the art from '
+      + 'the source repositories instead of this server, each file checked against the sha256 in its served URL. Generated by '
+      + 'tools/fetch-assets.mjs --write-source-map: never hand-edited.',
+    generator: 'tools/fetch-assets.mjs',
+    sources: sorted,
+  };
 }
 
 /** All files under a directory, as forward-slash paths relative to it. */
@@ -456,6 +508,13 @@ async function main() {
     `${Object.keys(plan.template.audio.voiceEn || {}).length} with EN, ` +
     `${Object.keys(plan.template.audio.voiceKr || {}).length} with KR, ` +
     `${Object.keys(plan.template.audio.voiceNative || {}).length} with an own-language dub)`);
+  if (opts.sourceMap) {
+    const target = opts.sourceMap === true ? SOURCE_MAP : String(opts.sourceMap);
+    const map = buildSourceMap(plan, leaves);
+    await writeJsonAtomic(target, map, 1);
+    log(`[source-map] ${Object.keys(map.sources).length} files → ${relative(ROOT, target)}`);
+    return 0;
+  }
   if (opts.dryRun) {
     for (const n of plan.notes) log(`  note: ${n}`);
     return 0;
@@ -517,7 +576,10 @@ async function main() {
     ...body,
   };
   const guard = shrinkGuard(current, manifest, opts);
-  if (guard.write) await writeJsonAtomic(MANIFEST, manifest);
+  if (guard.write) {
+    await writeJsonAtomic(MANIFEST, manifest);
+    await writeJsonAtomic(SOURCE_MAP, buildSourceMap(plan, leaves), 1);
+  }
 
   // Orphans: files on disk that the manifest does not reference (e.g. after a mapping change).
   const orphans = orphanFiles(await listFiles(ASSETS), new Set([...resolved.files, ...dl.preserved]));

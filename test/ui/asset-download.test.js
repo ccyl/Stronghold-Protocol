@@ -1,14 +1,17 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { collectAssetUrls, createAssetDownload } from '../../public/js/assetDownload.js';
+import { sha256Hex16, modelHashOf } from '../../public/js/assetPack.js';
 
 const json = (value) => new Response(JSON.stringify(value), { headers: { 'content-type': 'application/json' } });
 const file = () => new Response('asset', { headers: { 'content-type': 'application/octet-stream' } });
-function fixture(assets, get, local = { groups: {} }, fx = null) {
+function fixture(assets, get, local = { groups: {} }, fx = null, sources = null) {
   return async (url, options) => url === '/data/assets.json' ? json(assets)
     : url === '/data/local-assets.json' ? local === null ? new Response('', { status: 404 }) : json(local)
       : url === '/data/local-fx.json' ? fx === null ? new Response('', { status: 404 }) : json(fx)
-        : get(url, options);
+        // No source map unless a test supplies one: the queue then takes every file from this server, as before.
+        : url === '/data/asset-sources.json' ? sources === null ? new Response('', { status: 404 }) : json(sources)
+          : get(url, options);
 }
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -172,3 +175,190 @@ test('the official battle effects manifest (/data/local-fx.json, DESIGN §33) is
   assert.ok(got.includes('/assets/~fedcba0987654321/local/fx/prefabs/common_hit_01.json'));
   assert.ok(got.includes('/assets/~1234567890abcdef/a.png'));
 });
+
+test('a source map (data/asset-sources.json) takes every named file from the repository, verified, under the served URL', async () => {
+  const enc = (s) => new TextEncoder().encode(s);
+  const imgHash = await sha256Hex16(enc('img-bytes'));
+  const audHash = await sha256Hex16(enc('aud-bytes'));
+  const imgUrl = `/assets/~${imgHash}/char/a.png`;
+  const audUrl = `/assets/~${audHash}/audio/bgm/a.mp3`;
+  const audMedia = `/media/~${audHash}/bgm/a`;
+  const sources = {
+    'assets/char/a.png': ['https://repo.test/char/a.png'],
+    'assets/audio/bgm/a.mp3': ['https://repo.test/bgm/a.mp3'],
+  };
+  const serverHits = [], repoHits = [];
+  const caches = fakeCaches();
+  const queue = createAssetDownload({
+    lookupImported: async () => new Set(),
+    cachesApi: () => caches.api,
+    fetch: fixture({ img: imgUrl, aud: audUrl }, async (url) => {
+      if (url.startsWith('https://repo.test/')) {
+        repoHits.push(url);
+        return new Response(url.endsWith('a.png') ? enc('img-bytes') : enc('aud-bytes'), { headers: { 'content-type': 'application/octet-stream' } });
+      }
+      serverHits.push(url);
+      return file();
+    }, { groups: {} }, null, { version: 1, sources }),
+  });
+  await queue.start();
+  assert.equal(queue.get().phase, 'complete');
+  assert.equal(queue.get().fromSource, 2, 'both files came from the repository');
+  assert.deepEqual(serverHits, [], 'the host was never asked for a file the map names');
+  assert.deepEqual(repoHits.sort(), ['https://repo.test/bgm/a.mp3', 'https://repo.test/char/a.png']);
+  // Stored under the served URL and its /media/ alias: the service worker answers what the game requests.
+  const stored = [...caches.entries.keys()];
+  assert.ok(stored.includes(imgUrl), `img url stored (${stored.join(', ')})`);
+  assert.ok(stored.includes(audUrl), 'audio url stored');
+  assert.ok(stored.includes(audMedia), 'audio /media/ alias stored');
+  assert.ok(stored.includes('/sp-imported-index.json'), 'the import index lists them');
+});
+
+test('a file the map does not name, or whose repository copy fails its hash, still comes from this server', async () => {
+  const hash = await sha256Hex16(new TextEncoder().encode('good'));
+  const kept = `/assets/~${hash}/char/kept.png`;
+  const wrong = `/assets/~${hash}/char/wrong.png`;
+  const plain = `/assets/char/plain.png`;
+  const sources = { 'assets/char/kept.png': ['https://repo.test/kept.png'], 'assets/char/wrong.png': ['https://repo.test/wrong.png'] };
+  const serverHits = [];
+  const caches = fakeCaches();
+  const queue = createAssetDownload({
+    lookupImported: async () => new Set(),
+    cachesApi: () => caches.api,
+    fetch: fixture({ kept, wrong, plain }, async (url) => {
+      if (url === 'https://repo.test/kept.png') return new Response(new TextEncoder().encode('good'), { headers: { 'content-type': 'application/octet-stream' } });
+      if (url === 'https://repo.test/wrong.png') return new Response(new TextEncoder().encode('tampered'), { headers: { 'content-type': 'application/octet-stream' } });
+      serverHits.push(url);
+      return file();
+    }, { groups: {} }, null, { version: 1, sources }),
+  });
+  await queue.start();
+  assert.equal(queue.get().phase, 'complete', JSON.stringify(queue.get().failures));
+  assert.equal(queue.get().fromSource, 1, 'only the verified repository copy counts');
+  // The tampered source (a hash that does not match) and the unmapped file both fall back to the host. An unhashed
+  // URL has no hash to check, so it is never taken from a repository either.
+  assert.ok(serverHits.includes(plain), `unmapped file from the server (${serverHits.join(', ')})`);
+  assert.ok(serverHits.some((url) => url.includes('wrong')), `tampered file from the server (${serverHits.join(', ')})`);
+  assert.ok(!caches.entries.has(wrong), 'a hash mismatch is never stored');
+  assert.ok(caches.entries.has(kept), 'the verified one is stored');
+});
+
+test('a host without data/asset-sources.json keeps downloading every file from this server', async () => {
+  const got = [];
+  const queue = createAssetDownload({
+    lookupImported: async () => new Set(),
+    fetch: fixture({ a: '/assets/~1234567890abcdef/a.png' }, async (url) => { got.push(url); return file(); }),
+  });
+  await queue.start();
+  assert.equal(queue.get().phase, 'complete');
+  assert.equal(queue.get().fromSource, 0);
+  assert.deepEqual(got, ['/assets/~1234567890abcdef/a.png']);
+});
+
+test('a Spine model is taken from the repository only as a whole, checked by its model hash', async () => {
+  const enc = (s) => new TextEncoder().encode(s);
+  const parts = { 'a.skel': enc('skel'), 'a.atlas': enc('atlas'), 'a.png': enc('png') };
+  const hashes = [await sha256Hex16(parts['a.skel']), await sha256Hex16(parts['a.atlas']), await sha256Hex16(parts['a.png'])];
+  const model = await modelHashOf(hashes);
+  const dir = `/assets/~${model}/spine/op/a/front`;
+  const manifest = { chars: { a: { spine: { front: {
+    skel: `${dir}/a.skel`, atlas: `${dir}/a.atlas`, textures: [`${dir}/a.png`],
+  } } } } };
+  const sources = {
+    'assets/spine/op/a/front/a.skel': ['https://repo.test/a.skel'],
+    'assets/spine/op/a/front/a.atlas': ['https://repo.test/a.atlas'],
+    'assets/spine/op/a/front/a.png': ['https://repo.test/a.png'],
+  };
+  const serverHits = [], repoHits = [];
+  const caches = fakeCaches();
+  const queue = createAssetDownload({
+    lookupImported: async () => new Set(),
+    cachesApi: () => caches.api,
+    fetch: fixture(manifest, async (url) => {
+      if (url.startsWith('https://repo.test/')) { repoHits.push(url); return new Response(parts[url.slice(url.lastIndexOf('/') + 1)], { headers: { 'content-type': 'application/octet-stream' } }); }
+      serverHits.push(url);
+      return file();
+    }, { groups: {} }, null, { version: 1, sources }),
+  });
+  await queue.start();
+  assert.equal(queue.get().phase, 'complete', JSON.stringify(queue.get().failures));
+  assert.equal(queue.get().fromSource, 1, 'the model counts once');
+  assert.deepEqual(serverHits, [], 'no member of a verified model comes from the host');
+  assert.deepEqual(repoHits.sort(), ['https://repo.test/a.atlas', 'https://repo.test/a.png', 'https://repo.test/a.skel']);
+  for (const name of ['a.skel', 'a.atlas', 'a.png']) assert.ok(caches.entries.has(`${dir}/${name}`), `${name} stored under its served URL`);
+});
+
+test('a Spine model mixes sources: the rewritten atlas from this server completes the parts taken from a repository', async () => {
+  const enc = (s) => new TextEncoder().encode(s);
+  const parts = { 'b.skel': enc('skel'), 'b.atlas': enc('atlas-served'), 'b.png': enc('png') };
+  const hashes = [await sha256Hex16(parts['b.skel']), await sha256Hex16(parts['b.atlas']), await sha256Hex16(parts['b.png'])];
+  const model = await modelHashOf(hashes);
+  const dir = `/assets/~${model}/spine/op/b/front`;
+  const manifest = { chars: { b: { spine: { front: {
+    skel: `${dir}/b.skel`, atlas: `${dir}/b.atlas`, textures: [`${dir}/b.png`],
+  } } } } };
+  // The atlas is the part the asset pipeline rewrites after the download, so the map never names it: it is read from
+  // this server to complete the model hash, while the skel and the page come from the repository.
+  const sources = { 'assets/spine/op/b/front/b.skel': ['https://repo.test/b.skel'], 'assets/spine/op/b/front/b.png': ['https://repo.test/b.png'] };
+  const served = [], repoTaken = [];
+  const caches = fakeCaches();
+  const queue = createAssetDownload({
+    lookupImported: async () => new Set(),
+    cachesApi: () => caches.api,
+    fetch: fixture(manifest, async (url) => {
+      if (url.startsWith('https://repo.test/')) { repoTaken.push(url); return new Response(parts[url.slice(url.lastIndexOf('/') + 1)], { headers: { 'content-type': 'application/octet-stream' } }); }
+      served.push(url);
+      return new Response(parts[url.slice(url.lastIndexOf('/') + 1)], { headers: { 'content-type': 'application/octet-stream' } });
+    }, { groups: {} }, null, { version: 1, sources }),
+  });
+  await queue.start();
+  assert.equal(queue.get().phase, 'complete', JSON.stringify(queue.get().failures));
+  assert.equal(queue.get().fromSource, 1);
+  assert.deepEqual(repoTaken.sort(), ['https://repo.test/b.png', 'https://repo.test/b.skel']);
+  assert.deepEqual(served, [`${dir}/b.atlas`], 'only the part the map does not name is asked of this server');
+  assert.ok(caches.entries.has(`${dir}/b.skel`) && caches.entries.has(`${dir}/b.png`), 'the repository parts are stored');
+  assert.ok(!caches.entries.has(`${dir}/b.atlas`), 'the server-served part is not duplicated into the import cache');
+});
+
+test('a Spine model whose repository copy does not match the model hash comes from this server entirely', async () => {
+  const enc = (s) => new TextEncoder().encode(s);
+  const hashes = [await sha256Hex16(enc('skel')), await sha256Hex16(enc('atlas')), await sha256Hex16(enc('png'))];
+  const model = await modelHashOf(hashes);
+  const dir = `/assets/~${model}/spine/op/c/front`;
+  const manifest = { chars: { c: { spine: { front: {
+    skel: `${dir}/c.skel`, atlas: `${dir}/c.atlas`, textures: [`${dir}/c.png`],
+  } } } } };
+  const sources = {
+    'assets/spine/op/c/front/c.skel': ['https://repo.test/c.skel'],
+    'assets/spine/op/c/front/c.atlas': ['https://repo.test/c.atlas'],
+    'assets/spine/op/c/front/c.png': ['https://repo.test/c.png'],
+  };
+  const served = [];
+  const queue = createAssetDownload({
+    lookupImported: async () => new Set(),
+    cachesApi: () => fakeCaches().api,
+    fetch: fixture(manifest, async (url) => {
+      // The repository's page is not the one this build hashes: the model hash cannot be confirmed, so nothing is
+      // stored and every member falls back to the host.
+      if (url === 'https://repo.test/c.png') return new Response(enc('tampered-png'), { headers: { 'content-type': 'application/octet-stream' } });
+      if (url.startsWith('https://repo.test/')) return new Response(enc(url.slice(url.lastIndexOf('/') + 1, -4)), { headers: { 'content-type': 'application/octet-stream' } });
+      served.push(url);
+      return file();
+    }, { groups: {} }, null, { version: 1, sources }),
+  });
+  await queue.start();
+  assert.equal(queue.get().phase, 'complete');
+  assert.equal(queue.get().fromSource, 0);
+  assert.deepEqual(served.sort(), [`${dir}/c.atlas`, `${dir}/c.png`, `${dir}/c.skel`]);
+});
+
+/** A CacheStorage stub: the remote path stores bodies and the import index through it. */
+function fakeCaches() {
+  const entries = new Map();
+  const cache = {
+    async put(key, response) { entries.set(typeof key === 'string' ? key : key.url, response); },
+    async match(key) { return entries.get(typeof key === 'string' ? key : key.url) || undefined; },
+    async keys() { return [...entries.keys()]; },
+  };
+  return { entries, api: { async open() { return cache; } } };
+}

@@ -185,6 +185,13 @@ The first run downloads about **548 MiB in 10,643 files** (`stats` of `data/asse
 
 Outputs:
 - `data/assets.json`: the manifest (committed).
+- `data/asset-sources.json`: where every file of the manifest can be downloaded from — the community client dumps of
+  `docs/research/07-assets.json`, `{ '<rel under public/>': [url, …] }` (committed; written with the manifest, or alone
+  with `--write-source-map[=PATH]`). The client's predownload reads it at `/data/asset-sources.json` so the browser can
+  fetch the art from those repositories (each file checked against the sha256 in its served URL, then stored under the
+  served URL in the import cache) instead of the host's own upstream; a rel it does not name — a locally generated font,
+  a local-client extraction — is still downloaded from the server (`docs/PLAYING.md`, `public/js/assetDownload.js`). The
+  full file is about 3.2 MB, 165 KB gzipped.
 - `public/assets/**`: art and audio (git-ignored).
 - `public/fonts/*`: fonts and `fonts.css`.
 - `.cache/assets-report.json`: misses, fallbacks, `droppedLeaves` (the leaves left out of the manifest for having no file

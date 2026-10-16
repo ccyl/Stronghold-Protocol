@@ -50,7 +50,8 @@ export function AssetDownloadButton() {
       <p>${t('已读取 {size} MB（含浏览器缓存）', { size: (state.bytes / 1048576).toFixed(1) })}</p>
       ${state.total > 0 ? html`<p>${t('已就绪 {ready}，缺少 {missing}', { ready, missing })}</p>` : null}
       <p class="t-lo">${t('已导入的素材直接使用，不再向服务器请求。')}</p>
-      <p class="t-lo">${t('下载本服务器提供的素材到浏览器缓存。关闭窗口会暂停；缓存被清理后可再次下载。')}</p>
+      <p class="t-lo">${t('优先从社区素材仓库下载并校验后存入浏览器缓存，不再占用服务器流量；仓库没有的文件仍从本服务器下载。关闭窗口会暂停；缓存被清理后可再次下载。')}</p>
+      ${state.fromSource ? html`<p class="t-lo">${t('其中有 {n} 个文件来自社区素材仓库', { n: state.fromSource })}</p>` : null}
       ${state.localMissing ? html`<p class="t-lo">${t('服务器未提供额外的本地素材包，将使用基础素材。')}</p>` : null}
       ${state.failures.length ? html`<div class="asset-download__errors">
         <p>${t('下载未完成。请重试；若文件持续缺失，请联系服主补齐素材。')}</p>
