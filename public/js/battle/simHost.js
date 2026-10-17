@@ -53,7 +53,7 @@ export class InPageSimHost {
       ...(u.def?.diyFor && u.def.loadout?.diy ? { diy: { ...u.def.loadout.diy } } : {}),
     }));
   }
-  syncPool(hp, acked) { this.battle?.sharedBoss?.sync?.(hp, acked); }
+  syncPool(hp, acked, max) { this.battle?.sharedBoss?.sync?.(hp, acked, max); }
   forceEnd(reason) { this.battle?.forceEnd(reason); }
   stop() { this.battle = null; }
 }
@@ -129,7 +129,7 @@ export class WorkerSimHost {
     return this.statsCache.get(id) || null;
   }
   ownerOps(pid) { return this.packet?.ops?.[pid] || []; }
-  syncPool(hp, acked) { return this.rpc('syncPool', [hp, acked]).catch(() => {}); }
+  syncPool(hp, acked, max) { return this.rpc('syncPool', [hp, acked, max]).catch(() => {}); }
   async forceEnd(reason) { this.accept(await this.rpc('forceEnd', [reason])); }
   stop(err = failure('PLUGIN_WORKER_STOPPED', 'simulation worker stopped')) {
     if (this.stopped) return;
