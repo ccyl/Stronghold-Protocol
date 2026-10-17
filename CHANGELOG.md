@@ -11,10 +11,9 @@
 - 安卓端填服务器地址：原生化只认 `http(s)://`，把网页设置显示的 `wss://…` 粘进去会拼成 `https://wss://…` → 现在 `ws://`→`http://`、`wss://`→`https://`，未知 scheme 直接提示；网页「联机服务器」回显成 `https://…` 形式并保证路径补到 `/ws`。
 - 素材预下载补 jsDelivr 备选地址（每个文件「GitHub 原始源 → jsDelivr」，语音分支只留原始源），浏览器按顺序尝试并记住可用的主机。
 - 修复两处既有失败：`client-static` 挂死（掉线测试与本分支 `net.js` 的可恢复断开语义不符，会挂住整个文件）、上游新增 CSS 的 7 处 `color-mix()` 缺回退。
-- 修复合并引入的 20 人分组卡池回归（本分支核心特性，`test/match/player-capacity.test.js` 由 27/30 恢复为 30/30）：
-  - `gamedata.poolCopies` 恢复本分支边界——上游 #650 让**自选私有库存**在联机时也翻倍（8→16 / 5→10），与本分支 D010「自选私有库存不按共享组扩容」冲突，现只对共享卡池翻倍，自选仍为每人 8 / 5；
-  - `releaseItemStock` 回债改按玩家所属组（原来走 `m.itemPool`，那是第一组的兼容别名），修掉「别的组释放副本却还了第一组债务、第一组超上限却无债务」。
-  - 随之 `golden` 只有两个 DIY 场景移动（`coop2-NORMAL-70-diy`、`coop2-NORMAL-5-coverage-diy`：私有库存回到 8 / 5 后商店抽卡序列变化），已用 `npm run golden:update` 更新并写在本提交里。
+- 修复合并引入的 20 人分组卡池回归（本分支核心特性，`test/match/player-capacity.test.js` 恢复 30/30、`test/match/diy-shop.test.js` 12/12）：
+  - 自选私有库存按维护者**更晚**的决定统一：联机翻倍（8→16 / 5→10，#650，2026-10-15），且**不按共享组再扩容**（本分支 D010 的边界）；`PLAYER_CAPACITY.md`、`DECISIONS.md` 与两条 fork 测试同步到这一口径。
+  - `releaseItemStock` 回债改按玩家所属组（原来走 `m.itemPool`，那是第一组的兼容别名），修掉「别的组释放副本却还了第一组债务、第一组超上限却无债务」的不变量失败。
 - `data/assets.json` 补登记磁盘上的 5348 条双语语音（此前 2674 条未登记，`tools/bundle-android.mjs` 的打包门禁拒绝出包）。
 - 安卓 APK：`versionCode 27` / `versionName 0.3.1-fusion-20p`。
 

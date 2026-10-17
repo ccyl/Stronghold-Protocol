@@ -94,7 +94,7 @@ test('depleting one group leaves shop rolls and effect grants of the other group
   h.m.dispose();
 });
 
-test('nine players: a five-player group does not expand private DIY stock', () => {
+test('nine players: a five-player group gets the co-op doubling (#650) but no further group expansion', () => {
   const slotId = 'chess_char_5_diy1_a';
   const seats = Array.from({ length: 9 }, (_, seat) => ({
     seat, playerId: `p_${seat}`, name: `P${seat}`, connected: true, isBot: false,
@@ -103,13 +103,13 @@ test('nine players: a five-player group does not expand private DIY stock', () =
   const h = makeMatch({ seats, fake: true });
   const ps = h.ps('p_8');
   assert.equal(h.m.poolGroups[1].playerIds.length, 5);
-  assert.equal(ps.diyStock.cap(slotId), 8, 'private tier V remains the original eight copies');
+  assert.equal(ps.diyStock.cap(slotId), 16, 'private tier V: co-op doubles 8 to 16 (#650), a five-player group adds nothing');
   for (const group of h.m.poolGroups) assert.equal(group.pool.has(slotId), false);
   const piece = ps.acquireChess(slotId, { source: 'test' });
   assert.ok(piece);
-  assert.equal(ps.diyStock.left(slotId), 7);
+  assert.equal(ps.diyStock.left(slotId), 15);
   ps.eliminate(1);
-  assert.equal(ps.diyStock.left(slotId), 8);
+  assert.equal(ps.diyStock.left(slotId), 16);
   h.invariants();
   h.m.dispose();
 });
@@ -152,11 +152,11 @@ test('twenty players: buying, merging, selling and eliminating DIY / stand-in pi
   for (let i = 0; i < 3; i++) buy(slotId);
   const diyElite = ps.allChess().find((p) => p.id === ps.gd.goldenIdOf(slotId));
   assert.ok(diyElite);
-  assert.equal(ps.diyStock.left(slotId), 5);
-  assert.equal(h.ps('p_0').diyStock.left(slotId), 8);
-  assert.equal(h.ps('p_8').diyStock.left(slotId), 8);
+  assert.equal(ps.diyStock.left(slotId), 13, 'co-op 8 × 2 (#650) minus the three copies merged into the elite');
+  assert.equal(h.ps('p_0').diyStock.left(slotId), 16);
+  assert.equal(h.ps('p_8').diyStock.left(slotId), 16);
   assert.deepEqual(m.handle(ps.playerId, { t: 'g.sell', uid: diyElite.uid }), { ok: true });
-  assert.equal(ps.diyStock.left(slotId), 8);
+  assert.equal(ps.diyStock.left(slotId), 16);
 
   const id = [...ps.pool.entries.keys()].find((id) => ps.fieldsStandIn(id)
     && ps.pool.left(id) >= 3 && !ps.allChess().some((p) => ps.gd.baseIdOf(p.id) === id));
@@ -171,12 +171,12 @@ test('twenty players: buying, merging, selling and eliminating DIY / stand-in pi
 
   const ctx = makeCtx(m, ps, { key: 'test' }, 'onTest');
   assert.ok(ctx.grantChess(slotId));
-  assert.equal(ps.diyStock.left(slotId), 7, 'effect grants take the receiver\'s private stock');
+  assert.equal(ps.diyStock.left(slotId), 15, 'effect grants take the receiver\'s private stock');
   assert.ok(ctx.grantChess(id));
   assert.equal(ps.pool.left(id), before[4] - 1, 'stand-in still spends the original operator\'s group copy');
   h.invariants();
   ps.eliminate(1);
-  assert.equal(ps.diyStock.left(slotId), 8);
+  assert.equal(ps.diyStock.left(slotId), 16);
   assert.deepEqual(m.poolGroups.map((g) => g.pool.left(id)), before);
   h.invariants();
   assert.equal(m.errorCount, 0);

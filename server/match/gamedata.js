@@ -322,11 +322,12 @@ export class GameData {
     const pc = this.economy.poolCopies;
     const v = ov && Number.isInteger(ov[baseId]) && ov[baseId] >= 0 ? ov[baseId] : pc?.[tier];
     const base = Number.isInteger(v) && v >= 0 ? v : (DEFAULTS.poolCopies[tier] ?? 10);
-    // Co-op doubles the measured shared pool (shared by the whole team, independent of team size — upstream #650, and
-    // pool.js then sizes it per fixed group on top). A DIY slot is NOT the shared pool: its copies are one player's
-    // private stock, and this branch keeps it at 8 / 5 in co-op too (D010 "自选私有库存不按共享组扩容",
-    // docs/PLAYER_CAPACITY.md) — the only difference from upstream's poolCopies.
-    const multiplier = this.isSolo || this.chess(baseId)?.isDiy ? 1 : posIntOr(this.economy.coopPoolMultiplier, 1);
+    // Co-op doubles the single-player counts: the measured shared pool (shared by the whole team, independent of team
+    // size) and each player's private 自选 stock alike — the maintainer's decision of 2026-10-15 (GitHub #650): with
+    // the shared pool doubled and the 自选 stock not, a 自选 operator was diluted in the copy-weighted rolls. This
+    // branch's fixed groups then size the SHARED pool further (poolCopyScale in pool.js); a private 自选 stock is not
+    // scaled by group size (D010, docs/PLAYER_CAPACITY.md) — only the flat co-op doubling above applies to it.
+    const multiplier = this.isSolo ? 1 : posIntOr(this.economy.coopPoolMultiplier, 1);
     return base * multiplier;
   }
 
