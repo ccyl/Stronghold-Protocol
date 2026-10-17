@@ -999,14 +999,13 @@ class MainActivity : AppCompatActivity() {
     private fun normalizeServerUrl(input: String): String? {
         val trimmed = input.trim()
         if (trimmed.isEmpty()) return null
-        val lower = trimmed.lowercase()
-        val isExplicitHttps = lower.startsWith("https://")
-        val isExplicitHttp = lower.startsWith("http://")
-        val body = when {
-            isExplicitHttp -> trimmed.substring(7)
-            isExplicitHttps -> trimmed.substring(8)
-            else -> trimmed
-        }
+        // Accept the WebSocket spelling too: the web settings page stores `ws://` / `wss://`, and a page is loaded over
+        // http(s), so ws:// -> http:// and wss:// -> https://. An unknown scheme is refused here rather than glued into
+        // `https://wss://host` (what pasting a `wss://…` address used to produce).
+        val schemeMatch = Regex("^([A-Za-z][A-Za-z0-9+.-]*)://").find(trimmed)
+        val schemeIn = schemeMatch?.groupValues?.get(1)?.lowercase()
+        if (schemeIn != null && schemeIn !in setOf("http", "https", "ws", "wss")) return null
+        val body = if (schemeMatch != null) trimmed.substring(schemeMatch.value.length) else trimmed
         if (body.isBlank() || body.any(Char::isWhitespace)) return null
         val slash = body.indexOf('/')
         val authority = if (slash >= 0) body.substring(0, slash) else body
@@ -1017,11 +1016,10 @@ class MainActivity : AppCompatActivity() {
         val hostOnly = if (authority.contains(':')) authority.substringBefore(':') else authority
         val isIp = hostOnly.matches(Regex("^\\d{1,3}(\\.\\d{1,3}){3}$"))
 
-        val scheme = when {
-            isExplicitHttps -> "https://"
-            isExplicitHttp -> "http://"
-            isIp -> "http://"                     // 纯 IP 默认采用 HTTP
-            else -> "https://"                    // 公网域名默认采用 HTTPS
+        val scheme = when (schemeIn) {
+            "https", "wss" -> "https://"
+            "http", "ws" -> "http://"
+            else -> if (isIp) "http://" else "https://"   // 纯 IP 默认 HTTP，公网域名默认 HTTPS
         }
 
         val withPort = when {

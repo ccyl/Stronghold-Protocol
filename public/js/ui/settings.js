@@ -43,6 +43,14 @@ import { resolveOfficialFx } from '../render/vfx/tier.js';
 
 const cx = (...p) => p.flat().filter(Boolean).join(' ');
 
+/** The page form of a stored WebSocket address (`wss://h/ws` → `https://h`), for the settings field. */
+function wsUrlToPage(url) {
+  return String(url || '')
+    .replace(/^wss:\/\//i, 'https://')
+    .replace(/^ws:\/\//i, 'http://')
+    .replace(/\/ws$/i, '');
+}
+
 const initialPref = sanitizeSettings(loadPref('settings', null));
 if (typeof globalThis.AndroidNative?.isHighRefresh === 'function') {
   initialPref.highRefresh = globalThis.AndroidNative.isHighRefresh();
@@ -349,7 +357,10 @@ export function SettingsModal({ open, onClose }) {
   const s = useSettings();
   const [tested, setTested] = useState(false);
   const [testedVoice, setTestedVoice] = useState(false);
-  const [serverUrl, setServerUrl] = useState(() => globalThis.localStorage?.getItem('sp_ws_url') || '');
+  // Show the address the way a player types it — `https://host` — while `sp_ws_url` holds the WebSocket form the page
+  // actually dials (`wss://host/ws`). Keeping the stored value out of the field is what made an entered `https://…` look
+  // as if it had been rewritten into something else.
+  const [serverUrl, setServerUrl] = useState(() => wsUrlToPage(globalThis.localStorage?.getItem('sp_ws_url') || ''));
   const [touchUi] = useState(() => detectFeatures().coarse && !detectFeatures().fine);
   // The Android shell exposes itself as AndroidNative; the same page in a browser has none of it.
   const nativeShell = globalThis.AndroidNative?.isNativeApp?.() ? globalThis.AndroidNative : null;
@@ -371,7 +382,10 @@ export function SettingsModal({ open, onClose }) {
     }
     try {
       const u = new URL(target);
-      if (!u.pathname || u.pathname === '/') u.pathname = '/ws';
+      // The server answers the upgrade only on /ws (server/http/websocket.js rejects every other path with 404), so the
+      // path is completed rather than kept: a bare host becomes /ws, and a tunnel that maps a subpath (…/game) becomes
+      // …/game/ws instead of a URL that could never connect.
+      if (!u.pathname.endsWith('/ws')) u.pathname = `${u.pathname.replace(/\/+$/, '')}/ws`;
       target = u.toString();
     } catch {}
     globalThis.localStorage?.setItem('sp_ws_url', target);
