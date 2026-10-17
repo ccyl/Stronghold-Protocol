@@ -284,7 +284,18 @@ async function installProductionDeps(appDir) {
     : spawnSync('npm', args, { cwd: stage, stdio: 'inherit' });
   if (r.error || r.status !== 0) throw new Error('npm ci --omit=dev 失败（便携包需要生产依赖，请先联网）');
   await fsp.rm(path.join(appDir, 'node_modules'), { recursive: true, force: true });
-  await fsp.rename(path.join(stage, 'node_modules'), path.join(appDir, 'node_modules'));
+  // A rename is atomic and free on the same filesystem; when the staging dir is on another device (a tmpfs home, a
+  // mounted output path, a sandboxed build) it fails EXDEV — copy the tree instead of failing the whole bundle.
+  const from = path.join(stage, 'node_modules');
+  const to = path.join(appDir, 'node_modules');
+  try {
+    await fsp.rename(from, to);
+  } catch (err) {
+    if (err?.code !== 'EXDEV') throw err;
+    console.log('  · 暂存目录与目标不在同一设备，改为复制依赖…');
+    await fsp.cp(from, to, { recursive: true, verbatimSymlinks: true });
+    await fsp.rm(from, { recursive: true, force: true });
+  }
   await fsp.rm(stage, { recursive: true, force: true });
 }
 
