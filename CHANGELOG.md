@@ -1,3 +1,19 @@
+## 0.3.1-fusion-20p — 2026-10-17
+
+### 本分支（fusion-20p）
+
+- 并入官方 0.3.1：16 个 CI / 测试健壮性修复（Windows runner 上的超时与时序、`npm test` 只跑 `test/` 下的测试文件、Docker `.dockerignore` 换行、语言别名用例的大小写不敏感磁盘等），**没有功能改动**，上游 `package.json` 仍是 0.3.0。
+- 修复 0.3.0 合并遗留的两处硬错误：
+  - `server/sim/content/index.js` 的 `KIT_REGISTRY` 未定义（上游改成惰性导入、本分支用静态导入，合并后 `officialKit` 直接抛 `ReferenceError`）→ 按静态导入修复，官方干员 / 替身 / 自选的 kit 解析恢复，`test/studio/review.test.js` 由 18 项失败转为 23 项全通过；
+  - 自动合战结算 `server/match/match/settle.js` 的越界取值 → 对局不再卡在 `SETTLE`。
+- 恢复 Chromium 80-88（Android 7-9 WebView）兼容：上游带入的 50 处逻辑赋值（`??=` / `||=` / `&&=`）与 3 处数字分隔符改回 ES2020，`golden` 178 个场景仍全部一致。
+- `tools/local-extract/fx.py` 的 f-string 改为 Python 3.8+ 可解析（原先嵌套同类引号需要 3.12+，`extract.py` 连 import 都过不去）。
+- 安卓端填服务器地址：原生化只认 `http(s)://`，把网页设置显示的 `wss://…` 粘进去会拼成 `https://wss://…` → 现在 `ws://`→`http://`、`wss://`→`https://`，未知 scheme 直接提示；网页「联机服务器」回显成 `https://…` 形式并保证路径补到 `/ws`。
+- 素材预下载补 jsDelivr 备选地址（每个文件「GitHub 原始源 → jsDelivr」，语音分支只留原始源），浏览器按顺序尝试并记住可用的主机。
+- 修复两处既有失败：`client-static` 挂死（掉线测试与本分支 `net.js` 的可恢复断开语义不符，会挂住整个文件）、上游新增 CSS 的 7 处 `color-mix()` 缺回退。
+- `data/assets.json` 补登记磁盘上的 5348 条双语语音（此前 2674 条未登记，`tools/bundle-android.mjs` 的打包门禁拒绝出包）。
+- 安卓 APK：`versionCode 27` / `versionName 0.3.1-fusion-20p`。
+
 ## 0.3.0-fusion-20p — 2026-10-16
 
 ### 本分支（fusion-20p）
