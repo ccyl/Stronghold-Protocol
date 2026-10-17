@@ -18,8 +18,13 @@ export class PlayerItems {
    * @returns {number} copies repaid
    */
   releaseItemStock(piece) {
-    if (!piece || piece.kind !== 'item' || !this.m?.itemPool) return 0;
-    return this.m.itemPool.repay(piece.id, this.m.itemPool.need(piece.id));
+    if (!piece || piece.kind !== 'item' || !this.m) return 0;
+    // The player's own fixed group (#624 debt lives on that group's stock): `m.itemPool` is only the first group's
+    // compatibility alias, so repaying through it credited group 1 for another group's release and left group 1
+    // over its cap with no debt on record.
+    const pool = this.m.itemPoolFor(this);
+    if (!pool) return 0;
+    return pool.repay(piece.id, pool.need(piece.id));
   }
 
   /**
