@@ -722,7 +722,7 @@ describe('keyboard & settings', () => {
   test('sanitizeSettings', () => {
     assert.deepEqual(sanitizeSettings(null), { ...DEFAULT_SETTINGS });
     assert.deepEqual(sanitizeSettings({ bgm: 3, sfx: -1, voice: 2, muted: 'yes', damageNumbers: false, quality: 'ultra' }),
-      { bgm: 1, sfx: 0, voice: 1, voiceLang: 'cn', voiceNative: false, voiceOverrides: {}, muted: false, damageNumbers: false, officialDamageNumbers: false, ammoEnergyCount: false, combatMetrics: false, prepDeployFold: true, quality: 'high', officialFx: 'auto', otherSkins: true, textSize: 'sm', keys: { ...DEFAULT_SETTINGS.keys } },
+      { bgm: 1, sfx: 0, voice: 1, voiceLang: 'jp', voiceNative: false, voiceOverrides: {}, muted: false, damageNumbers: false, officialDamageNumbers: false, ammoEnergyCount: false, combatMetrics: false, prepDeployFold: true, quality: 'high', officialFx: 'auto', otherSkins: true, textSize: 'sm', board: 'auto', highRefresh: true, hoverShortcuts: false, keys: { ...DEFAULT_SETTINGS.keys } },
       'a saved profile without `keys` (before 0.2.0) gets the default key map (test/ui/feedback5-hotkeys.test.js)');
     // 显示其他玩家的皮肤 (docs/SKINS.md): on by default, and off only when the profile says so
     assert.equal(DEFAULT_SETTINGS.otherSkins, true);
@@ -730,10 +730,11 @@ describe('keyboard & settings', () => {
     assert.equal(sanitizeSettings({ otherSkins: false }).otherSkins, false);
     assert.equal(sanitizeSettings({ otherSkins: 'no' }).otherSkins, true, 'only `false` turns it off (the renderer reads it the same way)');
     assert.equal(sanitizeSettings({ bgm: 0.5 }).voice, DEFAULT_SETTINGS.voice, 'a saved profile without `voice` gets the default');
-    // 语音语言: 中文 by default. en / kr are dubs (0.3.0); anything else, including the per-operator 'native', stays 中文.
-    assert.equal(DEFAULT_SETTINGS.voiceLang, 'cn');
+    // 语音语言: 日本語 by default in this branch (the owner's decision); en / kr are dubs (0.3.0); anything else,
+    // including the per-operator 'native', stays 中文.
+    assert.equal(DEFAULT_SETTINGS.voiceLang, 'jp');
     assert.equal(DEFAULT_SETTINGS.voiceNative, false);
-    assert.equal(sanitizeSettings({ bgm: 0.5 }).voiceLang, 'cn');
+    assert.equal(sanitizeSettings({ bgm: 0.5 }).voiceLang, 'jp');
     assert.equal(sanitizeSettings({ bgm: 0.5 }).voiceNative, false, 'a profile saved before the switch stays off');
     assert.equal(DEFAULT_SETTINGS.combatMetrics, false);
     assert.equal(sanitizeSettings({ bgm: 0.5 }).combatMetrics, false, 'a profile saved before 作战统计 stays off');
@@ -748,7 +749,8 @@ describe('keyboard & settings', () => {
     assert.equal(sanitizeSettings({ voiceLang: 'en' }).voiceLang, 'en');
     assert.equal(sanitizeSettings({ voiceLang: 'kr' }).voiceLang, 'kr');
     assert.equal(sanitizeSettings({ voiceNative: true }).voiceNative, true);
-    for (const bad of ['native', 'JP', 'ja', 1, null]) assert.equal(sanitizeSettings({ voiceLang: bad }).voiceLang, 'cn', String(bad));
+    // an unusable global value falls back to this branch's DEFAULT_SETTINGS.voiceLang (日本語), not to 中文
+    for (const bad of ['native', 'JP', 'ja', 1, null]) assert.equal(sanitizeSettings({ voiceLang: bad }).voiceLang, 'jp', String(bad));
     assert.equal(sanitizeSettings({ bgm: 0.333 }).bgm, 0.33);
     assert.equal(sanitizeSettings({ quality: 'low' }).quality, 'low');
   });
