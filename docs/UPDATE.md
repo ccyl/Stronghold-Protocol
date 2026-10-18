@@ -48,11 +48,14 @@ node tools/make-update.mjs \
   --to <新版本树> \
   --from <上一个客户端包的 app 目录 或 完整包.zip>[,<再上一个>] \
   --out <发布目录> \
-  --url-base https://frp-say.com:17763/update \
+  --url-base /update \
   --key release-private.pem \
   --notes "<这一版做了什么>" \
   [--keep android/,docs/design/,...]   # 客户端渠道里服务端树没有的开发文件：永不删除
   [--no-art]                            # 只发程序与数据（素材交给 setup）；不发就带上改动过的素材
+
+# --url-base 保持相对的 /update：latest.json 里只写 /update/<文件名>，客户端按自己填写的服务器地址
+# 拼下载链接（多台服务器/自己搭服都能用）。写成 https://某主机/update 会把所有客户端钉死到那一台。
 
 # 3) 放到服务端
 scp <发布目录>/* 服务器:/opt/stronghold-updates/    # 先传 zip 与 MANIFEST.json，最后覆盖 latest.json
@@ -140,7 +143,7 @@ node tools/update.mjs apply  [同上] [--mode auto|zip|files] [--no-setup] [--fo
 # 服务端（0.2.4 树）当更新源
 SP_UPDATE_DIR=<发布目录> PORT=3100 HOST=127.0.0.1 node server/index.js &
 node tools/make-update.mjs --to <0.2.4树> --from <0.2.3客户端app目录> --out <发布目录> \
-  --url-base http://127.0.0.1:3100/update --no-art --key release-private.pem
+  --url-base /update --no-art --key release-private.pem
 
 # 客户端（0.2.3 包里的 app 目录）
 node tools/update.mjs check --root <客户端app> --source http://127.0.0.1:3100 --pubkey update-pubkey.pem

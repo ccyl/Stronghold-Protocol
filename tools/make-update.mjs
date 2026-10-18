@@ -2,7 +2,9 @@
 // tools/make-update.mjs — 发布侧：从"新版本树"生成更新源产物（版本自检 / 自更新的另一半）。
 //
 //   node tools/make-update.mjs --to <新版本目录> --from <旧安装目录或旧包.zip>[,<…>] --out <目录>
-//        [--url-base https://主机:端口/update] [--key <ed25519 私钥.pem>] [--line fusion-20p]
+//        [--url-base /update] [--key <ed25519 私钥.pem>] [--line fusion-20p]
+//        （--url-base 保持相对路径 /update：客户端按玩家自己填的服务器地址拼下载链接；
+//          写成绝对地址会把所有客户端钉死到那一台主机）
 //        [--order <整数>] [--notes <文字>] [--no-zip] [--json]
 //
 // 产物（写进 --out，再把整个目录放到服务端的 SP_UPDATE_DIR，就是 /update/ 下的那些地址）：
@@ -29,7 +31,7 @@ import {
 } from '../server/updateSet.js';
 
 const USAGE = 'usage: node tools/make-update.mjs --to <新版本目录> --from <旧安装目录或旧包.zip>[,<…>] --out <目录> '
-  + '[--url-base <http(s)://主机/update>] [--key <ed25519 私钥.pem>] [--line <分支名>] [--order <整数>] '
+  + '[--url-base </update>] [--key <ed25519 私钥.pem>] [--line <分支名>] [--order <整数>] '
   + '[--notes <文字>] [--keep <不删的路径前缀>[,…]] [--no-art] [--no-zip] [--json]';
 
 // ---------------------------------------------------------------------------------------------------
