@@ -49,14 +49,13 @@ function SkinTile({ row, chosen, onPick, onPreview }) {
       class=${cx('lo-skin', isDefault && 'lo-skin--default', chosen && 'is-on', row.fallbackArt && 'lo-skin--fallback')}
       title=${title} onClick=${() => (chosen && !isDefault ? onPreview() : onPick())}>
     <span class=${cx('lo-skin__art', row.face && 'lo-skin__art--face')}>
+      ${/* 底色永远画：某套皮肤的头像文件缺失时，onError 隐藏图片后不会留下一个破图 */ null}
+      <span class="lo-skin__art--none"></span>
       ${row.art
-        ? html`<img class="lo-skin__art--big" src=${row.art} alt="" loading="lazy" />`
+        ? html`<img class="lo-skin__art--big" src=${row.art} alt="" loading="lazy" onError=${(e) => { e.currentTarget.style.display = 'none'; }} />`
         : null}
       ${row.face
-        ? html`<img class="lo-skin__art--faceimg" src=${row.face} alt="" loading="lazy" />`
-        : null}
-      ${!row.art && !row.face
-        ? html`<span class="lo-skin__art--none"></span>`
+        ? html`<img class="lo-skin__art--faceimg" src=${row.face} alt="" loading="lazy" onError=${(e) => { e.currentTarget.style.display = 'none'; }} />`
         : null}
     </span>
     <span class="lo-skin__text">

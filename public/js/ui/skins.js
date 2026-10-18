@@ -196,7 +196,9 @@ export function availableSkins(charId) {
     // the tile art: the fixed-size portrait family first (a 1:2 box the grid lines up on), then the illustration, then
     // the avatar; the operator's own portrait when the skin ships none (`fallbackArt`, which the picker draws a little
     // differently so a plugin that replaced only the model is legible)
-    const ownArt = str(skin.portrait) || str(skin.illust);
+    // 官方的换装记录（tools/inject-skins-assets.mjs 注入的）只带 `avatar`（1:1 皮肤头像），没有 portrait/illust：
+    // 这一行的图就该是那套皮肤自己的头像，而不是干员默认立绘。
+    const ownArt = str(skin.portrait) || str(skin.illust) || str(skin.avatar);
     const portrait = ownArt || ownPortrait;
     const avatar = str(skin.avatar) || str(skin.illust) || ownAvatar;
     const illust = str(skin.illust) || portrait;
