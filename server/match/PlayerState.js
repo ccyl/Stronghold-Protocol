@@ -138,7 +138,7 @@ import { PlayerDiy, DiyStock } from './player/diy.js';
 export class PlayerState {
   /**
    * @param {import('./Match.js').Match} m owning match
-   * @param {{ seat: number, playerId: string, name: string, isBot: boolean, connected: boolean, loadout?: any, notOwned?: any, diy?: any }} seat
+   * @param {{ seat: number, playerId: string, name: string, isBot: boolean, connected: boolean, loadout?: any, notOwned?: any, diy?: any, skins?: any }} seat
    */
   constructor(m, seat) {
     this.m = m;
@@ -185,7 +185,14 @@ export class PlayerState {
     this.diyStock = new DiyStock();
     /** slotted slots without stock: every bond of the operator is switched off this match */
     this.diyBanned = Object.freeze([]);
-    if (!this.isBot && seat.diy) this.setDiy(seat.diy);
+    // A modded room's content list (Match.diyKitted) is what the lobby already accepted. Without it setDiy
+    // keeps the vanilla kit list and drops a plugin operator with no error (checkDiyPicks is lenient).
+    // Bots never slot 自选; they read the human's composed records once this succeeds (bot.js chessRec).
+    if (!this.isBot && seat.diy) this.setDiy(seat.diy, this.m.diyKitted ? { kitted: this.m.diyKitted } : undefined);
+    /** 皮肤 (docs/SKINS.md): frozen `{ [charId]: skinId }`, {} = every operator on its default model. Unlike the
+     * loadout these are PUBLIC (a teammate sees your skin), so they travel in Match.publicView().players[]. */
+    this.skins = Object.freeze({});
+    if (!this.isBot && seat.skins) this.setSkins(seat.skins);
     this.shop = { level: 1, upgradePrice: this.gd.upgradeBase(1) ?? 0, slots: [], frozen: false, freeRefreshes: 0 };
     /** reward offers queue (merge rewards, special refreshes): { tier, source, label, slots: [{ kind, id, price, sold }] } */
     this.offers = [];
@@ -221,7 +228,7 @@ export class PlayerState {
      * @type {null | { id: string, round: number, sourceItemId: string, cards: any[] }}
      */
     this.personalChoice = null;
-    /** free-form counters for content (ctx.counter / setCounter) */
+    /** free-form match-long content counters (ctx.counter / setCounter), including band:cathy:cellTaken (#677) */
     this.counters = {};
     /** per-round counters (reset at round start) */
     this.round = { refreshes: 0, buys: 0, sells: 0, spent: 0, gainedChess: 0, arts: 0 };
@@ -248,32 +255,6 @@ export class PlayerState {
     this.bonds = computeBonds(this.gd, this);
   }
 
-  /**
-   * 干员皮肤 (docs/SKINS.md, Paper-Yuan fusion): replace this player's skin choices. `{ [chessId]: skinId }`.
-   * A chess id (or a 自选 char_ id) is kept as given; anything else resolves through the data and rejects golden /
-   * hidden variants. Bots keep their defaults.
-   * @param {Record<string, string>|null} skins
-   * @returns {boolean} whether anything was accepted
-   */
-  setSkins(skins) {
-    if (this.isBot) return false;
-    const out = {};
-    if (skins && typeof skins === 'object' && !Array.isArray(skins)) {
-      for (const [id, skinId] of Object.entries(skins)) {
-        if (typeof skinId !== 'string' || !skinId) continue;
-        if (typeof id === 'string' && (id.startsWith('char_') || (id.startsWith('chess_char_') && id.includes('_diy')))) {
-          out[id] = skinId;
-          continue;
-        }
-        const rec = this.gd.chess(id);
-        if (!rec || rec.isGolden || rec.visible === false || rec.isHidden || (rec.baseId && rec.baseId !== id)) continue;
-        out[id] = skinId;
-      }
-    }
-    this.skins = Object.freeze(out);
-    if (this.m?._privDirty) this.dirty();
-    return Object.keys(out).length > 0;
-  }
 }
 
 // the method modules, in this order (a name defined twice is an error, never a silent override)

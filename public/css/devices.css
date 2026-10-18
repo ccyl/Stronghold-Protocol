@@ -9,6 +9,7 @@
    3. touch: every small control gets an invisible ≥ 44 px hit area (::before, no layout change); on short touch
       screens (phones) the most used controls also grow visually
    4. reduced motion extras; fullscreen button
+   5. 异形屏适配: the player's own edge insets (设置, js/ui/screenFit.js)
    ========================================================================================== */
 
 :root {
@@ -56,21 +57,19 @@ html:not(.sp-in-match) .toast-host { margin-top: var(--sa-t); }
 /* An invisible hit area of at least --tap-min around small controls on touch screens: centred, never smaller than the
    control, no layout change. Only controls that do not use ::before themselves are listed. */
 :where(.sp-coarse) :where(.tapx, .gtop__exit, .gtop__iconbtn, .enemybtn, .readybtn, .gm__gear, .fsbtn, .ewheel__btn, .ewheel__nav,
-  .toolbtn, .funds__collapse, .team__btn, .effect, .vswitch__arrow, .edrawer__close, .dpanel__close, .bpop__close,
-  .modal__close, .uf__btn, .chud__back, .tabs__tab, .btn, .pill-btn, .title-guide, .stephead__guide, .set-toggle) {
+  .toolbtn, .funds__collapse, .team__btn, .effect, .bslot .bond, .vswitch__arrow, .edrawer__close, .dpanel__close, .bpop__close,
+  .modal__close, .uf__btn, .chud__back, .tabs__tab, .btn, .pill-btn, .title-guide, .stephead__guide, .set-toggle, .set-seg button, .set-fit__step) {
   position: relative;
 }
 .sp-coarse :is(.tapx, .gtop__exit, .gtop__iconbtn, .enemybtn, .readybtn, .gm__gear, .fsbtn, .ewheel__btn, .ewheel__nav,
-  .toolbtn, .funds__collapse, .team__btn, .effect, .vswitch__arrow, .edrawer__close, .dpanel__close, .bpop__close,
-  .modal__close, .uf__btn, .chud__back, .tabs__tab, .btn, .pill-btn, .title-guide, .stephead__guide, .set-toggle)::before {
+  .toolbtn, .funds__collapse, .team__btn, .effect, .bslot .bond, .vswitch__arrow, .edrawer__close, .dpanel__close, .bpop__close,
+  .modal__close, .uf__btn, .chud__back, .tabs__tab, .btn, .pill-btn, .title-guide, .stephead__guide, .set-toggle, .set-seg button, .set-fit__step)::before {
   content: '';
   position: absolute; left: 50%; top: 50%; z-index: 0;
   width: max(100%, var(--tap-min)); height: max(100%, var(--tap-min));
   transform: translate(-50%, -50%);
   background: transparent; border: 0; box-shadow: none; clip-path: none; pointer-events: auto;
 }
-.set-seg button { pointer-events: auto; position: relative; z-index: 1; touch-action: manipulation; }
-.set-seg button::before { display: none !important; }
 /* The 交流 panel's pager (‹ dots ›) sits in the strip under the emote cells (panel y 1.97–2.31rem, css/emotes.css). Its
    hit areas stay inside that strip and never overlap each other: a centred 44 px area of ‹ / › covered the centres of
    the bottom-left / bottom-right emotes (a tap there turned the page or hit the disabled ‹), and 28 px dot areas 0.21rem
@@ -79,7 +78,7 @@ html:not(.sp-in-match) .toast-host { margin-top: var(--sa-t); }
 .sp-coarse .ewheel__panel .ewheel__nav::before { top: .03rem; bottom: -.15rem; height: auto; transform: none; }
 .sp-coarse .ewheel__panel .ewheel__nav.is-prev::before { left: auto; right: 0; }
 .sp-coarse .ewheel__panel .ewheel__nav.is-next::before { left: 0; right: auto; }
-.sp-coarse .ewheel__dot::before { inset: -.02rem -.05rem -.2rem; top: -.02rem; left: -.05rem; right: -.05rem; bottom: -.2rem; width: auto; height: auto; transform: none; }
+.sp-coarse .ewheel__dot::before { inset: -.02rem -.05rem -.2rem; width: auto; height: auto; transform: none; }
 
 /* Phones in landscape (short touch screens: 1rem ≈ 40 px here): the most used controls grow a little so they are
    comfortable to hit and to read, without changing the official layout. */
@@ -124,48 +123,12 @@ html:not(.sp-in-match) .toast-host { margin-top: var(--sa-t); }
 /* The left-docked detail card then ends above that two-row corner (.24rem + 交流 + .1rem gap + ⚙ row + .1rem): at its
    desktop bottom (1.02rem) it hid ⚙ / 📖 / ⛶. (gameLogic panelSlots keeps the taller desktop slot: conservative.) */
 @media (max-width: 767px) {
-  .gm__corner { flex-wrap: nowrap; width: auto; gap: .08rem; align-items: flex-end; }
-  .dpanel:not(.dpanel--right) { bottom: calc(.44rem + max(.56rem, 34px)); }
+  .gm__corner { flex-wrap: wrap-reverse; align-content: flex-start; width: max(72px, calc(3 * .56rem + .2rem)); }
+  .dpanel:not(.dpanel--right) { bottom: calc(.44rem + max(1.51rem, 72px) * 55 / 151 + .56rem); }
 }
 @media (max-width: 767px) and (pointer: coarse), (max-width: 767px) and (any-pointer: coarse) {
-  .gm__corner { flex-wrap: nowrap; width: auto; gap: .08rem; align-items: flex-end; }
-  .dpanel:not(.dpanel--right) { bottom: calc(.44rem + max(.56rem, 34px)); }
-}
-/* Mobile detail panel dimensions & clearance (vivo V2520A: 761x360 dpr 3) */
-:is(.sp-touch, .sp-coarse) .rwtag__micro { display: none; }
-@media (max-width: 767px), (max-height: 460px) {
-  .brief-stage { flex-wrap: wrap; gap: .06rem .12rem; }
-  .brief-stage__k { width: 100%; justify-content: space-between; }
-  .brief-stage__name { width: 100%; }
-  .gm__bonds { top: max(1.1rem, 36px); }
-  .dpanel {
-    width: max(4.9rem, 210px);
-    left: max(2.3rem, 76px);
-    top: max(2.1rem, 90px);
-  }
-  .dstat__k { font-size: max(.12rem, 8px); }
-  .dstat__k-full { display: none; }
-  .dstat__k::after { content: attr(data-short); }
-  .dstat__v { font-size: max(.17rem, 10px); }
-  .dstat small { font-size: max(.11rem, 8px); }
-  .dhead__name { font-size: max(.32rem, 12px); }
-  .dhead__class, .dhead__pos, .dtag-elite, .dtag-token, .dtag-kind, .drank { font-size: max(.13rem, 8px); }
-  .dtrait, .dtext, .dsec__title, .dskill__name, .dmodule__name, .ditem__text b, .ditem__desc, .dtalent b { font-size: max(.14rem, 8px); }
-  .dsp, .dsp__num, .dmodule__type, .dtag-loadout { font-size: max(.11rem, 8px); }
-  .dbond__name, .dbond__count { font-size: max(.12rem, 8px); }
-  .dbond__count small, .dskill__slot { font-size: max(.11rem, 8px); }
-  .rt-vup, .rt-rem, .rt-kw { font-size: max(.12rem, 8px); }
-  .scard__free, .scard__name, .scard__bond, .scard__class { font-size: max(.13rem, 8px); }
-  .dstats__tag { font-size: max(.11rem, 8px); }
-  .dgarrison__k, .dgarrison__v { font-size: max(.13rem, 8px); }
-  .dpanel .micro { font-size: max(.11rem, 8px); }
-  .gm.has-dpanel .gm__bonds {
-    opacity: .35;
-    transition: opacity var(--t-fast);
-  }
-  .gm.has-dpanel .gm__bonds:hover {
-    opacity: 1;
-  }
+  .gm__corner { width: max(96px, calc(3 * max(.56rem, 34px) + .2rem)); }
+  .dpanel:not(.dpanel--right) { bottom: calc(.44rem + max(1.51rem, 96px) * 55 / 151 + max(.56rem, 34px)); }
 }
 /* With the shop folded (收起) no bar covers the corner: one row again, so the folded shop's prep camera, which keeps the
    bench above the corner's hit areas (ui/fieldHost.js hudBands), grows the board on narrow phones too (public issue #5). */
@@ -190,54 +153,28 @@ html:not(.sp-in-match) .toast-host { margin-top: var(--sa-t); }
   .diff-card { padding-top: .12rem; padding-bottom: .12rem; }
   .create-box { margin-top: .18rem; }
   .create-box .btn--xl { height: .8rem; }
-  .matchmaking-hud { padding: .12rem .2rem; }
-  .matchmaking-hud__info { font-size: .16rem; gap: .1rem; }
-  .matchmaking-hud__time { font-size: .18rem; }
-}
-
-/* ---- 5. Multi-Aspect-Ratio & Screen Size Adaptations --------------------------------------------- */
-
-/* Ultra-wide screens (19:9, 19.5:9, 20:9, 21:9 modern flagship phones):
-   Keep central stage centered and prevent edge controls from being obscured by curved corners or camera cutouts */
-@media (min-aspect-ratio: 19/9) {
-  .gm__hud {
-    padding-left: max(var(--sa-l), 16px);
-    padding-right: max(var(--sa-r), 16px);
-  }
-  .screen:not(.gm) {
-    padding-left: max(var(--sa-l), 20px);
-    padding-right: max(var(--sa-r), 20px);
-  }
-}
-
-/* Narrow aspect-ratio screens (4:3, 16:10, 3:2 tablets, iPads, foldable phones unfolded):
-   Give more vertical breathing room to the central chessboard and scale shop/topbar gracefully */
-@media (max-aspect-ratio: 16/10) {
-  .gm__hud > .shopbar {
-    bottom: calc(.1rem + var(--sa-b));
-  }
-  .lobby-body {
-    flex-direction: column;
-    overflow-y: auto;
-    max-height: 90vh;
-  }
-}
-
-/* Compact low-profile phone screens (≤ 380px CSS height, e.g. 720p/1080p landscape with 3x scale):
-   Ensure all modals, drawers, and battle action overlays stay 100% visible without clipping */
-@media (max-height: 380px) {
-  .modal__box {
-    max-height: 96vh;
-    padding: .2rem .24rem;
-  }
-  .shopbar {
-    scale: 0.95;
-    transform-origin: center bottom;
-  }
-  .topbar {
-    height: max(.48rem, 30px);
-  }
 }
 
 .rotate-hint__pwa { pointer-events: auto; margin-top: 6px; }
 .rotate-hint__pwa[hidden] { display: none; }
+
+/* ---- 5. 异形屏适配 (设置, ui/screenFit.js) ------------------------------------------------------------------------
+   The player's own insets for a screen whose cutout / curved edge the browser does not report (or reports wrongly in
+   fullscreen): .app-root becomes the inset box — every .screen is absolute inset 0, so it lands inside, and the board is
+   sized from its host — and the layout root 1rem is computed from that box (theme.css's rule with the insets taken
+   off). Only while <html data-fit> is set: with all four at 0 nothing here applies. The bands outside show the page
+   background; fixed overlays (dialogs, toasts) still use the whole screen. */
+html[data-fit] {
+  font-size: clamp(40px, min(calc((100vw - var(--fit-l, 0px) - var(--fit-r, 0px)) / 19.2), calc((100vh - var(--fit-t, 0px) - var(--fit-b, 0px)) / 10.8)), 240px);
+  font-size: clamp(40px, min(calc((100vw - var(--fit-l, 0px) - var(--fit-r, 0px)) / 19.2), calc((100svh - var(--fit-t, 0px) - var(--fit-b, 0px)) / 10.8)), 240px);
+}
+/* the screens' own box (theme.css .app-root: fixed, inset 0) and the full-page panels fixed over the screens (统计数据,
+   干员调配, 玩法说明) */
+html[data-fit] :is(.app-root, .st, .lo, .guide) {
+  left: var(--fit-l, 0px); right: var(--fit-r, 0px); top: var(--fit-t, 0px); bottom: var(--fit-b, 0px);
+}
+.set-fit { display: flex; flex-direction: column; gap: .06rem; }
+.set-fit__row { grid-template-columns: minmax(0, 1.5rem) auto minmax(.8rem, 1fr) auto minmax(.36rem, auto); gap: .1rem; }
+.set-fit__step { flex: none; width: .4rem; min-width: 28px; height: .34rem; min-height: 26px; padding: 0; border: 1px solid var(--line-2); background: rgba(0, 0, 0, .3);
+  color: var(--text-hi); font-size: calc(.2 * var(--t)); line-height: 1; cursor: pointer; }
+.set-fit__step:disabled { opacity: .35; cursor: default; }

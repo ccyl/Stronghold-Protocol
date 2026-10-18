@@ -7,19 +7,101 @@
 
 /* ---- screen shell ---------------------------------------------------------------------------- */
 .gm { background: transparent; }
-.gm__field { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; inset: 0; z-index: 0; overflow: hidden; }
+/* Host test dock (public/js/ui/testDock.js DOCK_REM). Unitless rem, shared by the HUD and the dock.
+   team-right = .team left .22 + avatar .8 + gap .1 + name 1.5 + info padding .18.
+   bond-bottom = fieldHost.js HUD_REM.bondStripBottom. shop-top = HUD_REM.shopBarTop.
+   hand-clear = prep hudPadding bottom 3.2 + the bench piece 1.56. top = bottom of .gtop.
+   ready-h = .gtop padding .2 + clock --cd-h .7 + gap .1 + .readybtn .56. */
+.gm, .testconsole {
+  --dock-w: 3.6;
+  --dock-margin: 0.08;
+  --dock-team-left: 0.22;
+  --dock-team-right: 2.8;
+  --dock-team-top: 2.36;
+  --dock-team-avatar: 0.8;
+  --dock-team-gap: 0.14;
+  --dock-team-rows: 4;
+  --dock-bond-left: 1.56;
+  --dock-bond-top: 1.36;
+  --dock-bond-bottom: 2.16;
+  --dock-bond-slot: 0.74;
+  --dock-bond-gap: 0.1;
+  --dock-top: 1.02;
+  --dock-hand-clear: 4.76;
+  --dock-hand-left: 2.85;
+  --dock-ready-right: 0.3;
+  --dock-ready-w: 2.6;
+  --dock-ready-h: 1.56;
+  --dock-shop-top: 2.64;
+  --dock-funds-w: 1.18;
+  --dock-shop-right: 0.26;
+}
+.gm__field { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
 .gm__field canvas { display: block; }
 .gm__vignette {
-  position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; inset: 0; z-index: 1; pointer-events: none;
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
   background:
     linear-gradient(180deg, rgba(6, 9, 8, .78) 0%, rgba(6, 9, 8, 0) 18%),
     linear-gradient(0deg, rgba(6, 9, 8, .6) 0%, rgba(6, 9, 8, 0) 22%),
     radial-gradient(120% 90% at 45% 50%, transparent 60%, rgba(0, 0, 0, .5) 100%);
 }
-.gm__loading { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; inset: 0; z-index: 2; display: grid; place-items: center; pointer-events: none; }
-.gm__hud { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; inset: 0; z-index: 3; pointer-events: none; }
+.gm__loading { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; pointer-events: none; }
+.gm__hud { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
 .gm__hud > * { pointer-events: auto; }
 .gload { align-items: center; justify-content: center; gap: .2rem; }
+
+/* Host test console (DESIGN §34.8). A floating field panel. Its default left/top is the dock home
+   (right of .team, below the bond strip, above the hand) from the --dock-* rem above. The host drags
+   it by the header; JS then sets left/top in px. At ≤720px the top sheet wins, including over a stored position. */
+.testconsole {
+  position: fixed;
+  left: calc((var(--dock-team-right) + var(--dock-margin)) * 1rem);
+  top: calc((var(--dock-bond-bottom) + var(--dock-margin)) * 1rem);
+  z-index: 20; display: flex; flex-direction: column; align-items: flex-start;
+  gap: .06rem; width: auto; max-width: min(calc(var(--dock-w) * 1rem), 28vw);
+  max-height: calc(100vh - (var(--dock-hand-clear) + var(--dock-bond-bottom) + var(--dock-margin) * 2) * 1rem);
+  pointer-events: auto; box-sizing: border-box;
+}
+.testconsole.is-open {
+  width: min(calc(var(--dock-w) * 1rem), 28vw);
+  overflow: hidden;
+}
+.testconsole__tab, .testconsole__run, .testconsole__row button {
+  color: #1a1408; background: #e8b84a; border: 0; font-weight: 700; padding: .04rem .1rem; cursor: pointer;
+}
+.testconsole__run { flex: 0 0 auto; }
+.testconsole__body {
+  width: 100%; display: grid; gap: .06rem; padding: .1rem; background: rgba(12, 14, 12, .94);
+  border: 1px solid rgba(232, 184, 74, .7); color: var(--text-hi); font-size: calc(.15 * var(--t));
+  max-height: calc(100vh - (var(--dock-hand-clear) + var(--dock-bond-bottom) + var(--dock-margin) * 2) * 1rem - .4rem);
+  overflow: auto; box-sizing: border-box;
+}
+.testconsole.is-open .testconsole__body { flex: 1 1 auto; min-height: 0; max-height: none; }
+.testconsole__head, .testconsole__row, .testconsole__field, .testconsole__check { display: flex; flex-wrap: wrap; align-items: center; gap: .06rem; }
+.testconsole__head { cursor: grab; touch-action: none; user-select: none; }
+.testconsole__head:active { cursor: grabbing; }
+.testconsole__field { display: grid; gap: .02rem; min-width: 0; }
+.testconsole__row .testconsole__field { flex: 1 1 8em; }
+.testconsole__field input, .testconsole__field select {
+  color: var(--text-hi); background: var(--bg-2); border: 1px solid var(--line-2); padding: .03rem .06rem;
+  min-width: 0; width: 100%; box-sizing: border-box;
+}
+/* the audit log keeps about five rows: a scroll container's automatic minimum is 0, so in the open panel's grid the
+   other controls squeezed it to a few px at the default height (the panel body scrolls instead) */
+.testconsole__log { margin: 0; padding: 0; list-style: none; min-height: 1.1rem; max-height: 2.4rem; overflow: auto; overflow-wrap: anywhere; }
+.testconsole__log .is-bad { color: #ff8a5c; }
+@media (max-width: 720px) {
+  .testconsole {
+    top: 8px !important; left: 8px !important; width: auto !important;
+    max-width: calc(100vw - 16px) !important; max-height: none !important; font-size: 14px;
+  }
+  .testconsole.is-open { width: calc(100vw - 16px) !important; max-width: calc(100vw - 16px) !important; max-height: 55vh !important; }
+  .testconsole__body, .testconsole.is-open .testconsole__body { font-size: 14px; max-height: 48vh !important; flex: none; }
+  .testconsole__tab, .testconsole__run, .testconsole__row button,
+  .testconsole__field input, .testconsole__field select {
+    min-height: 32px; min-width: 32px; font-size: 14px; padding: 6px 10px;
+  }
+}
 
 /* ---- top bar -------------------------------------------------------------------------------------- */
 .gtop {
@@ -32,6 +114,7 @@
 .gtop__meta { display: flex; flex-direction: column; align-items: flex-start; gap: .06rem; }
 /* a match with gameplay plugins (DESIGN §32.6): the HUD corner's MOD mark */
 .gtop__mod { pointer-events: auto; }
+.gtop__rules { max-width: 3.4rem; font-size: calc(.11 * var(--t)); line-height: 1.4; color: var(--text-md); overflow-wrap: anywhere; }
 /* the latency pill and, beside it, the 观战席 capsule (ui/hud.js SpectatorPill: an eye + how many are watching; opens the roster) */
 .gtop__net { display: flex; align-items: center; gap: .08rem; }
 .specpill { --btn-bg: rgba(0, 0, 0, .5); --btn-bg-hover: rgba(0, 0, 0, .66); --btn-bd: var(--line); height: .32rem; min-width: 0; padding: 0 .12rem; gap: .05rem; border-radius: 99px; }
@@ -72,8 +155,6 @@
 .gtop__right { display: flex; flex-direction: column; align-items: flex-end; gap: .1rem; justify-self: end; }
 .gtop__right .countdown { --cd-h: .7rem; filter: drop-shadow(0 0 .12rem rgba(0, 0, 0, .8)); }
 .gtop__clock { display: flex; align-items: flex-start; gap: .14rem; }
-.unite-vote { display: flex; flex-direction: column; align-items: flex-end; gap: .03rem; padding: .05rem; background: rgba(8, 13, 11, .9); border: 1px solid var(--mint-800); }
-.unite-vote__count { font-size: max(.11rem, 10px); color: var(--text-md); }
 
 /* solo pause / resume (ui/hud.js PauseButton, official battle pause: two bars on a dark square) */
 .pausebtn {
@@ -153,9 +234,98 @@
 .team__line .misstag__icon { font-size: .13rem; }
 .capsule--combat { --cap: var(--orange-hi); }
 .capsule--boss { --cap: var(--orange-hi); min-width: 4.2rem; }
+/* phase capsule scenes (ui/hud.js CapsuleScene, capsuleFxKind): the official hudPanel/trans_* sprites at ×1.3 of their
+   pixels over the capsule, which hides or holds its own content meanwhile. Timings from the event's top bar (video
+   7:55–7:58 回合开始 → 休整期, 8:32–8:34 作战, 8:38–8:41 联防); [ASSUMED] positions, sizes and timings estimated from it. */
+.gtop__cap { position: relative; display: flex; }
+.gtop__cap[class*="is-fx-"] .capsule { overflow: hidden; }
+.capfx {
+  position: absolute; inset: 2px; z-index: 2; display: flex; align-items: center; justify-content: center; gap: .1rem;
+  border-radius: .23rem; overflow: hidden; pointer-events: none;
+}
+.capfx .sprite { display: block; image-rendering: pixelated; }
+.gtop__cap.is-fx-wait .capsule > * { visibility: hidden; }
+.gtop__cap.is-fx-enter .capsule > * { animation: capfx-rise 240ms var(--ease-out) both; }
+.gtop__cap.is-fx-rest .capsule__icon { animation: capfx-rest-icon 560ms 150ms var(--ease-out) both; }
+.gtop__cap.is-fx-rest .capsule > :not(.capsule__icon) { animation: capfx-slide 260ms 450ms var(--ease-out) both; }
+.gtop__cap.is-fx-clash .capsule > * { animation: capfx-rise 160ms 1870ms var(--ease-out) both; }
+.gtop__cap.is-fx-unite .capsule > * { animation: capfx-rise 160ms 2800ms var(--ease-out) both; }
+/* 回合开始: three kettles (trans_cup 31×29) drop in one after another and bob out of step; at 休整期 they fly up */
+.capfx__k { width: .4rem; animation: capfx-drop 220ms calc(var(--i) * 70ms) var(--ease-out) both; }
+.capfx__k .sprite { width: 100%; height: auto; animation: capfx-bob 420ms calc(300ms + var(--i) * 140ms) steps(1, end) infinite; }
+.capfx--rest .capfx__k { animation: capfx-up 200ms calc(var(--i) * 50ms) ease-in forwards; }
+.capfx--rest .capfx__k .sprite { animation: none; }
+/* 作战 / 联防: the robot (trans_batte1 / coop1 31×33, its sword trans_batte2 / coop2 20×34 behind its left side) drops in,
+   the enemy (trans_worm1 46×31 / worm2 57×25) hops in from the right edge and stops beside it */
+.capfx__meet, .capfx__clash { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.capfx__meet { gap: .06rem; padding-top: .02rem; }
+.capfx__us { display: grid; justify-items: end; align-items: end; }
+.capfx__us > * { grid-area: 1 / 1; }
+.capfx__bot { position: relative; width: .4rem; height: .43rem; animation: capfx-drop 200ms var(--ease-out) both; }
+.capfx__body { position: relative; width: .4rem; height: .43rem; }
+.capfx__sword { position: absolute; left: -.14rem; top: -.08rem; width: .26rem; height: .44rem; }
+.capfx__foe { animation: capfx-hop 930ms linear both; }
+.capfx__foe .sprite { width: .6rem; height: .4rem; }
+.capfx--unite .capfx__bot { animation: capfx-drop 200ms 150ms var(--ease-out) both, capfx-hide 1ms 1500ms forwards; }
+.capfx--unite .capfx__foe { animation-duration: 800ms; }
+.capfx--unite .capfx__foe .sprite { width: .74rem; height: .33rem; }
+/* 联防: the robot turns into the two 联防 faces (trans_coop4 smiling, trans_coop3 worried; 31×33 / 30×33) */
+.capfx__faces { display: flex; gap: 0; opacity: 0; animation: capfx-show 1ms 1500ms forwards; }
+.capfx__face { width: .39rem; height: .43rem; }
+/* where they meet: the scene dims, the two crossed swords flash up and move left, 开始作战 / 联防开始 slides out of them */
+.capfx--clash .capfx__meet { animation: capfx-dim 200ms 930ms forwards; }
+.capfx--unite .capfx__meet { animation: capfx-dim 200ms 1600ms forwards; }
+.capfx__clash { gap: .08rem; }
+.capfx__swords { --sx: .6rem; position: relative; width: .45rem; height: .49rem; margin-top: -.03rem; opacity: 0; filter: drop-shadow(0 0 .05rem rgba(255, 190, 60, .7)); }
+/* trans_batte2 / coop2 (×1.45 here, as large as the footage's) lean ≈ 28°: turned to 45° and mirrored they cross
+   like the footage's ✕ */
+.capfx__x { position: absolute; left: .08rem; top: 0; width: .29rem; height: .49rem; transform: rotate(-17deg); }
+.capfx__x--flip { transform: scaleX(-1) rotate(-17deg); }
+.capfx__word {
+  font-family: var(--font-display); font-size: .27rem; font-weight: 900; letter-spacing: .06em; white-space: nowrap;
+  color: #ffd54a; text-shadow: 0 0 .1rem rgba(255, 170, 40, .75); opacity: 0;
+}
+.capfx--unite .capfx__word { color: #ffbf6a; text-shadow: 0 0 .1rem rgba(255, 110, 40, .8); }
+.capfx--clash .capfx__swords { animation: capfx-swords 450ms 930ms var(--ease-out) forwards; }
+.capfx--clash .capfx__word { animation: capfx-word 300ms 1050ms var(--ease-out) forwards; }
+.capfx--unite .capfx__swords { animation: capfx-swords 700ms 1600ms var(--ease-out) forwards; }
+.capfx--unite .capfx__word { animation: capfx-word 300ms 2050ms var(--ease-out) forwards; }
+/* then the words slide up out of the capsule and its own content rises in */
+.capfx--clash .capfx__clash { animation: capfx-out 120ms 1800ms ease-in forwards; }
+.capfx--unite .capfx__clash { animation: capfx-out 120ms 2700ms ease-in forwards; }
+@keyframes capfx-rise { from { transform: translateY(110%); opacity: 0; } }
+@keyframes capfx-slide { from { transform: translateX(-.4rem); opacity: 0; } }
+@keyframes capfx-rest-icon {
+  0% { transform: translate(.6rem, 110%); opacity: 0; }
+  45% { transform: translate(.6rem, 0); opacity: 1; }
+  100% { transform: none; opacity: 1; }
+}
+@keyframes capfx-drop { from { transform: translateY(-130%); opacity: 0; } }
+@keyframes capfx-up { to { transform: translateY(-140%); opacity: 0; } }
+@keyframes capfx-bob { 50% { transform: translateY(-.04rem); } }
+@keyframes capfx-hop {
+  0% { transform: translate(1.1rem, 0); } 12.5% { transform: translate(.96rem, -.06rem); } 25% { transform: translate(.82rem, 0); }
+  37.5% { transform: translate(.69rem, -.06rem); } 50% { transform: translate(.55rem, 0); } 62.5% { transform: translate(.41rem, -.06rem); }
+  75% { transform: translate(.28rem, 0); } 87.5% { transform: translate(.14rem, -.06rem); } 100% { transform: none; }
+}
+@keyframes capfx-hide { to { opacity: 0; } }
+@keyframes capfx-show { to { opacity: 1; } }
+@keyframes capfx-dim { 40% { opacity: .4; } 100% { opacity: 0; } }
+@keyframes capfx-swords {
+  0% { opacity: 0; transform: translateX(var(--sx)) scale(1.5); }
+  15% { opacity: 1; transform: translateX(var(--sx)); }
+  60% { opacity: 1; transform: translateX(var(--sx)); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes capfx-word { from { opacity: 0; transform: translateX(-.5rem); filter: blur(2px) brightness(1.8); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes capfx-out { to { transform: translateY(-100%); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .capfx { display: none; }
+  .gtop__cap .capsule > * { animation: none; visibility: visible; }
+}
 .bossbar { position: relative; flex: 1; min-width: 2.2rem; height: .2rem; background: rgba(0, 0, 0, .6); border: 1px solid rgba(255, 122, 51, .5); overflow: hidden; }
-.bossbar__fill { position: absolute; top: 0; left: 0; bottom: 0; right: auto; inset: 0 auto 0 0; background: linear-gradient(90deg, #b8340d, var(--orange-hi)); box-shadow: 0 0 .1rem rgba(255, 110, 40, .8); transition: width 300ms var(--ease-out); }
-.bossbar__txt { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; inset: 0; display: grid; place-items: center; font-size: .14rem; font-weight: 700; color: #fff; text-shadow: 0 1px 2px #000; }
+.bossbar__fill { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #b8340d, var(--orange-hi)); box-shadow: 0 0 .1rem rgba(255, 110, 40, .8); transition: width 300ms var(--ease-out); }
+.bossbar__txt { position: absolute; inset: 0; display: grid; place-items: center; font-size: .14rem; font-weight: 700; color: #fff; text-shadow: 0 1px 2px #000; }
 
 /* LP tower */
 .lp { display: inline-flex; align-items: center; gap: .05rem; color: var(--mint-400); white-space: nowrap; }
@@ -239,111 +409,13 @@
 .readybtn.is-busy { opacity: .7; }
 
 /* ---- bond strip ---------------------------------------------------------------------------------------- */
-/* Symmetric insets, so justify-content centres the strip on the screen. The right inset used to be 5.2rem as a
-   reserve for .gm__effects — but that column is a .5rem stack inset .3rem, one row lower (top: 2.4rem), so the
-   1.56rem inset already clears it and the extra reserve only pushed the whole strip ~1.8rem off-centre. */
-.gm__bonds { position: absolute; left: 1.56rem; top: 1.36rem; right: 1.56rem; pointer-events: none;
-  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+.gm__bonds { position: absolute; left: 1.56rem; top: 1.36rem; right: 5.2rem; pointer-events: none;
+  display: flex; align-items: flex-start; gap: max(.1rem, 8px); }
 /* Only the bond discs (and the +N chip) take the pointer: the strip's box spans the width under the top bar, where the
    top board row's units stand (row 12 at 16:9 / 21:9 / 720p / phones, the boss field's row 5 in a boss prep) — it used
    to swallow the taps and drags on them (review of user playtest #2 item 8: every own unit reachable). */
 .gm__bonds > *, .gm__bonds .bstrip { pointer-events: none; }
-.gm__bonds .bstrip-container, .gm__bonds .bstrip-tray { pointer-events: none; }
 .gm__bonds .bslot, .gm__bonds .bstrip__more { pointer-events: auto; }
-.gm__bonds .bstrip__fold-handle { pointer-events: auto; }
-
-/* 盟约整体外层容器与把手 (垂直抽屉收起方案，零触控漂移) */
-.bstrip-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  pointer-events: none;
-  width: 100%;
-}
-
-.bstrip-tray {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  pointer-events: none;
-  max-height: 2.6rem;
-  opacity: 1;
-  transform: translateY(0);
-  transform-origin: top center;
-  transition: max-height 0.24s cubic-bezier(0.2, 0.9, 0.3, 1),
-              opacity 0.2s cubic-bezier(0.2, 0.9, 0.3, 1),
-              transform 0.24s cubic-bezier(0.2, 0.9, 0.3, 1);
-  width: 100%;
-}
-
-.bstrip-container.is-collapsed .bstrip-tray {
-  max-height: 0;
-  opacity: 0;
-  transform: translateY(-0.35rem) scale(0.96);
-  pointer-events: none;
-  overflow: hidden;
-}
-
-/* 核心：紧贴在徽章正下方的半透明微型折叠把手 (27×14px) */
-.bstrip__fold-handle {
-  pointer-events: auto;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 0.54rem;
-  height: 0.28rem;
-  margin-top: 0.04rem;
-  background: rgba(18, 25, 23, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 2px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
-  color: rgba(255, 255, 255, 0.65);
-  transition: all 0.18s ease-out;
-  outline: none;
-  padding: 0;
-  flex: none;
-}
-
-.bstrip__fold-handle:hover {
-  background: rgba(28, 38, 35, 0.96);
-  border-color: rgba(23, 249, 183, 0.6);
-  color: #17f9b7;
-  box-shadow: 0 0 8px rgba(23, 249, 183, 0.35);
-}
-
-.bstrip__fold-handle:active {
-  transform: scale(0.92);
-  background: rgba(23, 249, 183, 0.2);
-}
-
-.bstrip__fold-icon {
-  width: 0.24rem;
-  height: 0.24rem;
-  display: grid;
-  place-items: center;
-  transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1);
-}
-
-.bstrip__fold-icon svg {
-  width: 100%;
-  height: 100%;
-  fill: currentColor;
-  display: block;
-}
-
-.bstrip-container.is-collapsed .bstrip__fold-handle {
-  margin-top: 0;
-  background: rgba(14, 20, 18, 0.92);
-  border-color: rgba(255, 255, 255, 0.25);
-}
-
-.bstrip-container.is-collapsed .bstrip__fold-icon {
-  transform: rotate(180deg);
-}
-
-.bstrip { display: flex; align-items: flex-start; justify-content: center; gap: max(.06rem, 4px) max(.1rem, 6px); flex-wrap: wrap; }
 .gm__bond-list { min-width: 0; }
 /* The hidden list leaves no hit area over the board; only this compact tab can reopen it (GitHub #142). */
 /* A bare arrow (the owner's request after 0.2.0: the boxed 「收起」 tab looked heavy): transparent, half-visible until
@@ -355,7 +427,7 @@
 .bonds-toggle[aria-expanded="false"] { opacity: .8; }
 .bonds-toggle:hover, .bonds-toggle:focus-visible { opacity: 1; color: var(--mint-500); }
 .bonds-toggle:focus-visible { outline: 2px solid var(--mint-500); outline-offset: -4px; }
-/* .bstrip is defined above with the fusion drawer (ours changed it; theirs still had the base rule) */
+.bstrip { display: flex; align-items: flex-start; gap: .1rem; flex-wrap: nowrap; }
 .bstrip.is-frozen .bslot { opacity: .5; filter: saturate(.4); }
 .bstrip--empty { display: inline-flex; align-items: center; gap: .12rem; padding: .08rem .16rem; font-size: .15rem; color: var(--text-dim); background: rgba(8, 11, 10, .6); border: 1px dashed var(--line-2); }
 /* a watched teammate's bonds (DESIGN §20.15): an amber "👁 name" pill in front of the discs, amber rings. Horizontal at
@@ -374,17 +446,11 @@
 }
 .bstrip.is-other .bond__core { box-shadow: 0 0 0 1px rgba(246, 163, 41, .45); }
 .bstrip__more { align-self: center; font-size: .16rem; color: var(--text-lo); padding: .04rem .08rem; border: 1px solid var(--line-2); background: rgba(8, 11, 10, .7); }
-/* The slot is sized by its label, not by the disc: bond names run to 4 CJK glyphs (维多利亚 / 协防干员), which at the
-   10 px phone floor measure ~40 px — a fixed 27 px box let each label spill into its neighbour's, so the names printed
-   on top of each other (user report 2026-10-04). min-width keeps the old footprint for short names, and the disc stays
-   centred by align-items. */
-.bslot { --bslot-disc: max(.52rem, 21px); position: relative; display: flex; flex-direction: column; align-items: center; min-width: max(.74rem, 27px); }
-.bslot .bond { --disc: var(--bslot-disc); }
-.bslot .bond__name { font-size: max(.16rem, 10px); font-weight: 500; text-shadow: 0 1px 3px #000, 0 0 6px #000; }
-/* Anchored to the disc's corner, not the slot's edge — the slot is now as wide as the label, so a right offset would
-   walk the counter away from the disc it counts. */
+.bslot { position: relative; display: flex; flex-direction: column; align-items: center; width: .74rem; }
+.bslot .bond { --disc: .52rem; }
+.bslot .bond__name { font-size: .14rem; font-weight: 500; text-shadow: 0 1px 3px #000, 0 0 6px #000; }
 .bslot__count {
-  position: absolute; top: -.04rem; right: calc(50% - var(--bslot-disc) / 2 - 2px); font-size: .13rem; font-weight: 700; color: var(--text-hi);
+  position: absolute; top: -.04rem; right: .02rem; font-size: .13rem; font-weight: 700; color: var(--text-hi);
   background: rgba(8, 11, 10, .92); border: 1px solid var(--line-2); padding: 0 .04rem; line-height: 1.35;
 }
 .bslot__count small { color: var(--text-dim); font-size: .11rem; }
@@ -401,34 +467,6 @@
 
 /* ---- team panel ------------------------------------------------------------------------------------------- */
 .team { position: absolute; left: .22rem; top: 2.36rem; display: flex; flex-direction: column; gap: .14rem; pointer-events: none; }
-.team__list { display: flex; flex-direction: column; gap: .14rem; }
-.team__section { display: flex; flex-direction: column; gap: .14rem; flex: none; }
-.team--grouped .team__list { gap: .2rem; }
-/* Fixed card-pool groups are independent of the green boss-pair frames. The light group frame stays behind
-   the existing row content, without adding a heading or changing the width of the emote area. */
-.team__pool-group { position: relative; isolation: isolate; }
-.team__pool-group::before {
-  content: ''; position: absolute; inset: -.06rem; z-index: -1; pointer-events: none;
-  border: 1px solid rgba(255, 255, 255, .18); border: 1px solid color-mix(in srgb, var(--pool-group-color) 38%, transparent);
-  background: rgba(255, 255, 255, .05); background: color-mix(in srgb, var(--pool-group-color) 7%, transparent);
-}
-.team--many { bottom: 1.12rem; width: max-content; max-width: 3.1rem; }
-/* Leave the boss pair frame's .07rem outset inside the scroll viewport. */
-.team--many .team__list { min-height: 0; gap: .05rem; overflow-y: auto; overflow-x: hidden; padding: .08rem; pointer-events: auto; scrollbar-width: thin; }
-.team--many.team--grouped .team__list { gap: .16rem; }
-.team--many .team__section { gap: .05rem; }
-.team--many .team__row { flex: none; min-height: .56rem; }
-.team--many .team__btn .pavatar { --pa: .53rem; }
-.team--many .team__name { max-width: 1.25rem; font-size: .13rem; }
-.team--many .team__info { padding: .01rem .06rem; }
-.team--many .team__line { gap: .04rem; }
-.team--many .team__bubble { display: none; }
-.team__emote-feed { position: absolute; left: calc(100% + .1rem); top: 0; z-index: 4; display: flex; flex-direction: column; gap: .03rem; width: 2.55rem; max-height: min(2.72rem, calc(100% - .08rem)); overflow-y: auto; padding: .03rem; border: 1px solid var(--mint-800); background: rgba(8, 13, 11, .88); pointer-events: auto; scrollbar-width: thin; }
-.team__feed-row { display: flex; align-items: center; gap: .04rem; flex: none; height: .57rem; padding: .02rem .05rem; border-bottom: 1px solid var(--line); }
-.team__feed-row .pavatar { --pa: .35rem; }
-.team__feed-name { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-md); font-size: .12rem; }
-.team__feed-bubble { position: relative; display: block; flex: none; width: .68rem; height: .55rem; }
-.team__feed-bubble .ebubble { position: absolute; left: 0; top: -.04rem; transform: scale(.58); transform-origin: top left; }
 .team__row { position: relative; display: flex; align-items: center; gap: .1rem; pointer-events: auto; }
 .team__btn {
   position: relative; padding: 0; background: none; border: 0;
@@ -439,12 +477,6 @@
   position: absolute; left: -.02rem; top: -.04rem; font-size: .11rem; padding: 0 .04rem; line-height: 1.3;
   background: rgba(8, 11, 10, .9); color: var(--text-lo); border: 1px solid var(--line-2);
 }
-.team__group-badge {
-  position: absolute; left: .02rem; bottom: .02rem; z-index: 2; display: grid; place-items: center;
-  min-width: max(.18rem, 14px); height: max(.18rem, 14px); padding: 0 .025rem;
-  font-family: var(--font-num); font-size: max(.12rem, 10px); font-weight: 700; line-height: 1;
-  color: #0b1520; background: var(--pool-group-color); border: 1px solid rgba(8, 11, 10, .65);
-}
 .team__ai { position: absolute; right: -.04rem; bottom: -.04rem; font-family: var(--font-num); font-size: .11rem; font-weight: 700; padding: 0 .04rem; background: #a9c3d8; color: #0b1520; }
 .team__you { position: absolute; right: -.08rem; top: -.08rem; width: .22rem; height: .22rem; display: grid; place-items: center; background: var(--mint-500); color: var(--text-on-mint); clip-path: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0 50%); }
 .team__you .icon { width: .14rem; height: .14rem; }
@@ -452,6 +484,16 @@
 .team__name { font-size: .15rem; font-weight: 500; color: var(--text-md); max-width: 1.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px #000; }
 .team__line { display: flex; align-items: center; gap: .1rem; }
 .team__status { width: .26rem; height: .26rem; display: grid; place-items: center; border: 1px solid currentColor; background: rgba(0, 0, 0, .5); }
+/* the shared 机变 draft's pick order on the portrait (ui/choiceOverlay.js spMarks): ✓ picked, ••• deciding */
+.team__spmark { position: absolute; right: -.07rem; bottom: -.05rem; z-index: 2; display: grid; place-items: center; width: .24rem; height: .24rem; border-radius: 50%;
+  background: var(--mint-500); color: #05261e; box-shadow: 0 0 0 2px rgba(6, 9, 8, .9), 0 0 .08rem rgba(23, 249, 183, .5); }
+.team__spmark .icon { width: .17rem; height: .17rem; }
+.team__spmark.is-turn { display: flex; gap: 2px; width: auto; padding: 0 .05rem; border-radius: .12rem; background: rgba(8, 11, 10, .92); box-shadow: 0 0 0 1px rgba(255, 255, 255, .35); }
+.team__spmark.is-turn i { width: 3px; height: 3px; border-radius: 50%; background: #f2f5f4; animation: spmark-dot 1s ease-in-out infinite; }
+.team__spmark.is-turn i:nth-child(2) { animation-delay: .16s; }
+.team__spmark.is-turn i:nth-child(3) { animation-delay: .32s; }
+@keyframes spmark-dot { 0%, 100% { opacity: .35; } 40% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .team__spmark.is-turn i { animation: none; } }
 .team__status .icon { width: .18rem; height: .18rem; }
 .team__status .lsprite { width: .2rem; height: .2rem; object-fit: contain; }
 .team__status.has-sprite { border-color: transparent; background: none; animation: none; }
@@ -491,12 +533,12 @@
   border: 1px solid var(--line-2);
 }
 .pavatar--sm { --pa: .42rem; }
-.pavatar__img { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; inset: 0; overflow: hidden; display: grid; place-items: center; }
+.pavatar__img { position: absolute; inset: 0; overflow: hidden; display: grid; place-items: center; }
 .pavatar__img img { width: 100%; height: 100%; object-fit: cover; }
 .pavatar__glyph { font-weight: 900; font-size: calc(var(--pa) * .5); color: hsl(var(--seat-hue) 70% 72%); }
 .pavatar__bot { width: 56%; height: 56%; color: #a9c3d8; }
 .pavatar.is-dead .pavatar__img, .pavatar.is-left .pavatar__img, .pavatar.is-offline .pavatar__img { filter: grayscale(1) brightness(.4); }
-.pavatar__x, .pavatar__door { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; inset: 0; display: grid; place-items: center; color: var(--red-premium); }
+.pavatar__x, .pavatar__door { position: absolute; inset: 0; display: grid; place-items: center; color: var(--red-premium); }
 .pavatar__x .icon, .pavatar__door .icon { width: 60%; height: 60%; filter: drop-shadow(0 0 4px #000); }
 
 /* ---- effects ---------------------------------------------------------------------------------------------- */
@@ -519,112 +561,14 @@
 .efftip__kind { font-size: .12rem; color: var(--text-dim); }
 .efftip p { font-size: .15rem; line-height: 1.55; color: var(--text-md); }
 
-/* ---- corner: emote + settings + chat -------------------------------------------------------------------------- */
-.gm__corner { position: absolute; left: .24rem; bottom: .24rem; display: flex; align-items: flex-end; gap: .08rem; z-index: 20; }
+/* ---- corner: emote + settings --------------------------------------------------------------------------------- */
+.gm__corner { position: absolute; left: .24rem; bottom: .24rem; display: flex; align-items: flex-end; gap: .1rem; }
 .gm__gear {
   width: .56rem; height: .56rem; display: grid; place-items: center; background: rgba(8, 11, 10, .85);
-  border: 1px solid var(--line-2); border-radius: .04rem; color: var(--text-lo); transition: color var(--t-fast), border-color var(--t-fast);
+  border: 1px solid var(--line-2); color: var(--text-lo); transition: color var(--t-fast), border-color var(--t-fast);
 }
 .gm__gear .icon { width: .28rem; height: .28rem; }
-.gm__gear:hover, .gm__gear.is-on { color: var(--mint-400); border-color: var(--mint-700); }
-.gm__gear.is-on { background: rgba(23, 249, 183, 0.15); }
-
-/* In-match chat bar */
-.chat-bar {
-  position: absolute; left: .24rem; bottom: calc(.24rem + max(.56rem, 34px) + .1rem); z-index: 50;
-  display: flex; align-items: center; background: rgba(14, 20, 24, .95); border: 1px solid var(--mint-700);
-  border-radius: .04rem; box-shadow: 0 .04rem .16rem rgba(0, 0, 0, .6); padding: .06rem;
-  animation: emo-panel-in 140ms var(--ease-out);
-}
-.chat-bar__form { display: flex; align-items: center; gap: .08rem; }
-.chat-bar__input {
-  width: max(3.6rem, 180px); height: max(.42rem, 30px); padding: 0 .12rem;
-  background: rgba(0, 0, 0, .6); border: 1px solid var(--line-2); border-radius: .03rem;
-  color: #fff; font-size: max(.16rem, 13px); outline: none;
-}
-.chat-bar__input:focus { border-color: var(--mint-500); }
-.chat-bar__send {
-  height: max(.42rem, 30px); padding: 0 max(.18rem, 12px); background: var(--mint-500);
-  border: 0; border-radius: .03rem; color: var(--text-on-mint); font-weight: 700; font-size: max(.15rem, 12px); cursor: pointer;
-}
-.chat-bar__send:disabled { opacity: .4; cursor: not-allowed; }
-.chat-bar__close {
-  display: grid; place-items: center; width: max(.42rem, 30px); height: max(.42rem, 30px);
-  background: transparent; border: 0; color: var(--text-dim); cursor: pointer;
-}
-.chat-bar__close:hover { color: #fff; }
-
-.gm__metrics[aria-expanded="true"] { color: var(--mint-400); border-color: var(--mint-700); background: var(--mint-900); }
-
-/* Local combat meter, docked above the corner's actual height (including mobile wrapped rows). */
-.combat-metrics {
-  --bk-c: var(--mint-500);
-  position: absolute; left: 0; bottom: calc(100% + max(.1rem, 8px)); z-index: 12;
-  width: min(max(5.2rem, 340px), calc(100vw - var(--sa-l, 0px) - var(--sa-r, 0px) - .48rem));
-  max-height: min(max(6.6rem, 280px), calc(100vh - var(--combat-corner-height, 110px) - max(.9rem, 48px) - .34rem - var(--sa-t, 0px) - var(--sa-b, 0px)));
-  max-height: min(max(6.6rem, 280px), calc(100dvh - var(--combat-corner-height, 110px) - max(.9rem, 48px) - .34rem - var(--sa-t, 0px) - var(--sa-b, 0px)));
-  display: flex; flex-direction: column; overflow: hidden;
-  background: linear-gradient(180deg, rgba(28, 35, 32, .98), rgba(17, 21, 19, .98));
-  border: 1px solid var(--line-2); border-top: 2px solid var(--mint-700);
-  box-shadow: 0 .12rem .4rem rgba(0, 0, 0, .6); color: var(--text-md);
-  font-size: max(calc(.14 * var(--t)), 12px); line-height: 1.35; text-align: left;
-}
-.combat-metrics__head { display: flex; flex: none; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 8px; padding: max(.1rem, 8px) max(.14rem, 10px) 0; }
-.combat-metrics__micro { font-family: var(--font-display); font-size: max(calc(.1 * var(--t)), 10px); letter-spacing: .12em; color: var(--mint-500); }
-.combat-metrics__head h2 { margin: 0; font-size: max(calc(.2 * var(--t)), 16px); color: var(--text-hi); }
-.combat-metrics__body { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; overflow: hidden; }
-.combat-metrics__close { display: grid; place-items: center; flex: none; width: max(.36rem, 32px); height: max(.36rem, 32px); color: var(--text-md); border: 1px solid var(--line-2); background: var(--bg-1); }
-.combat-metrics__close .icon { width: max(.18rem, 16px); height: max(.18rem, 16px); }
-.combat-metrics__tools { display: flex; flex: none; gap: 8px; padding: 8px max(.14rem, 10px); }
-.combat-metrics__head > .combat-metrics__tools { flex-basis: 100%; padding-left: 0; padding-right: 0; }
-.combat-metrics__scopes { display: flex; flex: 1; min-width: 0; }
-.combat-metrics__scopes button { flex: 1; min-width: 0; padding: 4px 6px; min-height: 32px; color: var(--text-lo); background: var(--bg-1); border: 1px solid var(--line-2); white-space: nowrap; font-size: inherit; }
-.combat-metrics__scopes button[aria-pressed="true"] { background: var(--mint-900); color: var(--mint-400); border-color: var(--mint-700); }
-.combat-metrics__totals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); flex: none; gap: 8px; padding: 0 max(.14rem, 10px) 8px; }
-.combat-metrics__totals span { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px; color: var(--text-lo); }
-.combat-metrics__totals b { font-family: var(--font-num); color: var(--text-hi); font-size: max(calc(.18 * var(--t)), 14px); overflow-wrap: anywhere; }
-.combat-metrics__totals span:nth-child(2) b { color: var(--mint-400); }
-.combat-metrics__legend { display: flex; flex: none; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 0 max(.14rem, 10px) 8px; font-size: max(calc(.12 * var(--t)), 11px); }
-.combat-metrics__type { display: inline-flex; align-items: center; gap: 4px; }
-.combat-metrics__type::before { content: ''; width: 10px; height: 4px; background: var(--damage-color); }
-.combat-metrics__type--phys, .combat-metrics__segment--phys { --damage-color: #f6a329; }
-.combat-metrics__type--arts, .combat-metrics__segment--arts { --damage-color: #9fd4ff; }
-.combat-metrics__type--true, .combat-metrics__segment--true { --damage-color: #ff7272; }
-.combat-metrics__type--elemental, .combat-metrics__segment--elemental { --damage-color: #cf9fff; }
-.combat-metrics__sort { margin-left: auto; color: var(--text-lo); }
-.combat-metrics__list { flex: 1 1 auto; min-height: 0; margin: 0; padding: 0 max(.14rem, 10px); list-style: none; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; -webkit-overflow-scrolling: touch; }
-.combat-metrics__row { display: grid; grid-template-columns: max(.2rem, 18px) max(.42rem, 30px) minmax(0, 1fr); gap: max(.08rem, 6px); align-items: center; padding: max(.09rem, 7px) 0; border-top: 1px solid var(--line); }
-.combat-metrics__rank { align-self: start; color: var(--text-lo); font-family: var(--font-num); padding-top: 2px; }
-.combat-metrics__row > .uthumb { width: max(.42rem, 30px); height: max(.42rem, 30px); }
-.combat-metrics__unit { min-width: 0; }
-.combat-metrics__name { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
-.combat-metrics__name b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-hi); }
-.combat-metrics__bar { display: flex; width: 100%; height: max(.05rem, 5px); margin: 5px 0; background: var(--bg-4); overflow: hidden; }
-.combat-metrics__segment { flex: none; height: 100%; background: var(--damage-color); }
-.combat-metrics__values { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; font-family: var(--font-num); font-variant-numeric: tabular-nums; }
-.combat-metrics__values span { min-width: 0; display: flex; flex-direction: column; }
-.combat-metrics__values small { color: var(--text-lo); font-size: max(calc(.1 * var(--t)), 10px); }
-.combat-metrics__values b { color: var(--text-hi); overflow-wrap: anywhere; font-size: max(calc(.14 * var(--t)), 12px); font-weight: 500; }
-.combat-metrics__values .combat-metrics__heal b { color: var(--mint-400); }
-.combat-metrics__empty { padding: 20px 8px; color: var(--text-md); text-align: center; }
-.combat-metrics__empty small { display: inline-block; margin-top: 6px; color: var(--text-lo); }
-.combat-metrics__note { flex: none; margin: 0; padding: 8px max(.14rem, 10px); border-top: 1px solid var(--line); color: var(--text-lo); font-size: max(calc(.1 * var(--t)), 10px); }
-.combat-metrics button:hover { color: var(--mint-400); border-color: var(--mint-700); }
-.combat-metrics button:focus-visible { outline: 2px solid var(--mint-400); outline-offset: -2px; }
-@media (pointer: coarse), (any-pointer: coarse) {
-  .combat-metrics__close, .combat-metrics__scopes button { min-height: 44px; }
-  .combat-metrics__close { min-width: 44px; }
-}
-@media (max-height: 460px) {
-  .combat-metrics__body { display: block; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; -webkit-overflow-scrolling: touch; }
-  .combat-metrics__list { overflow: visible; }
-  .combat-metrics__micro { display: none; }
-  .combat-metrics__head { padding-top: 4px; }
-  .combat-metrics__tools { padding-top: 4px; padding-bottom: 4px; }
-  .combat-metrics__totals, .combat-metrics__legend { padding-bottom: 4px; }
-  .combat-metrics__note { padding-top: 4px; padding-bottom: 4px; }
-  .combat-metrics__note br { display: none; }
-}
+.gm__gear:hover { color: var(--mint-400); border-color: var(--mint-700); }
 
 .gm__metrics[aria-expanded="true"] { color: var(--mint-400); border-color: var(--mint-700); background: var(--mint-900); }
 
@@ -779,7 +723,7 @@
 /* a spectator seat (community report #26): the same place, the watching pill's amber — nobody was eliminated */
 .gm__dead--spectator { background: rgba(24, 16, 4, .92); border-color: rgba(246, 163, 41, .6); color: var(--amber); }
 
-.chud { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; inset: 0; pointer-events: none; }
+.chud { position: absolute; inset: 0; pointer-events: none; }
 .chud > * { pointer-events: auto; }
 .dpbox {
   position: absolute; right: .3rem; top: 50%; transform: translateY(-50%);
@@ -857,10 +801,18 @@
 .set-toggle.is-on i { background: var(--mint-800); }
 .set-toggle.is-on i::after { transform: translateX(.22rem); background: var(--mint-400); }
 .set-seg { grid-column: 2 / 4; justify-self: start; display: flex; flex-wrap: wrap; max-width: 100%; border: 1px solid var(--line-2); }
-/* 语音语言: the four dubs plus the 本土语言 switch, wrapping on a narrow modal */
-.set-voice { grid-column: 2 / 4; justify-self: start; display: flex; flex-wrap: wrap; align-items: stretch; gap: .1rem; max-width: 100%; }
-.set-voice .set-seg { grid-column: auto; flex: 1 1 auto; }
-.set-native { min-height: .38rem; padding: 0 .12rem; background: #0a0d0c; border: 1px solid var(--line-2); color: var(--text-lo); font-size: calc(.16 * var(--t)); cursor: pointer; }
+/* 语音语言: the four endonyms plus the 本土语言 switch. A flex wrap left 한국어 on a row of its own (four .8rem
+   minima squeezed by the switch). The group wraps its four buttons four across or two by two, never 3 + 1: each
+   button's basis is clamp(25 %, (2.4rem − 100 %) × 999, 50 %) of the group — hugely negative (→ 25 %, four across)
+   while the group is wider than 2.4rem, hugely positive (→ 50 %, two by two) below it. The group's 1 px gaps over
+   its line-coloured background draw the dividers in both layouts. No container query (the CSS stays within the
+   supported browsers, test/client-static.test.js).
+   [ASSUMED] 2.4rem of the group (about 0.6rem a button): the usual control column (desktop, and a phone around
+   844 px where 1rem is 40 px) is wider, so the four names stay on one row beside 本土语言. */
+.set-voice { grid-column: 2 / 4; justify-self: stretch; display: flex; flex-wrap: nowrap; align-items: stretch; gap: .08rem; max-width: 100%; min-width: 0; }
+.set-voice .set-seg { grid-column: auto; flex: 1 1 auto; display: flex; flex-wrap: wrap; gap: 1px; min-width: 0; background: var(--line-2); }
+.set-voice .set-seg button { min-width: 0; padding: 0 .04rem; overflow-wrap: anywhere; border-right: 0; flex: 1 1 clamp(calc(25% - 1px), (2.4rem - 100%) * 999, calc(50% - 1px)); }
+.set-native { flex: none; display: inline-flex; align-items: center; justify-content: center; min-height: .38rem; padding: 0 .12rem; background: #0a0d0c; border: 1px solid var(--line-2); color: var(--text-lo); font-size: calc(.16 * var(--t)); cursor: pointer; }
 .set-native.is-on { background: var(--mint-500); color: var(--text-on-mint); font-weight: 700; }
 .set-seg button { flex: 1 1 auto; min-width: .8rem; min-height: .38rem; height: auto; white-space: normal; background: #0a0d0c; border: 0; border-right: 1px solid var(--line-2); color: var(--text-lo); font-size: calc(.16 * var(--t)); }
 /* 文字大小 (ui/settings.js): four steps, so its buttons are narrower than the two- and three-step groups' — at .8rem each
@@ -875,6 +827,7 @@
 .set-keys { display: flex; flex-direction: column; gap: .08rem; padding-top: .1rem; border-top: 1px solid var(--line); }
 /* 外观插件 (DESIGN §32 P1a, ui/settings.js CosmeticSection): laid out like 快捷键 — a head, a hint, one switch per plugin */
 .set-plugins { display: flex; flex-direction: column; gap: .08rem; padding-top: .1rem; border-top: 1px solid var(--line); }
+.set-theme-win { margin: 0; font-family: var(--font-num); color: var(--text-lo); overflow-wrap: anywhere; }
 .set-keys__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .12rem; min-height: .44rem; }
 .set-keys__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .06rem .14rem; margin: 0; padding: 0; list-style: none; }
 .set-keys__row { display: flex; align-items: center; justify-content: space-between; gap: .1rem; min-height: .42rem; padding: .03rem .03rem .03rem .12rem; background: rgba(0, 0, 0, .22); border: 1px solid var(--line); }
@@ -890,6 +843,9 @@
 .set-keys__more > summary { padding: .06rem 0; font-size: calc(.15 * var(--t)); color: var(--mint-400); cursor: pointer; }
 .set-keys__more[open] > summary { margin-bottom: .08rem; }
 @keyframes set-key-wait { to { box-shadow: 0 0 .12rem rgba(246, 163, 41, .45); } }
+/* 素材存储 (ui/settings.js StorageSection): laid out like 问题反馈 below it — a head with its button, a hint, the answer */
+.set-storage { display: flex; flex-direction: column; gap: .08rem; padding-top: .1rem; border-top: 1px solid var(--line); }
+.set-storage__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .08rem; }
 /* 问题反馈 (ui/settings.js DiagSection): laid out like 快捷键 — a head with its button, a hint, the result line; the
    recorded-error count in the figure face of the slider values (amber once there is one); the report box only when the
    clipboard refused it, styled like 干员调配's 导出 box (screens/loadout.css .lo-io__text) */
@@ -924,8 +880,8 @@
 .awayov__box h2 { font-size: calc(.34 * var(--t)); letter-spacing: .12em; }
 
 /* ---- simplified (DOM) field view ---------------------------------------------------------------------------------------- */
-.ff { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; inset: 0; overflow: hidden; user-select: none; }
-.ff::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; inset: 0; background: radial-gradient(70% 60% at 45% 48%, rgba(40, 60, 52, .35), transparent 70%); }
+.ff { position: absolute; inset: 0; overflow: hidden; user-select: none; }
+.ff::before { content: ''; position: absolute; inset: 0; background: radial-gradient(70% 60% at 45% 48%, rgba(40, 60, 52, .35), transparent 70%); }
 .ff-board { position: absolute; }
 .ff-tile, .ff-slot, .ff-piece, .ff-unit { position: absolute; left: 0; top: 0; }
 .ff-tile { box-sizing: border-box; border: 1px solid rgba(0, 0, 0, .35); }
@@ -956,7 +912,7 @@
 .ff-piece.is-draggable { cursor: grab; }
 .ff-piece.is-lifted { opacity: .25; }
 .ff-piece__art {
-  position: absolute; top: 7%; left: 7%; right: 7%; bottom: 7%; width: 86%; height: 86%; inset: 7%; overflow: hidden; display: grid; place-items: center; background: #1a201d;
+  position: absolute; inset: 7%; overflow: hidden; display: grid; place-items: center; background: #1a201d;
   border: 2px solid rgba(255, 255, 255, .22); clip-path: polygon(12% 0, 100% 0, 100% 88%, 88% 100%, 0 100%, 0 12%);
 }
 .ff-piece__art img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
@@ -1006,6 +962,11 @@
 .ff-badge { position: absolute; left: 50%; bottom: .08rem; transform: translateX(-50%); font-family: var(--font-display); font-size: .1rem; letter-spacing: .3em; color: var(--text-dim); opacity: .5; pointer-events: none; }
 .gm--combat .ff-badge { display: none; }
 
+/* ---- small screens (1280×720 → root ≈ 66px) ------------------------------------------------------------------------ */
+@media (max-aspect-ratio: 16/10) {
+  .gm__bonds { right: 4.6rem; }
+}
+
 /* fallback view: enemy preview pen (setCamera('pen')) */
 .ff-board--pen .ff-pen__enemy { padding: 0; border: 0; background: none; cursor: pointer; border-radius: 50%; }
 .ff-board--pen .ff-pen__enemy:hover { filter: brightness(1.2); }
@@ -1015,11 +976,11 @@
 /* enemy preview pen view (research 09 §2): the bond strip and the effects column step aside for the pen */
 .gm__bonds, .gm__effects { transition: opacity var(--t-med) var(--ease-out); }
 .gm.is-pen .gm__bonds, .gm.is-pen .gm__effects { opacity: 0; pointer-events: none; }
-.gm.is-pen .gm__bonds > *, .gm.is-pen .gm__effects > *, .gm.is-pen .gm__bonds .bslot, .gm.is-pen .gm__bonds .bstrip__more, .gm.is-pen .gm__bonds .bstrip__fold-handle { pointer-events: none; }
+.gm.is-pen .gm__bonds > *, .gm.is-pen .gm__effects > *, .gm.is-pen .gm__bonds .bslot, .gm.is-pen .gm__bonds .bstrip__more { pointer-events: none; }
 
 /* solo pause overlay (screens/game.js PausedOverlay; m.public.paused): the field dims under an official matte plate */
 .pauseov {
-  position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; inset: 0; z-index: 65; display: grid; place-items: center; pointer-events: auto;
+  position: absolute; inset: 0; z-index: 65; display: grid; place-items: center; pointer-events: auto;
   background: rgba(4, 7, 6, .62); -webkit-backdrop-filter: grayscale(.6) blur(2px); backdrop-filter: grayscale(.6) blur(2px);
   animation: screen-in var(--t-med) var(--ease-out);
 }
@@ -1032,140 +993,37 @@
 .pauseov__plate h2 { font-size: calc(.5 * var(--t)); font-weight: 900; letter-spacing: .3em; color: #fff; text-shadow: 0 0 .2rem rgba(0, 0, 0, .8); }
 .pauseov__note { font-size: calc(.17 * var(--t)); color: var(--text-md); text-shadow: 0 1px 2px #000; }
 .pauseov__btns { display: flex; gap: .2rem; }
-
-/* =========================================================================
-   多人实时战术文字聊天组件 (ChatBox)
-   ========================================================================= */
-.chat-panel {
-  position: absolute;
-  left: .24rem;
-  bottom: calc(.24rem + max(.56rem, 34px) + .12rem);
-  width: 3.6rem;
-  pointer-events: none;
-  z-index: 105;
-  display: flex;
-  flex-direction: column;
-  gap: 0.06rem;
+/* 协议已失效 (ui/downedPlate.js): the project's Modal restyled as the event's panel (video 10:56–10:58) — the official map
+   behind, the knocked-out face, the title, and the two buttons under the panel; design px ÷ 100 [ASSUMED: measured from
+   that footage]. The face turns from calm to knocked out after .5 s with a shake; with reduced motion it simply shows. */
+/* the footage dims the field but keeps it sharp: no blur behind this one */
+.modal.downm-veil { background: rgba(3, 5, 4, .6); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.modal__box.downm { --bk-c: transparent; width: min(13.8rem, 96vw); max-height: none; background: none; border: 0; box-shadow: none; overflow: visible; }
+.downm .modal__stripe { display: none; }
+.downm .modal__body { padding: 0; overflow: visible; }
+.downm__panel { position: relative; height: 3.45rem; overflow: hidden; background: rgba(5, 11, 13, .9); box-shadow: 0 0 .5rem .25rem rgba(5, 11, 13, .7); }
+/* the official map is an opaque square: its edges fade into the panel */
+.downm__map { position: absolute; left: 1.6rem; top: -2.6rem; width: 8.67rem; max-width: none; opacity: .55;
+  -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent); mask-image: radial-gradient(closest-side, #000 55%, transparent); }
+.downm__x { position: absolute; width: .24rem; height: .24rem; opacity: .6;
+  background: linear-gradient(var(--red), var(--red)) center / 100% 2px no-repeat, linear-gradient(var(--red), var(--red)) center / 2px 100% no-repeat; }
+.downm__x--tl { left: 3.2rem; top: .5rem; }
+.downm__x--tr { right: 3.2rem; top: .5rem; }
+.downm__x--bl { left: 3.2rem; bottom: .5rem; }
+.downm__x--br { right: 3.2rem; bottom: .5rem; }
+.downm__face { position: absolute; left: 4.79rem; top: 1.05rem; width: 1.12rem; height: 1.04rem; color: #c9cccc; }
+.downm__face.is-out { animation: downm-shake 360ms steps(6, end); }
+.downm__pix { display: block; width: 100%; height: 100%; }
+.downm__title { position: absolute; left: 6.3rem; top: 1.2rem; margin: 0; color: #f0353b; font-size: calc(.6 * var(--t)); font-weight: 900; letter-spacing: .04em;
+  line-height: 1.1; white-space: nowrap; animation: downm-in 260ms 120ms var(--ease-out) both; }
+.downm__sub { position: absolute; left: 6.3rem; top: 2.05rem; color: #6d7779; font-family: var(--font-display); font-size: calc(.2 * var(--t)); letter-spacing: .08em; }
+.downm__btns { display: flex; justify-content: center; gap: 2rem; margin-top: .8rem; }
+.downm__btn { min-width: 3.06rem; min-height: .75rem; font-size: calc(.24 * var(--t)); }
+/* the footage's button glyphs are about as tall as the text block */
+.downm__btn .btn__icon { width: 1.5em; height: 1.5em; }
+.downm__btn--watch { background: #e9ecec; color: #15191a; border-color: #e9ecec; }
+@keyframes downm-shake { 0%, 100% { transform: none; } 20%, 60% { transform: translateX(-.06rem); } 40%, 80% { transform: translateX(.06rem); } }
+@keyframes downm-in { from { opacity: 0; transform: translateX(.3rem); } }
+@media (prefers-reduced-motion: reduce) {
+  .downm__face.is-out, .downm__title { animation: none; }
 }
-
-.chat-log {
-  max-height: 1.8rem;
-  overflow-y: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 0.04rem;
-  font-size: 0.13rem;
-  text-shadow: 0 1px 2px #000;
-  transition: opacity 0.25s ease-out;
-  padding-right: 0.04rem;
-}
-
-.chat-panel:not(.is-active) .chat-log {
-  opacity: 0.45;
-}
-
-.chat-panel.is-active .chat-log,
-.chat-panel:hover .chat-log {
-  opacity: 1;
-  pointer-events: auto;
-  overflow-y: auto;
-}
-
-.chat-item {
-  background: rgba(10, 15, 13, 0.78);
-  padding: 0.04rem 0.08rem;
-  border-left: 2px solid var(--mint, #17f9b7);
-  word-break: break-all;
-  border-radius: 0 2px 2px 0;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
-}
-
-.chat-seat {
-  font-weight: 700;
-  margin-right: 0.06rem;
-}
-
-.chat-seat.seat-0 { color: #17f9b7; }
-.chat-seat.seat-1 { color: #f6a329; }
-.chat-seat.seat-2 { color: #45b7ff; }
-.chat-seat.seat-3 { color: #be7eff; }
-.chat-seat.seat-spec { color: #8fa29a; }
-
-.chat-text {
-  color: #f0f4f2;
-}
-
-.chat-form {
-  pointer-events: auto;
-  display: flex;
-  align-items: center;
-  gap: 0.04rem;
-  background: rgba(14, 20, 18, 0.95);
-  border: 1px solid rgba(23, 249, 183, 0.5);
-  border-radius: 2px;
-  padding: 0.04rem 0.06rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-}
-
-.chat-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  color: #fff;
-  font-size: 0.14rem;
-  outline: none;
-  font-family: inherit;
-}
-
-.chat-send-btn {
-  background: var(--mint, #17f9b7);
-  color: #0b0f0d;
-  border: none;
-  font-weight: 700;
-  font-size: 0.12rem;
-  padding: 0.04rem 0.1rem;
-  border-radius: 2px;
-  cursor: pointer;
-}
-
-.chat-send-btn:hover {
-  background: #fff;
-}
-
-.chat-trigger-btn {
-  pointer-events: auto;
-  width: 0.36rem;
-  height: 0.36rem;
-  border-radius: 50%;
-  background: rgba(18, 25, 23, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #fff;
-  font-size: 0.18rem;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-  transition: all 0.15s ease-out;
-}
-
-.chat-trigger-btn:hover {
-  background: rgba(28, 38, 35, 0.96);
-  border-color: var(--mint, #17f9b7);
-}
-
-/* 移动端视口适配 */
-@media (max-width: 767px), (max-height: 460px) {
-  .chat-panel {
-    left: .24rem;
-    bottom: calc(.24rem + max(.56rem, 34px) + .08rem);
-    width: 2.8rem;
-  }
-  .chat-log {
-    max-height: 1.2rem;
-    font-size: 0.11rem;
-  }
-  .chat-input {
-    font-size: 0.12rem;
-  }
-}
-

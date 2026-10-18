@@ -581,7 +581,7 @@ describe('drafts', () => {
     const sp2 = normalizeSp({ cards: [{}, {}], order: ['b', 'a'], turn: 0, picks: [{ playerId: 'b', idx: 1 }, { playerId: 'x', idx: 9 }] }, players);
     assert.equal(sp2.turnPid, 'b'); assert.equal(sp2.cards[1].takenBy, 'b'); assert.equal(sp2.pickOf.has('x'), false);
     assert.equal(normalizeSp(null), null);
-    assert.equal(normalizeSp({ cards: new Array(23).fill({}) }).cards.length, 6, 'at most six cards per group');
+    assert.equal(normalizeSp({ cards: new Array(9).fill({}) }).cards.length, 6, 'at most 6 cards');
   });
   test('personal choice: only the living recipient in the current PREP, independent of the public draft', () => {
     const pub = { phase: PHASE.PREP, round: 14, sp: { family: 'supply', cards: ['global'] } };
@@ -722,13 +722,18 @@ describe('keyboard & settings', () => {
   test('sanitizeSettings', () => {
     assert.deepEqual(sanitizeSettings(null), { ...DEFAULT_SETTINGS });
     assert.deepEqual(sanitizeSettings({ bgm: 3, sfx: -1, voice: 2, muted: 'yes', damageNumbers: false, quality: 'ultra' }),
-      { bgm: 1, sfx: 0, voice: 1, voiceLang: 'jp', voiceNative: false, voiceOverrides: {}, muted: false, damageNumbers: false, officialDamageNumbers: false, ammoCount: false, combatMetrics: false, mysticEnergy: false, quality: 'high', officialFx: 'auto', textSize: 'sm', board: 'auto', highRefresh: true, keys: { ...DEFAULT_SETTINGS.keys } },
+      { bgm: 1, sfx: 0, voice: 1, voiceLang: 'cn', voiceNative: false, voiceOverrides: {}, muted: false, damageNumbers: false, officialDamageNumbers: false, ammoEnergyCount: false, combatMetrics: false, prepDeployFold: true, quality: 'high', officialFx: 'auto', otherSkins: true, textSize: 'sm', keys: { ...DEFAULT_SETTINGS.keys } },
       'a saved profile without `keys` (before 0.2.0) gets the default key map (test/ui/feedback5-hotkeys.test.js)');
+    // 显示其他玩家的皮肤 (docs/SKINS.md): on by default, and off only when the profile says so
+    assert.equal(DEFAULT_SETTINGS.otherSkins, true);
+    assert.equal(sanitizeSettings({ bgm: 0.5 }).otherSkins, true, 'a profile saved before the switch draws other players\' skins');
+    assert.equal(sanitizeSettings({ otherSkins: false }).otherSkins, false);
+    assert.equal(sanitizeSettings({ otherSkins: 'no' }).otherSkins, true, 'only `false` turns it off (the renderer reads it the same way)');
     assert.equal(sanitizeSettings({ bgm: 0.5 }).voice, DEFAULT_SETTINGS.voice, 'a saved profile without `voice` gets the default');
-    // 语音语言: 日本語 by default on this branch. en / kr are dubs (0.3.0); the per-operator 'native' is not a global dub.
-    assert.equal(DEFAULT_SETTINGS.voiceLang, 'jp');
+    // 语音语言: 中文 by default. en / kr are dubs (0.3.0); anything else, including the per-operator 'native', stays 中文.
+    assert.equal(DEFAULT_SETTINGS.voiceLang, 'cn');
     assert.equal(DEFAULT_SETTINGS.voiceNative, false);
-    assert.equal(sanitizeSettings({ bgm: 0.5 }).voiceLang, 'jp');
+    assert.equal(sanitizeSettings({ bgm: 0.5 }).voiceLang, 'cn');
     assert.equal(sanitizeSettings({ bgm: 0.5 }).voiceNative, false, 'a profile saved before the switch stays off');
     assert.equal(DEFAULT_SETTINGS.combatMetrics, false);
     assert.equal(sanitizeSettings({ bgm: 0.5 }).combatMetrics, false, 'a profile saved before 作战统计 stays off');
@@ -739,18 +744,13 @@ describe('keyboard & settings', () => {
     for (const v of ['off', 'lite', 'full', 'auto']) assert.equal(sanitizeSettings({ officialFx: v }).officialFx, v);
     assert.equal(sanitizeSettings({ officialFx: 'ultra' }).officialFx, 'auto');
     assert.equal(sanitizeSettings({ combatMetrics: 'yes' }).combatMetrics, false, 'a non-boolean stays off');
-    // 棋盘视角 (this branch): 'auto' follows the 3D capability probe
-    assert.equal(DEFAULT_SETTINGS.board, 'auto');
-    assert.equal(sanitizeSettings({ board: '3d' }).board, '3d');
-    assert.equal(sanitizeSettings({ board: 'bogus' }).board, 'auto');
     assert.equal(sanitizeSettings({ voiceLang: 'jp' }).voiceLang, 'jp');
     assert.equal(sanitizeSettings({ voiceLang: 'en' }).voiceLang, 'en');
     assert.equal(sanitizeSettings({ voiceLang: 'kr' }).voiceLang, 'kr');
     assert.equal(sanitizeSettings({ voiceNative: true }).voiceNative, true);
-    for (const bad of ['native', 'JP', 'ja', 1, null]) assert.equal(sanitizeSettings({ voiceLang: bad }).voiceLang, 'jp', String(bad));
+    for (const bad of ['native', 'JP', 'ja', 1, null]) assert.equal(sanitizeSettings({ voiceLang: bad }).voiceLang, 'cn', String(bad));
     assert.equal(sanitizeSettings({ bgm: 0.333 }).bgm, 0.33);
     assert.equal(sanitizeSettings({ quality: 'low' }).quality, 'low');
-    assert.equal(sanitizeSettings({ highRefresh: false }).highRefresh, false);
   });
 });
 
