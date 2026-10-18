@@ -459,6 +459,39 @@ export class Lobby {
    * @param {string} host
    * @returns {{ enabled: boolean, warn: string|null }}
    */
+  diy(session, { picks }) {
+    const room = this.roomOf(session);
+    const res = checkDiyPicks(picks, { data: this.dataFor(room), kitted: this.kittedFor(room) });
+    if (!res || !('ok' in res)) return fail(ERR.BAD_MSG, res && res.detail);
+    const kept = freezeDiy(res.picks);
+    const cs = this.csOf(room);
+    session.diy = kept;
+    session.diyCs = cs;
+    if (!room) return OK;
+    const seat = room.seatOf(session.playerId);
+    if (seat) { seat.diy = kept; seat.diyCs = cs; }
+    if (room.match && seat) return fail(ERR.ROOM_STARTED, 'stored for the next match');
+    return OK;
+  }
+
+
+  ownership(session, { notOwned }) {
+    const room = this.roomOf(session);
+    const data = this.dataFor(room);
+    const res = checkNotOwned(notOwned, (id) => lookup('chess', id, data));
+    if (!res || res.error) return fail(ERR.BAD_MSG, res && res.detail);
+    const list = Object.freeze(res.notOwned.slice());
+    const cs = this.csOf(room);
+    session.notOwned = list;
+    session.notOwnedCs = cs;
+    if (!room) return OK;
+    const seat = room.seatOf(session.playerId);
+    if (seat) { seat.notOwned = list; seat.notOwnedCs = cs; }
+    if (room.match && seat) return fail(ERR.ROOM_STARTED, 'stored for the next match');
+    return OK;
+  }
+
+
   setTestHost(host) {
     this.testHost = typeof host === 'string' ? host : '';
     const gate = testModeGate(this.testMode, this.testHost);
