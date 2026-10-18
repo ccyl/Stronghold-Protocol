@@ -33,9 +33,11 @@
 //   한국어 `audio.voiceKr` and the operator's own-language dub `audio.voiceNative` (settings 语音语言, the 本土语言
 //   switch and the per-operator override; not tied to the interface language). A line the chosen tree or the host
 //   lacks falls back to the Chinese file of the same name (voiceLine).
-// - Battle SFX from `b.ev` tuples (`handleBattleEvents`): at most MAX_VOICES concurrent unit sounds, at most
-//   MAX_PER_URL overlapping copies of one sound (the official banks' maxSoundAllowed 2), a per-unit cooldown and a
-//   per-URL minimum gap (SfxLimiter), so a 60-unit fight stays listenable. A `['skill', id, 1]` that arrives before its
+// - Battle SFX from `b.ev` tuples (`handleBattleEvents`): attack / hit use their official bank's maxSoundAllowed,
+//   popOldest, and the played file's minPitch / maxPitch / delay (audio_data.json, #680). Aliases share a pool; distinct
+//   banks sharing a file do not. [ASSUMED] The remake's MAX_VOICES ceiling, 160 ms per-unit cooldown and 45 ms per-URL
+//   gap remain on top to guard high game speeds; sounds without pool metadata keep the legacy two-copy cap.
+//   A `['skill', id, 1]` that arrives before its
 //   unit is known is held and played once the unit is tracked (`pendingSkill`): a unit that casts inside its own deploy
 //   tick emits that first cue before its `['spawn', unitInfo]`, and dropping it left the one cast silent while every
 //   later one played (GitHub PR #292 by @LimitlessHPPK).
@@ -84,12 +86,15 @@ import { PHASE } from '../../shared/constants.js';
 import { mediaUrl } from './media.js';
 import { unhashedUrl } from '../../shared/assetPaths.js';
 
-const isMobile = typeof navigator !== 'undefined' && (/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && !globalThis.matchMedia?.('(pointer: fine)').matches));
-
 const MAX_VOICES = 8;
+// [ASSUMED] Remake anti-spam intervals, retained at high game speeds; not official audio pool parameters (#680).
 const UNIT_COOLDOWN_MS = 160;
 const URL_GAP_MS = 45;
 const MAX_PER_URL = 2;
+// [ASSUMED] Bound decoding/delayed attack requests independently of playing voices (#680 review). Stalled URLs
+// keep one decode subscriber across field changes; only the latest request per bank/unit waits for that decode.
+const POOL_PENDING_MAX = 64;
+const POOL_DECODE_MAX_MS = 2500; // [ASSUMED] Older undecoded attacks are obsolete, like the impact attribution window.
 /**
  * 漏怪: the original Arknights exit alarm (`sfx.battle.leak`, `battle/b_ui/b_ui_alarmenter`) runs **1.44 s**, and the
  * official bank is a one-shot: `battle.ON_ENEMY_REACHED_EXIT` carries `maxSoundAllowed: 1` with `popOldest: true` on the
@@ -99,9 +104,9 @@ const MAX_PER_URL = 2;
  * (The SFX limiter still applies on top.)
  */
 const LEAK_SFX_GAP_MS = 1500;
-const BUFFER_CACHE = isMobile ? 60 : 180;
+const BUFFER_CACHE = 180;
 /** Decoded-PCM budget of the buffer cache beside its entry count: a voice line decodes to 0.4–1.3 MB (see _buffer). */
-const BUFFER_BYTES = isMobile ? 24 * 1024 * 1024 : 64 * 1024 * 1024;
+const BUFFER_BYTES = 64 * 1024 * 1024;
 const XFADE_S = 1;
 const FADE_S = 0.8;
 /** Voice: shortest gap between two lines, and the crossfade of a higher-priority line taking the channel (official 0.1 s). */
@@ -409,17 +414,6 @@ export function resultSpeaker(pp, random = Math.random, charOf = null) {
   return pool[Math.min(pool.length - 1, Math.floor(random() * pool.length))].id;
 }
 
-export function voiceKey(x, gd = null) {
-  if (!x) return null;
-  if (typeof x === 'string') {
-    if (x.startsWith('char_')) return x;
-    const getFn = gd?.getChess || gd?.chess || (typeof gd === 'function' ? gd : null);
-    const rec = getFn ? getFn(x) : null;
-    return rec?.charId || null;
-  }
-  if (x.piece) return voiceKey(x.piece, gd);
-  return x.charId || voiceKey(x.id || x.chessId || x.defId || x.def || x.spine, gd) || null;
-}
 /** Concurrency + cooldown gate for battle SFX. Pure (time is passed in). */
 /** Gestures that may unlock audio: iOS Safari only accepts touchend / click / keydown; pointerdown covers the rest. */
 const UNLOCK_EVENTS = ['pointerdown', 'touchend', 'click', 'keydown'];
@@ -430,8 +424,7 @@ export class SfxLimiter {
     this.maxVoices = o.maxVoices ?? MAX_VOICES;
     this.unitCooldownMs = o.unitCooldownMs ?? UNIT_COOLDOWN_MS;
     this.urlGapMs = o.urlGapMs ?? URL_GAP_MS;
-    // the official battle banks (attack, impact, heal, born, dead…) allow at most 2 overlapping copies of a sound
-    // (audio_data maxSoundAllowed 2): a heal / impact heard on every tick of a crowd never piles up
+    // [ASSUMED] Legacy fallback for sounds without official pool metadata (and prep landing voices).
     this.maxPerUrl = o.maxPerUrl ?? MAX_PER_URL;
     this.active = 0;
     this.lastByUnit = new Map();
@@ -445,21 +438,27 @@ export class SfxLimiter {
    * @param {string|number|null} unitKey e.g. `${unitId}:atk`
    * @param {string} url
    */
-  tryAcquire(now, unitKey, url) {
+  tryAcquire(now, unitKey, url, maxPerUrl = this.maxPerUrl) {
     if (this.active >= this.maxVoices) return false;
-    if ((this.activeByUrl.get(url) || 0) >= this.maxPerUrl) return false;
-    if (unitKey != null) {
-      const t = this.lastByUnit.get(unitKey);
-      if (t != null && now - t < this.unitCooldownMs) return false;
-    }
-    const u = this.lastByUrl.get(url);
-    if (u != null && now - u < this.urlGapMs) return false;
+    if ((this.activeByUrl.get(url) || 0) >= maxPerUrl) return false;
+    if (!this.gapsAllow(now, unitKey, url)) return false;
     if (unitKey != null) this.lastByUnit.set(unitKey, now);
     this.lastByUrl.set(url, now);
     if (this.lastByUnit.size > 600) this.lastByUnit.clear();
     if (this.lastByUrl.size > 400) this.lastByUrl.clear();
     this.active += 1;
     this.activeByUrl.set(url, (this.activeByUrl.get(url) || 0) + 1);
+    return true;
+  }
+
+  /** Read-only gap check before a pool takes over its oldest instance. */
+  gapsAllow(now, unitKey, url) {
+    if (unitKey != null) {
+      const t = this.lastByUnit.get(unitKey);
+      if (t != null && now - t < this.unitCooldownMs) return false;
+    }
+    const u = this.lastByUrl.get(url);
+    if (u != null && now - u < this.urlGapMs) return false;
     return true;
   }
 
@@ -579,11 +578,14 @@ export class AudioManager {
     this.sfxGain = null;
     this.voiceGain = null;
     this.volumes = { bgm: 0.6, sfx: 0.8, voice: 0.8, muted: false };
-    this._duckTimer = null;
     this.buffers = new Map(); // url → Promise<AudioBuffer|null> (insertion order = LRU)
     this.bufBytes = new Map(); // url → decoded PCM bytes (the byte budget of the LRU, see _buffer)
     this.warned = new Set();
     this.limiter = new SfxLimiter();
+    this.poolVoices = new Map(); // official bank id → playing instances in start order
+    this.poolRequests = new Set(); // decoding / delayed requests; no playing slots reserved
+    this.poolLoads = new Map(); // url → coalesced decode requests (one subscriber per URL, even across fields)
+    this.poolFieldToken = 0;
     // prep landings (deployCue): their own voices — a full pool hands the oldest one's voice to the newest (_playLanding);
     // no per-file gap (one landing per piece, the cap bounds the overlap), the per-piece cooldown of the battle sounds
     this.landLimiter = new SfxLimiter({ maxVoices: LAND_VOICES, maxPerUrl: LAND_VOICES, urlGapMs: 0 });
@@ -597,7 +599,7 @@ export class AudioManager {
     this.bondCueToken = 0;
     this.bondCueScope = null;
     this.voiceOverrides = {};
-this.voiceLang = 'jp';    // settings 语音语言: cn | jp | en | kr (VOICE_TREES; a missing line falls back to audio.voice); this branch defaults to 日本語
+    this.voiceLang = 'jp';    // settings 语音语言: cn | jp | en | kr (this branch default 日本語; a missing line falls back to audio.voice)
     this.voiceNative = false; // settings 本土语言: an operator with an own-language dub speaks it unless their own pick wins
     this.startVoiceDone = false; // 行动出发 of this field (the first operator deployed says it)
     this.uiVoices = 0;
@@ -740,9 +742,6 @@ this.voiceLang = 'jp';    // settings 语音语言: cn | jp | en | kr (VOICE_TRE
       voice: n(v?.voice, this.volumes.voice),
       muted: typeof v?.muted === 'boolean' ? v.muted : this.volumes.muted,
     };
-    if (typeof v?.voiceLang === 'string' && (v.voiceLang === 'jp' || v.voiceLang === 'cn')) {
-      this.voiceLang = v.voiceLang;
-    }
     this._applyVolumes();
     if (this.volumes.muted || this.volumes.sfx <= 0) this.stopBondCue();
     // the music became audible again: download and start the track the screen wants now (none was fetched meanwhile)
@@ -764,26 +763,6 @@ this.voiceLang = 'jp';    // settings 语音语言: cn | jp | en | kr (VOICE_TRE
   setVoiceLang(lang, overrides = this.voiceOverrides) {
     this.voiceLang = VOICE_LANGS.includes(lang) ? lang : 'cn';
     this.voiceOverrides = sanitizeVoiceOverrides(overrides);
-  }
-
-  /**
-* Temporarily duck BGM volume to make voice lines pop (~0.35 volume for durationMs, then restore).
-   */
-  duckBgm(durationMs = 1800) {
-    if (!this.ctx || !this.bgmGain) return;
-    try {
-      const t = this.ctx.currentTime;
-      const normal = this.volumes.bgm ** 2 * 0.55;
-      const ducked = normal * 0.35;
-      this.bgmGain.gain.setTargetAtTime(ducked, t, 0.08);
-      clearTimeout(this._duckTimer);
-      this._duckTimer = setTimeout(() => {
-        if (this.ctx && this.bgmGain) {
-          const t2 = this.ctx.currentTime;
-          this.bgmGain.gain.setTargetAtTime(this.volumes.bgm ** 2 * 0.55, t2, 0.3);
-        }
-      }, durationMs);
-    } catch { /* ignore */ }
   }
 
   /**
@@ -1055,12 +1034,13 @@ this.voiceLang = 'jp';    // settings 语音语言: cn | jp | en | kr (VOICE_TRE
 
   /**
    * @param {string} url
-   * @param {{ volume?: number, rate?: number, limited?: boolean, unitKey?: string | null, again?: (() => unknown) | null }} [o]
+   * @param {{ volume?: number, rate?: number, limited?: boolean, unitKey?: string | null, again?: (() => unknown) | null, pool?: any }} [o]
    *   again: the sound's URL picked from the manifest again — played instead once when this one was a cosmetic plugin's
    *   file that would not load (its entry fell back: see the header)
    */
-  _play(url, { volume = 1, rate = 1, limited = false, unitKey = null, again = null } = {}) {
+  _play(url, { volume = 1, rate = 1, limited = false, unitKey = null, again = null, pool = null } = {}) {
     if (!this.ctx || !url || this.volumes.muted || this.volumes.sfx <= 0) return;
+    if (limited && pool) { this._playPool(url, { volume, unitKey, again, pool }); return; }
     const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
     if (limited) { if (!this.limiter.tryAcquire(now, unitKey, url)) return; }
     else if (this.uiVoices >= 12) return;
@@ -1091,6 +1071,121 @@ this.voiceLang = 'jp';    // settings 语音语言: cn | jp | en | kr (VOICE_TRE
   }
 
   /**
+   * Official attack/hit pool (#680, audio_data.json soundFXBanks). Decode and delay are bounded separately from
+   * playing voices: admission/takeover happens only when playback is due, so a sustained stream cannot keep
+   * replacing sources before any start. [ASSUMED] Pending caps/coalescing/expiry, audio-clock due admission and
+   * field-owned cancellation are web-client scheduling guards (review #680).
+   */
+  _playPool(url, { volume, unitKey, again, pool }) {
+    const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    let load = this.poolLoads.get(url);
+    const key = `${pool.id}:${unitKey ?? ''}`;
+    const previous = load?.get(key);
+    if (previous) { this._dropPoolRequest(previous); load.delete(key); }
+    if (this.poolRequests.size >= POOL_PENDING_MAX || (!load && this.poolLoads.size >= POOL_PENDING_MAX)) return;
+    const req = { url, volume, unitKey, again, pool, ctx: this.ctx, token: this.poolFieldToken, at: now, timer: null };
+    this.poolRequests.add(req);
+    if (load) { load.set(key, req); return; }
+    load = new Map([[key, req]]);
+    this.poolLoads.set(url, load);
+    try {
+      this._buffer(url).then(buf => this._poolDecoded(url, load, buf), () => this._poolDecoded(url, load, null));
+    } catch { this._poolDecoded(url, load, null); }
+  }
+
+  _poolRequestCurrent(req) {
+    return this.poolRequests.has(req) && req.token === this.poolFieldToken && req.ctx === this.ctx
+      && !this.volumes.muted && this.volumes.sfx > 0;
+  }
+
+  _dropPoolRequest(req) {
+    clearTimeout(req.timer);
+    this.poolRequests.delete(req);
+  }
+
+  _poolDecoded(url, load, buf) {
+    this.poolLoads.delete(url);
+    const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    for (const req of load.values()) {
+      if (!this._poolRequestCurrent(req) || now - req.at > POOL_DECODE_MAX_MS) { this._dropPoolRequest(req); continue; }
+      if (!buf) {
+        this._dropPoolRequest(req);
+        const next = req.again && this.fellBack.has(url) ? req.again() : null;
+        if (typeof next === 'string' && next !== url) this._play(next, { volume: req.volume, limited: true, unitKey: req.unitKey, pool: req.pool });
+        continue;
+      }
+      const path = unhashedUrl(url).replace(/^\/assets\/audio\/sfx\//, '');
+      const sound = req.pool.sounds?.[path];
+      const delay = Math.max(0, sound?.delay || 0);
+      const due = req.ctx.currentTime + delay;
+      const ready = () => {
+        if (!this._poolRequestCurrent(req)) { this._dropPoolRequest(req); return; }
+        // Wall timers also run while AudioContext is suspended. Keep the file's delay on the audio clock.
+        const remaining = due - req.ctx.currentTime;
+        if (remaining > 1e-6) {
+          req.timer = setTimeout(ready, Math.max(10, remaining * 1000));
+          return;
+        }
+        this._dropPoolRequest(req);
+        this._startPool(req, buf, sound);
+      };
+      ready();
+    }
+    load.clear();
+  }
+
+  /** Admit only playing instances. A zero official cap is unlimited within the remake's global budget. */
+  _startPool({ ctx, url, volume, unitKey, pool }, buf, sound) {
+    const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    if (!this.limiter.gapsAllow(now, unitKey, url)) return;
+    const voices = this.poolVoices.get(pool.id) || [];
+    const limit = pool.maxSoundAllowed > 0 ? pool.maxSoundAllowed : Infinity;
+    const oldest = voices.length >= limit ? voices[0] : null;
+    if (oldest && !pool.popOldest) return;
+    if (!oldest && this.limiter.active >= this.limiter.maxVoices) return;
+    const lo = sound?.minPitch > 0 ? sound.minPitch : 1;
+    const hi = sound?.maxPitch >= lo ? sound.maxPitch : lo;
+    // [ASSUMED] Uniform draw within the played file's official range; absent cosmetic files use pitch 1 / delay 0.
+    const rate = lo + (hi - lo) * Math.max(0, Math.min(1, this.random()));
+    let src, gain, timer, acquired = false, done = false;
+    const end = () => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      if (acquired) {
+        this.limiter.release(url);
+        const index = voices.indexOf(voice);
+        if (index >= 0) voices.splice(index, 1);
+        if (!voices.length) this.poolVoices.delete(pool.id);
+      }
+      try { src?.disconnect(); gain?.disconnect(); } catch { /* ignore */ }
+    };
+    const voice = { stop: () => { try { src?.stop(); } catch { /* already ended */ } end(); } };
+    try {
+      src = ctx.createBufferSource(); gain = ctx.createGain();
+      src.buffer = buf; src.playbackRate.value = rate;
+      gain.gain.value = Math.max(0, Math.min(1.5, volume));
+      src.connect(gain); gain.connect(this.sfxGain);
+      if (oldest) oldest.stop();
+      acquired = this.limiter.tryAcquire(now, unitKey, url, Infinity);
+      if (!acquired) { end(); return; }
+      voices.push(voice); this.poolVoices.set(pool.id, voices);
+      src.onended = end;
+      src.start(ctx.currentTime);
+      timer = setTimeout(end, buf.duration / rate * 1000 + 250);
+    } catch { end(); }
+  }
+
+  /** Field replacement, battle exit and screen cleanup invalidate downloads/delays and stop every playing pool source. */
+  stopPoolSounds() {
+    this.poolFieldToken++;
+    for (const req of this.poolRequests) this._dropPoolRequest(req);
+    // Keep empty loads subscribed: clearing this map would attach more handlers to the same stalled promise next field.
+    for (const load of this.poolLoads.values()) load.clear();
+    for (const voices of this.poolVoices.values()) for (const voice of [...voices]) voice.stop();
+  }
+
+  /**
    * UI sound by name (sfx.ui keys). Unknown names are ignored.
    * @param {string} name
    * @param {{ volume?: number, scope?: string }} [o]
@@ -1107,20 +1202,20 @@ this.voiceLang = 'jp';    // settings 语音语言: cn | jp | en | kr (VOICE_TRE
   }
 
   /** Battle sound by name (sfx.battle keys), limited like unit sounds. */
+  /**
+   * Allied unit deployment SFX (e.g. from render unitDeploy); this branch's small wrapper over the bank's deploy sound.
+   */
+  deploy(e, gd) {
+    try {
+      this.battle('deploy');
+    } catch { /* ignore */ }
+  }
+
   battle(name, o = {}) {
     try {
       const pick = () => this.getManifest()?.audio?.sfx?.battle?.[name];
       const url = pick();
       if (typeof url === 'string') this._play(url, { volume: o.volume ?? 0.7, limited: true, unitKey: o.unitKey ?? `b:${name}`, again: pick });
-    } catch { /* ignore */ }
-  }
-
-  /**
-   * Allied unit deployment SFX (e.g. from render unitDeploy).
-   */
-  deploy(e, gd) {
-    try {
-      this.battle('deploy');
     } catch { /* ignore */ }
   }
 
@@ -1154,7 +1249,11 @@ this.voiceLang = 'jp';    // settings 语音语言: cn | jp | en | kr (VOICE_TRE
       const mix = kind === 'skill' ? null : typeof mode === 'string'
         ? (kind === 'attack' ? u?.attackMix : u?.hitMix)?.[skillIndex] : u?.mix?.[kind];
       if (!unitSoundPlays(mix, this.random())) return true;
-      this._play(url, { volume: unitGain(kind === 'attack' || kind === 'hit' ? 0.55 : 0.8, mix), limited: true, unitKey: `${unitId}:${kind}`, again: () => pick().url });
+      const poolId = typeof mode === 'string'
+        ? (kind === 'attack' ? u?.attackPools : u?.hitPools)?.[skillIndex] : u?.pools?.[kind];
+      const params = this.getManifest()?.audio?.sfx?.pools?.[poolId];
+      const pool = params ? { ...params, id: poolId } : null;
+      this._play(url, { volume: unitGain(kind === 'attack' || kind === 'hit' ? 0.55 : 0.8, mix), limited: true, unitKey: `${unitId}:${kind}`, again: () => pick().url, pool });
       return true;
     } catch { return false; }
   }
@@ -1169,7 +1268,7 @@ this.voiceLang = 'jp';    // settings 语音语言: cn | jp | en | kr (VOICE_TRE
    * line must pass VoiceGate: one at a time, a global gap, a per-unit cooldown, higher priority wins.
    * @param {string} charId e.g. 'char_263_skadi'
    * @param {'start'|'faceEnemy'|'select'|'place'|'skill1'|'skill2'|'skill3'|'skill4'|'squad'|'squadFirst'
-   *   |'resultFour'|'resultThree'|'resultTwo'|'resultLose'|'gacha'} [slot] defaults to 'place'
+   *   |'resultFour'|'resultThree'|'resultTwo'|'resultLose'|'gacha'} slot
    * @param {{ unitKey?: string|number|null, volume?: number }} [o] `unitKey` = the cooldown key (a battle unit id)
    * @returns {boolean} whether such a line exists and started
    */
@@ -1267,7 +1366,6 @@ this.voiceLang = 'jp';    // settings 语音语言: cn | jp | en | kr (VOICE_TRE
         setTimeout(end, (buf.duration + 0.3) * 1000); // safety if onended never fires
         src.start();
         this.voiceNode = node;
-        this.duckBgm(1800);
       } catch (err) {
         this._warn('voice-play', err);
         if (token === this.voiceToken) this.voiceGate.release();
@@ -1295,6 +1393,7 @@ this.voiceLang = 'jp';    // settings 语音语言: cn | jp | en | kr (VOICE_TRE
 
   /** Reset the unit map for a new field (m.field.units = UnitInfo[]). */
   setFieldUnits(units) {
+    this.stopPoolSounds();
     this.stopBondCue();
     this.units.clear();
     // unit ids belong to one battle: a cast still held for a unit of the field left must not sound for a unit of the new
@@ -1312,7 +1411,7 @@ this.voiceLang = 'jp';    // settings 语音语言: cn | jp | en | kr (VOICE_TRE
     if (!u || typeof u !== 'object' || u.id == null) return;
     // UnitInfo.spine is the model id (charId / tokenId / enemyId) — the key of sfx.units; kind/defId pick the
     // official class sounds (operator vs summon vs device). `skillActive` follows the ['skill', id, 1] / 0 events.
-    this.units.set(u.id, { def: u.spine || u.defId, defId: u.defId ?? null, kind: u.kind ?? null, side: u.side, boss: !!u.boss,
+    this.units.set(u.id, { def: u.spine || u.defId, voice: u.voice || u.spine || u.defId, defId: u.defId ?? null, kind: u.kind ?? null, side: u.side, boss: !!u.boss,
       skillIndex: Number.isInteger(u.skillIndex) ? u.skillIndex : null, skillActive: !!u.skillActive });
     // a cast that arrived before this unit was known (handleBattleEvents): it sounds now, once
     const held = this.pendingSkill.get(u.id);
@@ -1464,7 +1563,7 @@ this.voiceLang = 'jp';    // settings 语音语言: cn | jp | en | kr (VOICE_TRE
             // 作战中N: the equipped skill's own slot (0-based; 作战中4 is the fallback of a 4th slot)
             if (unitSoundClass(u) === 'char') {
               const n = Number.isInteger(u.skillIndex) ? Math.min(4, u.skillIndex + 1) : 1;
-              this.voice(u.def, `skill${n}`, { unitKey: e[1] });
+              this.voice(u.voice, `skill${n}`, { unitKey: e[1] });
             }
           } else {
             // The unit is not tracked yet. The sim emits the cast of a deployment that fires inside its own first tick
@@ -1483,7 +1582,7 @@ this.voiceLang = 'jp';    // settings 语音语言: cn | jp | en | kr (VOICE_TRE
         } else if (kind === 'engage') {
           // 行动开始: the first attack a unit makes on an enemy (the sim's ENGAGE, official ENCOUNTER_ENEMY, 3 s apart)
           const u = this.units.get(e[1]);
-          if (u && unitSoundClass(u) === 'char') this.voice(u.def, 'faceEnemy', { unitKey: e[1] });
+          if (u && unitSoundClass(u) === 'char') this.voice(u.voice, 'faceEnemy', { unitKey: e[1] });
         } else if (kind === 'die') {
           const u = this.units.get(e[1]);
           if (!u) continue;
@@ -1508,20 +1607,18 @@ this.voiceLang = 'jp';    // settings 语音语言: cn | jp | en | kr (VOICE_TRE
         } else if (kind === 'deploy') {
           const u = this.units.get(e[1]);
           if (!u || u.side === 'enemy') continue;
-          const isInitial = !!(e[2]?.initial || (typeof e[2] === 'object' && e[2]?.initial));
           const m = this.getManifest();
           const url = deploySfxUrl(m, u);
           // 行动出发 / 部署: the first operator of the battle says the battle-start line, the others their deploy line
           // (a knocked-out operator redeploying in the same battle is one of the others; a summon says nothing).
-          // 初始批量部署 (initial) 时，只有首位干员说 start，其余干员不开局齐声喊 place 台词
           // Kept ahead of the deploy-SFX guards below: the voice channel is independent of the unit sound's roll.
           if (unitSoundClass(u) === 'char') {
             if (!this.startVoiceDone) {
               this.startVoiceDone = true;
-              if (!this.voice(u.def, 'start')) this.voice(u.def, 'place', { unitKey: e[1] });
-            } else if (!isInitial) this.voice(u.def, 'place', { unitKey: e[1] });
+              if (!this.voice(u.voice, 'start')) this.voice(u.voice, 'place', { unitKey: e[1] });
+            } else this.voice(u.voice, 'place', { unitKey: e[1] });
           }
-          if (!url || isInitial) continue;
+          if (!url) continue;
           const own = url === m?.audio?.sfx?.units?.[u.def]?.born;
           const mix = own ? m.audio.sfx.units[u.def].mix?.born : null;
           if (!unitSoundPlays(mix, this.random())) continue;
@@ -1582,4 +1679,16 @@ export function installAudio(deps) {
     }
   } catch (err) { console.warn('[audio] install failed', err); }
   return () => {};
+}
+
+export function voiceKey(x, gd = null) {
+  if (!x) return null;
+  if (typeof x === 'string') {
+    if (x.startsWith('char_')) return x;
+    const getFn = gd?.getChess || gd?.chess || (typeof gd === 'function' ? gd : null);
+    const rec = getFn ? getFn(x) : null;
+    return rec?.charId || null;
+  }
+  if (x.piece) return voiceKey(x.piece, gd);
+  return x.charId || voiceKey(x.id || x.chessId || x.defId || x.def || x.spine, gd) || null;
 }
