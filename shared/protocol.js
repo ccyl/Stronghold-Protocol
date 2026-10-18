@@ -2,6 +2,7 @@
 // Every client→server message is `{ t, rid?, ...fields }`. Unknown `t` or invalid fields ⇒ ERR.BAD_MSG.
 
 import { DIFFICULTIES, NAME_MAX_LEN, ROOM_CODE_LEN, MAX_SEATS, ROOM_CAPACITIES, MAX_DRAFT_CARDS, EMOTES, GEO } from './constants.js';
+import { PLUGIN_OFFER_SLOTS } from './plugins/limits.js';
 import { isDroppableChess } from './standIn.js';
 import { diySlotIds, validateDiyPicks } from './diy.js';
 import { cultivatedStats, isPotential, isCultivate, POTENTIAL_DEFAULT, CULTIVATE_DEFAULT, hasPotentialData } from './potential.js';
@@ -522,6 +523,11 @@ export const C2S = {
   'g.destroy': { uid: isUid },
   'g.reward': { idx: (v) => isInt(v, 0, 5) },
   'g.choice': { idx: (v) => isInt(v, 0, MAX_DRAFT_CARDS - 1), choiceId: isId, ...draftScope, $optional: ['choiceId', ...draftScopeOptional] },
+  // A plugin interaction window (PLUGIN API v2, docs/PLUGINS.md §10b): a slot picked; g.offerRefresh redraws one
+  // slot (the window's own `refresh.perSlot` bounds how often). The host applies the window's declared effect
+  // primitive — a plugin never receives these messages itself.
+  'g.offer': { offerId: isId, pluginId: isId, seq: (v) => isInt(v, 0, 1000000), cardId: optional(isId), idx: (v) => isInt(v, 0, PLUGIN_OFFER_SLOTS - 1) },
+  'g.offerRefresh': { offerId: isId, pluginId: isId, seq: (v) => isInt(v, 0, 1000000), cardId: optional(isId), idx: (v) => isInt(v, 0, PLUGIN_OFFER_SLOTS - 1) },
   'g.ready': { ready: isBool },
   'g.emote': { id: (v) => EMOTES.includes(v) },
   // playerId: the player tapped in the team panel (a 联防 / boss pair field shows two) — what an eliminated viewer or a

@@ -17,14 +17,14 @@ const PERSONAL_OFFER_SIZE = 3;
 
 export class MatchSpDraft {
   enterSpDraft() {
-    if (!this.alivePlayers().length) { this.enterPrep(); return; }
+    if (!this.alivePlayers().length) { this.beforePrepOffers(); return; }
     const groups = this.makeDraftGroups({ shuffle: false });
     const active = groups.filter((g) => g.order.length).map((g) => ({ id: g.id, playerIds: g.order.slice() }));
     const pages = generateGroupDrafts(this.gd, this.rngDraft, this.round, active, {
       stageId: this.stageId, bondAvailable: (bondId, group) => this.bondLive(bondId, group.playerIds[0]),
       itemAvailable: (id, group) => this.itemPoolFor(group.playerIds[0]).canGain(id),
     });
-    if (!pages || !pages.length) { this.enterPrep(); return; }
+    if (!pages || !pages.length) { this.beforePrepOffers(); return; }
     for (const g of groups) {
       const page = pages.find((p) => p.id === g.id);
       Object.assign(g, page || { cards: [] }, { taken: {} });
@@ -155,7 +155,7 @@ export class MatchSpDraft {
   finishSpDraft() {
     if (this.phase !== PHASE.SP_DRAFT) return;
     for (const g of this.sp.groups) this.clearDraftGroupTimer(g);
-    this.enterPrep();
+    this.beforePrepOffers();
   }
 
   /**
