@@ -125,19 +125,38 @@ export const skinFor = (charId) => (str(charId) ? (skinsStore.get()[SKINS_KEY] |
  * @returns {{ id: string, name: string, group: string, playable: boolean, portrait: string|null, avatar: string|null,
  *   illust: string|null }[]}
  */
+/**
+ * The official skin catalogue (this branch): `data/skins.json`'s `chars[<charId>]` = `[{ id, name, group }]`, the skin
+ * table the 换装 section listed before 0.3.1. Upstream 0.3.1 moved the section to the composed asset manifest, which
+ * only a cosmetic plugin writes — so an installation without such a plugin (the common case) lost the list entirely.
+ * A catalogue row carries no model record, so it is offered as an art row (its official avatar/portrait) and the
+ * operator keeps its own body in battle.
+ */
+const catalogueSkins = (charId) => {
+  const cat = data.get('skins');
+  const list = cat && isObj(cat.chars) ? cat.chars[charId] : null;
+  return Array.isArray(list) ? list.filter((x) => isObj(x) && str(x.id)) : [];
+};
+
+/** A catalogue skin's art: `public/assets/char/skin_avatar/<id with @ # → _>.png` (the official skin avatars). */
+const catalogueArt = (skinId) => {
+  const key = String(skinId).replace(/[#@]/g, '_');
+  return key ? `/assets/char/skin_avatar/${key}.png` : null;
+};
+
 export function availableSkins(charId) {
   const id = str(charId);
   if (!id) return [];
   const m = data.get('assets');
   const rec = m && isObj(m.chars) ? m.chars[id] : null;
-  // a record without `skins` still has its own appearance (the 默认 row below), because the picker's global display rule
-  // shows the section for an operator the plugins wrote no skin for (hasAnySkinChoices, docs/SKINS.md)
-  if (!rec) return [];
-  const ownIllust = str(rec.illust);
-  const ownPortrait = str(rec.portrait);
-  const ownAvatar = str(rec.avatar);
+  // a record without `skins` still has its own appearance (the 默认 row below), and this branch's official catalogue
+  // still lists the operator's outfits — only an id with neither at all returns nothing.
+  if (!rec && !catalogueSkins(id).length) return [];
+  const ownIllust = str(rec && rec.illust);
+  const ownPortrait = str(rec && rec.portrait);
+  const ownAvatar = str(rec && rec.avatar);
   const rows = [];
-  for (const [skinId, skin] of Object.entries(isObj(rec.skins) ? rec.skins : {})) {
+  for (const [skinId, skin] of Object.entries(isObj(rec && rec.skins) ? rec.skins : {})) {
     if (!str(skinId) || !isObj(skin)) continue;
     const playable = skinHasModel(skin);
     // the tile art: the fixed-size portrait family first (a 1:2 box the grid lines up on), then the illustration, then
@@ -159,6 +178,23 @@ export function availableSkins(charId) {
       own: false,
     });
   }
+  // This branch's official catalogue (data/skins.json): every outfit the extraction lists for the operator, unless a
+  // plugin overlay already wrote the same id (the plugin's record carries the model/art and wins).
+  for (const cs of catalogueSkins(id)) {
+    if (rows.some((r) => r.id === cs.id)) continue;
+    const art = catalogueArt(cs.id);
+    rows.push({
+      id: cs.id,
+      name: str(cs.name) || cs.id,
+      group: str(cs.group) || '',
+      playable: true,
+      portrait: art || ownPortrait || null,
+      avatar: art || ownAvatar || null,
+      illust: art || ownIllust || ownPortrait || null,
+      fallbackArt: !art && !ownPortrait,
+      own: false,
+    });
+  }
   // The operator's OWN appearance, always the first row — even for a record the plugins wrote no `skins` under, because
   // the picker shows the section for every operator as soon as one of them has a skin (hasAnySkinChoices).
   //
@@ -168,11 +204,13 @@ export function availableSkins(charId) {
   // all, and that picture must be visible rather than staying in the manifest unread. The tile box is 1:2 and crops to
   // the top, exactly as it already does for a skin that ships only an illust. Never null while the record has any of
   // the three: an empty art box is the one thing this row must not draw.
-  rows.unshift({
-    id: '', name: '', group: '', playable: true,
-    portrait: ownIllust || ownPortrait, avatar: ownAvatar,
-    illust: ownIllust || ownPortrait, fallbackArt: false, own: true,
-  });
+  if (rec) {
+    rows.unshift({
+      id: '', name: '', group: '', playable: true,
+      portrait: ownIllust || ownPortrait, avatar: ownAvatar,
+      illust: ownIllust || ownPortrait, fallbackArt: false, own: true,
+    });
+  }
   return rows;
 }
 
@@ -195,6 +233,10 @@ export function availableSkins(charId) {
  * @returns {boolean}
  */
 export function hasAnySkinChoices() {
+  // this branch: the official catalogue alone is enough — an installation with the skin table has the section
+  const cat = data.get('skins');
+  const catChars = cat && isObj(cat.chars) ? cat.chars : null;
+  if (catChars && Object.values(catChars).some((l) => Array.isArray(l) && l.length)) return true;
   const m = data.get('assets');
   const chars = m && isObj(m.chars) ? m.chars : null;
   if (!chars) return false;

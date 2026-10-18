@@ -10,6 +10,10 @@ each player switches on for themself.
 > `data/skins-installed.json` 又会让更新校验对不上。本实现没有安装报文、不写 `data/` 下的任何文件、不随包发布任何
 > 安装状态：皮肤属于插件，插件怎么落地是 `plugins/` 目录（安装、studio、ZIP）本来就有的问题。
 
+## 本分支：官方换装目录（data/skins.json）
+
+上游 0.3.1 把皮肤行的来源改成「插件写入的素材清单 overlay」（见下一节）：没有装外观插件就没有换装列表。本分支保留官方换装目录——`data/skins.json`（`chars[<charId>] = [{ id, name, group }]`，来自本机提取 / 社区素材包）里的每个套装由 `ui/skins.js` 的 `availableSkins()` 合并进列表，行数与 0.3.1 之前一致。插件 overlay 里同一 id 的记录优先（它带模型与立绘）。目录行没有模型记录，因此按「仅外观」提供：列表显示该套装的官方头像（`public/assets/char/skin_avatar/<id，@# 换成 _>.png`），作战中干员仍用本体。`hasAnySkinChoices()` 只要目录里有内容就显示换装区。
+
 ## The data: one overlay, no catalogue file
 
 ```
