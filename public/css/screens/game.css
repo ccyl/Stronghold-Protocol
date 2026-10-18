@@ -415,7 +415,7 @@
    top board row's units stand (row 12 at 16:9 / 21:9 / 720p / phones, the boss field's row 5 in a boss prep) — it used
    to swallow the taps and drags on them (review of user playtest #2 item 8: every own unit reachable). */
 .gm__bonds > *, .gm__bonds .bstrip { pointer-events: none; }
-.gm__bonds .bslot, .gm__bonds .bstrip__more { pointer-events: auto; }
+.gm__bonds .bslot, .gm__bonds .bstrip__more, .gm__bonds .bstrip__fold-handle { pointer-events: auto; }
 .gm__bond-list { min-width: 0; }
 /* The hidden list leaves no hit area over the board; only this compact tab can reopen it (GitHub #142). */
 /* A bare arrow (the owner's request after 0.2.0: the boxed 「收起」 tab looked heavy): transparent, half-visible until
@@ -438,6 +438,32 @@
 .bstrip__owner .micro { color: var(--amber); font-size: max(.15rem, 10px); letter-spacing: .04em; max-width: max(1.3rem, 72px);
   overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .bstrip__eye { color: var(--amber); font-size: max(.17rem, 11px); flex: none; }
+
+/* 盟约条的折叠手柄（0.3.x）：默认展开，点一下收起整条（状态记在 sp_bonds_collapsed）。
+   顶栏整体 pointer-events: none，所以这里必须显式 auto，否则点不到（这也是它此前「点了没反应」的原因）。 */
+.bstrip-container { display: flex; align-items: flex-start; gap: max(.06rem, 4px); min-width: 0; pointer-events: none; }
+.bstrip-tray { min-width: 0; display: flex; }
+.bstrip-container.is-collapsed .bstrip-tray { display: none; }
+.bstrip__fold-handle {
+  flex: none;
+  width: max(.3rem, 20px);
+  height: max(.3rem, 20px);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  font: inherit;
+  color: var(--text-dim);
+  cursor: pointer;
+  background: rgba(8, 11, 10, .6);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  touch-action: manipulation;
+  pointer-events: auto;
+}
+.bstrip__fold-handle:hover { color: var(--text-hi); border-color: var(--line-3); }
+.bstrip__fold-handle:focus-visible { outline: 2px solid var(--mint-400); outline-offset: 2px; }
+.bstrip__fold-icon svg { display: block; width: max(.16rem, 10px); height: max(.16rem, 10px); fill: currentColor; }
+.bstrip-container.is-collapsed .bstrip__fold-icon { transform: rotate(180deg); }
 .bstrip--empty .bstrip__owner .micro { max-width: max(1.6rem, 80px); }
 .bstrip--empty.is-other { border-color: rgba(246, 163, 41, .5); }
 @media (max-width: 767px) {
