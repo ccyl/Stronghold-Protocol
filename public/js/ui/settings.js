@@ -170,9 +170,9 @@ const HOTKEY_NAMES = { buy: N_('购买鼠标指向的商品'), refresh: N_('刷�
  * shortcut has is swapped — the line under the list says what happened; 恢复默认 restores the keys of 0.1.4. Esc
  * (cancel / close) is fixed. On a touch-only device the section says the keys need a keyboard and folds the list (an
  * attached keyboard still uses it).
- * @param {{ keys: Record<string, string>, touchUi: boolean }} props
+ * @param {{ keys: Record<string, string>, touchUi: boolean, hoverShortcuts: boolean }} props
  */
-function HotkeySection({ keys, touchUi }) {
+function HotkeySection({ keys, touchUi, hoverShortcuts }) {
   const [waiting, setWaiting] = useState(null); // the action waiting for its new key
   const [note, setNote] = useState(null);       // { text, warn }: the result line
   // a layout effect: the key listener is on as soon as the key shows that it waits (an Esc right after the click must
@@ -238,6 +238,11 @@ function HotkeySection({ keys, touchUi }) {
       <span class="set-row__label" id="set-keys-title">${t('快捷键')}<${MicroLabel}>HOTKEYS<//></span>
       <${Button} variant="ghost" size="sm" icon="refresh" class="set-keys__reset" disabled=${isDefaultHotkeys(keys)}
         onClick=${() => { setWaiting(null); updateSettings({ keys: DEFAULT_HOTKEYS }); setNote({ text: t('已恢复默认快捷键') }); }}>${t('恢复默认')}<//>
+    </div>
+    <div class="set-keys__modes">
+      <${Toggle} label=${t('快捷操作跟随悬停')} micro="HOVER SHORTCUTS" value=${hoverShortcuts}
+        onChange=${(v) => updateSettings({ hoverShortcuts: v })} />
+      <p class="set-hint">${t('打开：Q 撤退、X 出售作用于鼠标悬停的干员，W 购买悬停的商店卡牌。关闭（默认）：与旧版本一致，Q / X 作用于已点选的干员（其操作栏），W 不生效。')}</p>
     </div>
     ${touchUi ? html`<p class="set-hint">${t('快捷键需要实体键盘；触屏设备连接键盘后可用')}</p>
       <details class="set-keys__more"><summary>${t('查看 / 更改快捷键')}</summary>${list}</details>` : list}
@@ -585,7 +590,7 @@ export function SettingsModal({ open, onClose }) {
       </div>
       <p class="set-hint set-textsize-note">${t('调整界面文字大小，棋盘保持原比例。')}</p>
       <${ScreenFitSection} />
-      <${HotkeySection} keys=${s.keys} touchUi=${touchUi} />
+      <${HotkeySection} keys=${s.keys} touchUi=${touchUi} hoverShortcuts=${s.hoverShortcuts} />
       <${Toggle} label=${t('动态高刷新率')} micro="PREP 120 / BATTLE 60" value=${s.highRefresh !== false}
         onChange=${(v) => updateSettings({ highRefresh: v })} />
       <div class="set-row">

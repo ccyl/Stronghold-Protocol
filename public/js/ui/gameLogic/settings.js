@@ -35,11 +35,15 @@ export const TEXT_SIZES = Object.freeze(['sm', 'md', 'lg', 'xl']);
  *  (GitHub #602, PR #646). Default on (the 0.3.0 behaviour). Off: the pickup changes neither the shop's fold nor the
  *  camera. [ASSUMED] the label; only an explicit false turns it off (a missing or junk value stays on).
  *  combatMetrics: 设置「作战统计」 (PR #618), off by default: the official HUD has no such panel.
+ *  hoverShortcuts: 设置「快捷操作跟随悬停」(this branch): OFF (default) keeps the pre-0.3.0 habit — Q / X act on
+ *  the operator the player tapped (its underframe), and W does nothing; ON is upstream PR #629 — Q / X act on the
+ *  operator under the pointer and W buys the shop card under the pointer. The owner asked for the switch on 2026-10-18:
+ *  the hover change (0.3.0) did not match how players of the previous version used 快捷出售 / 购买 / 撤退.
  *  officialFx: 设置「官方特效」 (0.3.0, render/vfx): 'auto' (完整 on a desktop, 精简 on a touch device — render/vfx/tier.js),
  *  'off', 'lite' (精简), 'full' (完整); only shown when effects were extracted from the local client. This branch also
  *  keeps `board` (BOARDS, the DOM fallback board; 'auto' follows the 3D probe) and `highRefresh` (the Android shell's
  *  dynamic refresh rate). */
-export const DEFAULT_SETTINGS = Object.freeze({ bgm: 0.6, sfx: 0.8, voice: 0.8, voiceLang: 'jp', voiceNative: false, voiceOverrides: Object.freeze({}), muted: false, damageNumbers: true, officialDamageNumbers: false, ammoEnergyCount: false, combatMetrics: false, prepDeployFold: true, quality: 'high', officialFx: 'auto', otherSkins: true, textSize: 'sm', board: 'auto', highRefresh: true, keys: DEFAULT_HOTKEYS });
+export const DEFAULT_SETTINGS = Object.freeze({ bgm: 0.6, sfx: 0.8, voice: 0.8, voiceLang: 'jp', voiceNative: false, voiceOverrides: Object.freeze({}), muted: false, damageNumbers: true, officialDamageNumbers: false, ammoEnergyCount: false, combatMetrics: false, prepDeployFold: true, quality: 'high', officialFx: 'auto', otherSkins: true, textSize: 'sm', board: 'auto', highRefresh: true, hoverShortcuts: false, keys: DEFAULT_HOTKEYS });
 const QUALITIES = ['high', 'medium', 'low'];
 const BOARDS = ['auto', '3d', '2d'];
 /** The values of 设置「官方特效」 (render/vfx/tier.js OFFICIAL_FX). Display order in the dialog is low / medium / high. */
@@ -60,7 +64,7 @@ function ammoEnergyCountOf(r) {
  * Sanitize persisted settings. Retired keys `ammoCount` and `mysticEnergy` are read here and never returned.
  * @param {any} raw
  * @returns {{ bgm: number, sfx: number, voice: number, voiceLang: 'cn'|'jp'|'en'|'kr', voiceNative: boolean, voiceOverrides: Record<string, string>, muted: boolean, damageNumbers: boolean, officialDamageNumbers: boolean, ammoEnergyCount: boolean, combatMetrics: boolean, prepDeployFold: boolean, quality: 'high'|'medium'|'low', officialFx: 'auto'|'off'|'lite'|'full', otherSkins: boolean,
- *   textSize: 'sm'|'md'|'lg'|'xl', board: 'auto'|'3d'|'2d', highRefresh: boolean, keys: Record<'buy'|'refresh'|'freeze'|'levelUp'|'retreat'|'sell'|'ready', string> }}
+ *   textSize: 'sm'|'md'|'lg'|'xl', board: 'auto'|'3d'|'2d', highRefresh: boolean, hoverShortcuts: boolean, keys: Record<'buy'|'refresh'|'freeze'|'levelUp'|'retreat'|'sell'|'ready', string> }}
  */
 export function sanitizeSettings(raw) {
   const r = isObj(raw) ? raw : {};
@@ -84,6 +88,7 @@ voiceLang: VOICE_LANGS.includes(r.voiceLang) ? r.voiceLang : DEFAULT_SETTINGS.vo
     textSize: TEXT_SIZES.includes(r.textSize) ? r.textSize : DEFAULT_SETTINGS.textSize,
     board: BOARDS.includes(r.board) ? r.board : DEFAULT_SETTINGS.board,
     highRefresh: typeof r.highRefresh === 'boolean' ? r.highRefresh : DEFAULT_SETTINGS.highRefresh,
+    hoverShortcuts: typeof r.hoverShortcuts === 'boolean' ? r.hoverShortcuts : DEFAULT_SETTINGS.hoverShortcuts,
     keys: sanitizeHotkeys(r.keys),
   };
 }

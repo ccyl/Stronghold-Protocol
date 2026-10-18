@@ -1447,6 +1447,8 @@ const [chatOpen, setChatOpen] = useState(false);
       }
       if (!L.editable) return;
       if (act === 'buy') {
+        // 设置「快捷操作跟随悬停」OFF: the old (pre-0.3.0) habit — W did not exist; buying is a click on the shop card
+        if (settingsStore.get().hoverShortcuts !== true) return;
         if (L.drag || L.facing || !pointer || pointer.buttons) return;
         const card = document.elementFromPoint(pointer.x, pointer.y)?.closest('.scard[data-shop-slot]');
         if (!card || !barRef.current?.contains(card)) return;
@@ -1458,6 +1460,19 @@ const [chatOpen, setChatOpen] = useState(false);
         return;
       }
       if (act === 'retreat' || act === 'sell') {
+        // 设置「快捷操作跟随悬停」OFF (default): the pre-0.3.0 habit — Q / X act on the operator the player tapped (the one
+        // whose underframe the tap opened), not on whatever the pointer happens to be over. ON: upstream PR #629's hover
+        // target (Q / X act on the operator under the pointer).
+        if (settingsStore.get().hoverShortcuts !== true) {
+          if (!L.showPrep || L.drag || L.facing || L.selBusy || L.pen || !L.sel) return;
+          const uid = L.sel.uid;
+          const selected = L.placeCtx.pieces.get(uid);
+          if (selected?.piece.kind !== 'chess') return;
+          const available = underframeActions(L.placeCtx, uid);
+          if (act === 'retreat' && available?.retreat) await retreatPiece(uid);
+          else if (act === 'sell' && available?.sell != null) await sellOwnPiece(uid);
+          return;
+        }
         if (!L.showPrep || L.drag || L.facing || L.selBusy || L.pen || !pointer || pointer.buttons) return;
         const uid = L.view?.pieceAtClientPoint(pointer.x, pointer.y);
         const hovered = Number.isInteger(uid) ? L.placeCtx.pieces.get(uid) : null;

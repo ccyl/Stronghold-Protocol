@@ -2354,5 +2354,7 @@
   "服务器即将关闭维护": "Server shutting down for maintenance",
   "当前服务器处于高载荷运行状态（算力/网络接近上限）。新加入玩家或未预载玩家可能会遇到明显卡顿或掉线，建议前往备用服游玩或稍后再试。": "The server is under heavy load (compute and network are near their limits). New or non-preloaded players may see noticeable lag or disconnects; consider playing on a backup server or trying again later.",
   "当前服务器处于高峰拥挤状态。建议网页端玩家在主页右下角「⚡资源预载」完成缓存后再进入游戏，以获得顺畅体验。": "The server is crowded at peak hours. Web players are advised to finish caching via ⚡ Resource Preload at the bottom right of the home page before entering the game for a smooth experience.",
-  "击杀": "Kills"
+  "击杀": "Kills",
+  "快捷操作跟随悬停": "Hover shortcuts",
+  "打开：Q 撤退、X 出售作用于鼠标悬停的干员，W 购买悬停的商店卡牌。关闭（默认）：与旧版本一致，Q / X 作用于已点选的干员（其操作栏），W 不生效。": "On: Q retreats and X sells the operator under the pointer, and W buys the shop card under the pointer. Off (default): the previous version behaved this way — Q / X act on the operator you tapped (its action bar), and W does nothing."
 }

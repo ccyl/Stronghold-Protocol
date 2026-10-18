@@ -26,6 +26,14 @@ describe('hovered operator shortcuts', { skip: !ENABLED && 'set SP_E2E=1 and CHR
       const errors = [];
       page.on('pageerror', (e) => errors.push(e.message));
       await page.setViewport({ width: 1920, height: 1080 });
+      // this suite tests the hover mode of 设置 →「快捷操作跟随悬停」; the build's default is the previous version's click mode
+      await page.evaluateOnNewDocument(() => {
+        try {
+          const k = 'sp.pref.settings';
+          const cur = JSON.parse(localStorage.getItem(k) || '{}');
+          localStorage.setItem(k, JSON.stringify({ ...cur, hoverShortcuts: true }));
+        } catch { /* no storage */ }
+      });
       const renderer = mode === 'fallback' ? 'fallback' : 'engine';
       await page.goto(`${srv.url}/dev/game-mock.html?shot=1&phase=PREP&variant=temp&render=${renderer}&board=${mode}`, { waitUntil: 'domcontentloaded' });
       await page.waitForFunction((kind) => globalThis.__SP_VIEW__?.kind === kind, { timeout: 30000 }, renderer);
