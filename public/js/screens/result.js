@@ -21,6 +21,7 @@ import { useGameData, Img, UnitThumb, BandIcon, PlayerAvatar, BondGlyph, LpTower
 import { normalizeResult, fmtNum, diyRecordFor, cardStandIn, standInForText } from '../ui/gameLogic.js';
 import { data } from '../data.js';
 import { enemyIconUrl, titleIconUrl, uiUrl } from '../ui/assetUrls.js';
+import { store, useStore, emptyMatch } from '../store.js';
 import { audio } from '../audio.js';
 import { sentText } from '../ui/lang.js';
 import { UnofficialMark } from '../ui/pluginTag.js';
@@ -102,6 +103,17 @@ function PlayerCard({ p, myId, titles, best, solo = false }) {
       ${Number.isFinite(p.lp) ? html`<div class="rstat" title=${p.lpShared && !solo ? t('最终攻势起全队共享目标生命值') : ''}><span>${p.lpShared && !solo ? t('同盟剩余生命') : t('剩余生命')}</span><${LpTower} value=${p.lp} size="sm" /></div>` : null}
     </div>
   </article>`;
+}
+
+/** RESULT screen of the match on screen: reads the store; 返回同盟 / 返回大厅 drops the match. */
+export function ResultScreen() {
+  const res = useStore((s) => s.match.result);
+  const pub = useStore((s) => s.match.public);
+  const myId = useStore((s) => s.me.playerId);
+  const hasRoom = useStore((s) => !!s.room);
+  const content = useStore((s) => s.room?.content ?? null);
+  const back = () => store.set({ match: emptyMatch() });
+  return html`<${ResultView} res=${res} pub=${pub} myId=${myId} backLabel=${hasRoom ? t('返回同盟') : t('返回大厅')} onBack=${back} content=${content} />`;
 }
 
 /**
