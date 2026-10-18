@@ -1088,3 +1088,59 @@
 @media (prefers-reduced-motion: reduce) {
   .downm__face.is-out, .downm__title { animation: none; }
 }
+
+/* ---- 局内聊天 (ui/chatBox.js、ui/chatInputBar.js) ---------------------------------------------------------------
+   之前这两个组件的类名（.chat-panel / .chat-log / .chat-form …）在任何样式表里都不存在，输入条按普通文档流渲染，
+   于是弹出后跑到页面左上角。这里给成套样式：面板贴在底部左侧，日志向上堆叠、点击穿透，输入条与发送按钮在最下面。 */
+.chat-panel {
+  position: absolute; left: .3rem; bottom: 1.95rem; z-index: 6;
+  display: flex; flex-direction: column; gap: .06rem;
+  width: min(5.2rem, 40vw); pointer-events: none;
+}
+.chat-log {
+  display: flex; flex-direction: column; gap: .03rem;
+  max-height: 2.2rem; overflow-y: auto; padding: .04rem;
+  scrollbar-width: thin; pointer-events: none;
+}
+.chat-item {
+  display: flex; gap: .06rem; padding: .03rem .06rem;
+  background: rgba(8, 11, 10, .72); border-left: 2px solid var(--line-3);
+  font-size: max(.14rem, 11px); line-height: 1.45;
+}
+.chat-seat { flex: none; color: var(--ice); font-weight: 700; }
+.chat-seat.seat-0 { color: #7fd8ff; }
+.chat-seat.seat-1 { color: #ffd479; }
+.chat-seat.seat-2 { color: #a0f0b0; }
+.chat-seat.seat-3 { color: #ff9fb5; }
+.chat-seat.seat-spec { color: var(--text-lo); }
+.chat-text { min-width: 0; color: var(--text-md); overflow-wrap: anywhere; }
+.chat-form { display: flex; gap: .06rem; pointer-events: auto; }
+.chat-input {
+  flex: 1 1 auto; min-width: 0; padding: .06rem .09rem;
+  font: inherit; font-size: max(.14rem, 11px); color: var(--text-hi);
+  background: rgba(8, 11, 10, .92); border: 1px solid var(--line-3); border-radius: 2px;
+}
+.chat-input:focus { outline: none; border-color: var(--mint-400); }
+.chat-send-btn {
+  flex: none; padding: .06rem .14rem; font: inherit; font-size: max(.14rem, 11px); font-weight: 700;
+  color: var(--text-on-mint); background: var(--mint-500); border: 0; border-radius: 2px; cursor: pointer;
+}
+.chat-trigger-btn {
+  align-self: flex-start; pointer-events: auto; padding: .05rem .12rem;
+  font: inherit; font-size: max(.14rem, 11px); color: var(--text-md);
+  background: rgba(8, 11, 10, .8); border: 1px solid var(--line); border-radius: 2px; cursor: pointer;
+}
+/* 另一套输入条（ui/chatInputBar.js，当前未被引用）：同样的底部浮层定位 */
+.chat-bar { position: absolute; left: .3rem; bottom: 1.95rem; z-index: 6; width: min(5.2rem, 40vw); }
+.chat-bar__form { display: flex; gap: .06rem; }
+.chat-bar__input {
+  flex: 1 1 auto; min-width: 0; padding: .06rem .09rem; font: inherit; font-size: max(.14rem, 11px);
+  color: var(--text-hi); background: rgba(8, 11, 10, .92); border: 1px solid var(--line-3); border-radius: 2px;
+}
+.chat-bar__input:focus { outline: none; border-color: var(--mint-400); }
+.chat-bar__send, .chat-bar__close {
+  flex: none; padding: .06rem .12rem; font: inherit; font-size: max(.14rem, 11px);
+  color: var(--text-on-mint); background: var(--mint-500); border: 0; border-radius: 2px; cursor: pointer;
+}
+.chat-bar__close { color: var(--text-md); background: rgba(8, 11, 10, .85); border: 1px solid var(--line); }
+.chat-bar__close:disabled, .chat-bar__send:disabled { opacity: .5; cursor: default; }
