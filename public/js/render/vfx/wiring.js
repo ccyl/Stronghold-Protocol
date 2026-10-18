@@ -272,11 +272,12 @@ export class FxWiring {
         if (Object.hasOwn(this.idx.units || {}, rec.fx.unit)) cands.unshift(rec.fx.unit);
       }
       cands.push(v.info?.spine, v.info?.defId);
+      const units = this.idx.units && typeof this.idx.units === 'object' ? this.idx.units : {}; // no 单位表 must not throw
       for (const c of cands) {
         if (!c) continue;
-        if (this.idx.units[c]) { k = c; break; }
+        if (units[c]) { k = c; break; }
         const base = String(c).replace(/_\d+$/, '');
-        if (base !== c && this.idx.units[base]) { k = base; break; }
+        if (base !== c && units[base]) { k = base; break; }
       }
       this.keyCache.set(id, k);
     }
@@ -286,7 +287,8 @@ export class FxWiring {
   /** The index unit of a view (by its info), cached per battle id. */
   unitOf(v) {
     const k = this.unitKeyOf(v);
-    return k ? this.idx.units[k] : null;
+    const units = this.idx?.units;
+    return k && units && typeof units === 'object' ? units[k] : null;
   }
 
   /** A battle view by id (opts.view), or null. */

@@ -242,7 +242,7 @@ function DiySkinSection({ charId, slotId }) {
  * The picker's view (no hooks: the tests draw it): `filter` 'all' | 'proto' | 'owned', `query`, `draft` the pick being
  * made (null = none chosen yet) and their setters.
  */
-export function DiyPickerView({ m, slot, picks, kitted, onDone, onClose, filter, query, draft, onFilter: setFilter, onQuery: setQuery, onDraft: setDraft, ops = {}, onOps = null, previewLevel = 'elite', onPreviewLevel = () => {} }) {
+export function DiyPickerView({ m, slot, picks = {}, kitted, onDone, onClose, filter, query, draft, onFilter: setFilter, onQuery: setQuery, onDraft: setDraft, ops = {}, onOps = null, previewLevel = 'elite', onPreviewLevel = () => {} }) {
   const D = diyData();
   const cur = picks[slot.slotId] || null;
   const options = pickOptions(slot.slotId, picks, D, kitted);
@@ -337,7 +337,7 @@ export function DiyPanel(props) {
 }
 
 /** The tab's view (no hooks: the tests draw it): `picking` = the slot being filled, or null. */
-export function DiyPanelView({ m, picks, legal, kitted, onSet, picking, onPicking: setPicking, ops = {}, onOps = null }) {
+export function DiyPanelView({ m, picks = {}, legal = {}, kitted, onSet, picking, onPicking: setPicking, ops = {}, onOps = null }) {
   const slots = diySlotList(diyData());
   const slot = picking ? slots.find((s) => s.slotId === picking) : null;
   const tiers = [...new Set(slots.map((s) => s.tier))];

@@ -56,10 +56,11 @@ export function operatorVoiceOptions(audioManifest, charId, saved) {
 export function OperatorVoice({ charId }) {
   const settings = useSettings();
   if (!charId) return null;
-  const value = settings.voiceOverrides[charId] || '';
+  const overrides = settings.voiceOverrides || {};
+  const value = overrides[charId] || '';
   const options = operatorVoiceOptions(data.get('assets')?.audio, charId, value);
   const change = (lang) => {
-    const voiceOverrides = { ...settings.voiceOverrides };
+    const voiceOverrides = { ...overrides };
     if (lang) voiceOverrides[charId] = lang;
     else delete voiceOverrides[charId];
     updateSettings({ voiceOverrides });
