@@ -76,6 +76,40 @@ export function parseStoredSkins(raw) {
  * (ui/loadoutSync.js: it must survive a room / match reset). `ui/loadoutSync.js installSkinsSync` watches
  * `SKINS_KEY` and mirrors it to the server as `room.skins`.
  */
+/**
+ * 本分支 0.3.x 的选择存的是 `{ [chessId]: skinId }`（chessId 形如 `chess_char_1_01_a`）；0.3.1 起按干员 charId
+ * （`char_498_inside`）存。玩家升级后旧键查不到，换装会全部失效——这里把旧键一次性换成对应干员的 charId
+ * （同一干员的多个棋子 id 取第一个），再让 loadoutSync 的 pref sync 落盘/上报。
+ * 需要棋表；数据还没载入时返回 false，下次打开换装面板会再试。
+ * @returns {boolean} 是否改了存储
+ */
+export function migrateLegacySkinKeys() {
+  const cur = skinsStore.get()[SKINS_KEY] || {};
+  const chess = data.get('chess');
+  const recs = chess && isObj(chess) ? chess : null;
+  if (!recs) return false;
+  const byChessId = new Map();
+  for (const r of Object.values(recs)) {
+    if (r && typeof r === 'object' && str(r.chessId) && str(r.charId)) byChessId.set(r.chessId, r.charId);
+  }
+  let changed = false;
+  const next = {};
+  for (const [key, skinId] of Object.entries(cur)) {
+    if (key.startsWith('chess_')) {
+      const charId = byChessId.get(key) || null;
+      if (charId) {
+        if (!(charId in next)) next[charId] = skinId;
+        changed = true;
+        continue;
+      }
+    }
+    next[key] = skinId;
+  }
+  if (!changed) return false;
+  skinsStore.set({ [SKINS_KEY]: next });
+  return true;
+}
+
 export const skinsStore = createStore({ [SKINS_KEY]: parseStoredSkins(loadPref(SKINS_PREF, null)), [SKINS_SYNC_KEY]: 'idle' });
 
 /**

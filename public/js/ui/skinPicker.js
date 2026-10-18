@@ -20,11 +20,11 @@
 // A missing piece of art still falls back to the OPERATOR's own (its 立绘 / portrait / avatar), never to a slash or a
 // placeholder, so the 默认 tile of a picture-only plugin draws the picture that plugin wrote.
 
-import { useState } from '../../vendor/hooks.module.js';
+import { useState, useEffect } from '../../vendor/hooks.module.js';
 import { html, MicroLabel, Modal } from './components.js';
 import { useStore } from '../store.js';
 import { useData } from '../data.js';
-import { skinsStore, availableSkins, chosenSkin, hasAnySkinChoices, setSkin, clearSkin, SKINS_KEY } from './skins.js';
+import { skinsStore, availableSkins, chosenSkin, hasAnySkinChoices, setSkin, clearSkin, migrateLegacySkinKeys, SKINS_KEY } from './skins.js';
 import { t } from '../../../shared/i18n.js';
 
 const cx = (...p) => p.flat().filter(Boolean).join(' ');
@@ -95,6 +95,8 @@ export function SkinSection({ charId }) {
   const s = useStore((v) => v, Object.is, skinsStore);
   const ready = useData('assets');
   const [preview, setPreview] = useState(null);
+  // 旧版本按 chessId 存的换装选择，换成干员 charId（否则升级后全部失效）；数据未就绪时下次打开再试
+  useEffect(() => { if (ready) migrateLegacySkinKeys(); }, [ready]);
 
   const id = typeof charId === 'string' && charId ? charId : null;
   if (!id || !ready) return null;
