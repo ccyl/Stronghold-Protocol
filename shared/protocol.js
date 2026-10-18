@@ -85,11 +85,23 @@ export function isBattleResult(v) {
  * Unlike `room.loadout` these are PUBLIC: they ride in `Match.publicView().players[]` so a teammate sees your
  * skin, which is the whole point of choosing one in a co-op match.
  */
-export const SKIN_LIMITS = Object.freeze({ entries: 160, idLen: 64 });
-/** A skinId. NOT `isId`: those allow only `[A-Za-z0-9_\-.:]`, and skin ids carry `@` and `#` (`char_002_amiya@winter#1`). */
-export const isSkinId = (v) => typeof v === 'string' && v.length > 0 && v.length <= SKIN_LIMITS.idLen && /^[A-Za-z0-9_@#+.\-]+$/.test(v);
+export const SKIN_LIMITS = Object.freeze({
+  // [ASSUMED] absolute ceiling of one message. The practical cap is the operator count of the room's content
+  // (checkSkinSelection drops the rest); 256 is above the vanilla roster (210) and the same order as the loadout's
+  // operator map. A larger map is refused whole, the way an over-long loadout is.
+  entries: 256, idLen: 64, charIdLen: 64,
+});
+/** A skinId. NOT `isId`: that allows only `[A-Za-z0-9_\-.:]`, while a skin key carries `@` and `#` (`char_002_amiya@winter#1`). The same character class as shared/plugins/visual.js `isSkinKey`. */
+export const isSkinId = (v) => typeof v === 'string' && v.length > 0 && v.length <= SKIN_LIMITS.idLen && /^[A-Za-z0-9_][A-Za-z0-9_@#+.\-]*$/.test(v);
+/**
+ * An operator charId. Official ids are `char_<digits>_<token>` (character_table / data/chess.json: `char_498_inside`,
+ * `char_1012_skadi2`, `char_4145_ulpia`, `char_616_pithst`). A plugin operator is `char_x_<id>`
+ * (shared/plugins/recordsSchema.js). A chess id (`chess_char_1_01_a`) is not one: `isId` would accept it.
+ */
+export const CHAR_ID = /^char_(?:x_[A-Za-z0-9_-]+|[0-9]+_[A-Za-z0-9_]+)$/;
+export const isCharId = (v) => typeof v === 'string' && v.length <= SKIN_LIMITS.charIdLen && CHAR_ID.test(v);
 /** Structural check of `room.skins.skins`. */
-export const isSkinSelection = (v) => isMap(v, SKIN_LIMITS.entries, isId, isSkinId);
+export const isSkinSelection = (v) => isMap(v, SKIN_LIMITS.entries, isCharId, isSkinId); // keys are operator charIds, never chess ids
 
 // ---- operator loadout (DESIGN §16): room.loadout { entries } -------------------------------------------------
 
@@ -646,6 +658,8 @@ export function checkSkinSelection(skins, hasOperator) {
  * @param {{ chess?: Record<string, any>, backups?: any }|null|undefined} data
  * @returns {Set<string>}
  */
+/** Per-content cache for operatorCharIds (a WeakMap: the content object is the key). */
+const SKIN_OPS = new WeakMap();
 export function operatorCharIds(data) {
   if (!data || typeof data !== 'object') return new Set();
   let ids = SKIN_OPS.get(data);
