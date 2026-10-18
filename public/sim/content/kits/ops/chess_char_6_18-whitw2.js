@@ -5,6 +5,8 @@ import { sortEnemyTargets, canTargetEnemy } from '../../../targeting.js';
 import { rotateOffset } from '../../../dir.js';
 import { bodyDist } from '../../../body.js';
 import { num, tbb, hasBond, ANY, selectedSkill, skillGridOf, WHOLE_FIELD, bstate, aura } from '../shared/tier6.js';
+import { boundedCount } from '../../../../../shared/plugins/limits.js';
+import { bbCap } from '../../../../../shared/plugins/officialBounds.js';
 import { hypot, sin, cos, atan2 } from '../../../detmath.js';
 
 // ------------------------------------------------------------------------------------------------------------------
@@ -193,9 +195,9 @@ function whitw2(bb, chess, def) {
           const c = battle.enemiesInKeys(unit.rangeKeys, unit, ctx.profile);
           for (const e of battle.blockedTargets(unit, ctx.profile)) if (!c.includes(e)) c.push(e);
           if (!c.length) { ctx.targets = []; return; }
-          const n = 1 + Math.floor(num(bb['attack@cnt'])) + ((unit.mem.wolfStage || 0) >= 3 ? 1 : 0);
+          const n = 1 + Math.floor(boundedCount(num(bb['attack@cnt']), bbCap('attack@cnt'), 0)) + ((unit.mem.wolfStage || 0) >= 3 ? 1 : 0);
           m.locks = m.locks.filter((e) => e.alive && c.includes(e)).slice(0, n);
-          while (m.locks.length < n) {
+          while (m.locks.length < n) { // loop-cap: bbCap attack@cnt; picks only from enemies already in range
             const free = c.filter((e) => !m.locks.includes(e));
             m.locks.push(battle.rng.pick(free.length ? free : c));
           }
@@ -285,7 +287,7 @@ function whitw2(bb, chess, def) {
       } },
       { install(battle, unit) { // 叙拉古的荣幸: one team effect per player, the strongest copy's numbers
         const S = bstate(battle);
-        S.siracusa ??= new Map();
+        S.siracusa = S.siracusa ?? new Map();
         const cur = S.siracusa.get(unit.ownerId);
         const sp = num(t1.sp), as = num(t1.attack_speed);
         if (cur) { cur.sp = Math.max(cur.sp, sp); cur.as = Math.max(cur.as, as); return; }

@@ -69,7 +69,7 @@ export default {
         const allies = battle.alliesFor(unit).filter(inZone);
         // one DEF buff per alchemy unit, so two units on one ally add up (+60 +60; PRTS 度算浪波 备注 「效果均可叠加」,
         // GitHub #388 — one shared key let the last unit's buff replace the other's)
-        z.defKey ??= `thorn2:bastion:${unit.id}:${unit.mem.bastionSeq = (unit.mem.bastionSeq ?? 0) + 1}`;
+        z.defKey = z.defKey ?? `thorn2:bastion:${unit.id}:${unit.mem.bastionSeq = (unit.mem.bastionSeq ?? 0) + 1}`;
         for (const a of allies) battle.addBuff(a, { key: z.defKey, duration: AURA_DUR, mods: mods({ defFlat: num(bb.def) }) });
         if (z.acc >= 1 - 1e-9) {
           z.acc -= 1;
@@ -106,7 +106,7 @@ export default {
             if (!t) return;
             const key = `thorn2:guard:${unit.id}:${unit.mem.zoneSeq = (unit.mem.zoneSeq ?? 0) + 1}`;   // its regen buff ("效果均可叠加")
             const z = { type: 'guard', r: t.tileR, c: t.tileC, x: t.x, y: t.y, t: 0, acc: 0, dur: num(bb.projectile_delay_time, 6) + extend(battle, unit), key };
-            (unit.mem.zones ??= []).push(z);
+            (unit.mem.zones ?? (unit.mem.zones = [])).push(z);
             battle.fx('zone', { x: z.x, y: z.y, id: unit.id, r: RING1, duration: z.dur });
           },
         }),
@@ -118,7 +118,7 @@ export default {
               .slice(0, Math.max(1, num(bb.max_target_token, 3)));
             const dur = num(bb.projectile_delay_time, 19) + extend(battle, unit);
             for (const a of ops) {
-              (unit.mem.zones ??= []).push({ type: 'sea', anchor: a, x: a.x, y: a.y, t: 0, acc: Math.max(0.1, num(bb.interval, 1)) - AURA_IV, dur });
+              (unit.mem.zones ?? (unit.mem.zones = [])).push({ type: 'sea', anchor: a, x: a.x, y: a.y, t: 0, acc: Math.max(0.1, num(bb.interval, 1)) - AURA_IV, dur });
               battle.fx('zone', { x: a.x, y: a.y, id: unit.id, r: RING1, duration: dur });
             }
           },
@@ -153,7 +153,7 @@ export default {
           // place instead of stacking a new layer each second (render/fx/zones.js; community report of 2026-10-06)
           const key = `thorn2:${unit.id}:${unit.mem.zoneSeq = (unit.mem.zoneSeq ?? 0) + 1}`;
           const z = { x: t.x, y: t.y, vx: (dx / len) * speed, vy: (dy / len) * speed, t: 0, acc: 0, dur: baseDur + extra, key };
-          (unit.mem.zones ??= []).push(z);
+          (unit.mem.zones ?? (unit.mem.zones = [])).push(z);
           battle.fx('zone', { x: z.x, y: z.y, id: unit.id, r: r0, duration: z.dur, key });
         },
       },
