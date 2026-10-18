@@ -638,3 +638,9 @@
 .asset-import__drop:hover { border-color: var(--mint-400); color: var(--text-md); }
 .asset-import__row { display: flex; align-items: center; gap: .08rem; padding: .05rem .02rem; font-size: max(.14rem, 11px); border-bottom: 1px solid var(--line); }
 .asset-import__status, .asset-import__reason { font-size: max(.12rem, 10px); color: var(--text-lo); }
+
+/* ---- 匹配中的 HUD (screens/lobby.js .matchmaking-hud) ----------------------------------------------------------
+   面板本身靠 .brackets 的画框，内部文字与计时此前没有样式。 */
+.matchmaking-hud__info { display: flex; align-items: center; gap: .1rem; }
+.matchmaking-hud__text { font-size: max(.16rem, 12px); color: var(--text-md); }
+.matchmaking-hud__time { font-family: var(--font-num); font-size: max(.18rem, 13px); color: var(--mint-400); letter-spacing: .04em; }
