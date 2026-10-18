@@ -626,3 +626,15 @@
   letter-spacing: .02em;
 }
 
+
+/* ---- 素材导入面板 (ui/assetImport.js .asset-import__*) --------------------------------------------------------
+   此前整组没有样式：隐藏的文件输入控件会以默认外观露出来。 */
+.asset-import__file { display: none; }
+.asset-import__drop {
+  display: flex; align-items: center; justify-content: center; min-height: 1.6rem; padding: .12rem;
+  font-size: max(.15rem, 11px); color: var(--text-lo); text-align: center;
+  background: rgba(255, 255, 255, .02); border: 1px dashed var(--line-3); border-radius: 2px; cursor: pointer;
+}
+.asset-import__drop:hover { border-color: var(--mint-400); color: var(--text-md); }
+.asset-import__row { display: flex; align-items: center; gap: .08rem; padding: .05rem .02rem; font-size: max(.14rem, 11px); border-bottom: 1px solid var(--line); }
+.asset-import__status, .asset-import__reason { font-size: max(.12rem, 10px); color: var(--text-lo); }

@@ -1144,3 +1144,12 @@
 }
 .chat-bar__close { color: var(--text-md); background: rgba(8, 11, 10, .85); border: 1px solid var(--line); }
 .chat-bar__close:disabled, .chat-bar__send:disabled { opacity: .5; cursor: default; }
+
+/* ---- 联防跳过投票 (ui/hud.js UniteSkipVote) -------------------------------------------------------------------
+   此前 .unite-vote 没有样式，按钮和票数说明挤成一行贴在一起。 */
+.unite-vote {
+  display: flex; align-items: center; gap: .08rem; flex-wrap: wrap;
+  padding: .04rem .08rem; background: rgba(8, 11, 10, .8);
+  border: 1px solid var(--line); border-radius: 2px; pointer-events: auto;
+}
+.unite-vote__count { font-size: max(.13rem, 10px); color: var(--text-lo); white-space: nowrap; }

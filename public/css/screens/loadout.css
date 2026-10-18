@@ -1004,3 +1004,14 @@
 }
 
 .diy-choice__tags { display: flex; flex-wrap: wrap; gap: .08rem; color: var(--text-lo); font-size: max(calc(.12 * var(--t)), 10px); }
+
+/* ---- 导出 / 导入对话框 (screens/loadout.js .lo-io__*) ---------------------------------------------------------
+   这组类名此前没有任何样式：文件选择控件直接以默认外观显示、文本框只有两三行高。 */
+.lo-io__hint { margin: 0 0 .08rem; font-size: max(.14rem, 11px); line-height: 1.55; color: var(--text-md); }
+.lo-io__text {
+  display: block; width: 100%; box-sizing: border-box; min-height: 4.2rem; max-height: 42vh; resize: vertical;
+  padding: .08rem .1rem; font-family: var(--font-num); font-size: max(.13rem, 10px); line-height: 1.5;
+  color: var(--text-hi); background: rgba(8, 11, 10, .9); border: 1px solid var(--line-2); border-radius: 2px;
+}
+.lo-io__text:focus { outline: none; border-color: var(--mint-400); }
+.lo-io__file { display: none; }
