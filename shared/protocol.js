@@ -520,6 +520,9 @@ export const C2S = {
   // replaceUid: with both of the target's slots used, the equipped item the replace dialog picked (research 09 §1.2
   // UseEquipUp.unloadInstId; absent ⇒ the oldest; not one of the target's items ⇒ BAD_TARGET)
   'g.equip': { itemUid: isUid, targetUid: isUid, replaceUid: nullable(isUid), $optional: ['replaceUid'] },
+  // unequip (DESIGN §34.15, upstream 0.3.1): one equipped item back to the hand, else the visible temp window.
+  // Official rooms refuse it; the schema was lost when this branch's C2S catalogue was restored over the merge.
+  'g.unequip': { itemUid: isUid },
   'g.art': { itemUid: isUid, row: (v) => isInt(v, 0, GEO.ROWS - 1), col: (v) => isInt(v, 0, GEO.COLS - 1), dir: isDir, $optional: ['dir'] },
   'g.destroy': { uid: isUid },
   'g.reward': { idx: (v) => isInt(v, 0, 5) },

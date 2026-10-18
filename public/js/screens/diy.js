@@ -16,7 +16,7 @@ import { chessAvatarUrl, chessPortraitUrl, profIconUrl, skillRecordIconUrl, modu
 import { data, useData } from '../data.js';
 import { PROF_NAME, skillLabel, moduleBadge, fullTraitText, skillTags } from '../ui/loadoutModel.js';
 import { diySlotList, pickChoices, pickOptions, slotRecord, defaultPick } from '../ui/diyModel.js';
-import { skinsStore, availableSkins, loadSkinData, setSkin, clearSkin } from '../ui/skins.js';
+import { skinsStore, availableSkins, loadSkinData, setSkin, clearSkin, skinFor } from '../ui/skins.js';
 import { OperatorVoice } from '../ui/operatorVoice.js';
 // 皮肤 (docs/SKINS.md): the same self-contained section the 干员调配 detail draws, keyed by the operator being picked
 import { SkinSection } from '../ui/skinPicker.js';
@@ -81,7 +81,7 @@ function SlotCard({ m, slot, pick, illegal, onOpen, onClear, ops = {}, onOps = n
         <span>${mod ? html`<b class="num">${mod.type || ''}</b> ${mod.name || ''}` : t('不装备模组')} <small class="t-dim">${t('（精锐时生效）')}</small></span>
       </span>
       ${(() => {
-        const skinId = skinsStore.get().entries[rec.charId] || skinsStore.get().entries[slot.slotId];
+        const skinId = skinFor(rec.charId) || skinFor(slot.slotId);
         if (!skinId) return null;
         const skinInfo = availableSkins(rec.charId).find((s) => s.id === skinId);
         return html`<span class="diy-slot__kit" data-skin=${skinId}>
@@ -185,10 +185,10 @@ export const skinAvatarUrl = (skinId) => (skinId ? `/assets/char/skin_avatar/${s
 function DiySkinSection({ charId, slotId }) {
   useData('skins');
   useData('assets');
-  const [equipped, setEquipped] = useState(() => skinsStore.get().entries[charId] || skinsStore.get().entries[slotId] || null);
+  const [equipped, setEquipped] = useState(() => skinFor(charId) || skinFor(slotId) || null);
   useEffect(() => {
     loadSkinData();
-    setEquipped(skinsStore.get().entries[charId] || skinsStore.get().entries[slotId] || null);
+    setEquipped(skinFor(charId) || skinFor(slotId) || null);
   }, [charId, slotId]);
 
   const skins = availableSkins(charId);

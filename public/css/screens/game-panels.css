@@ -744,3 +744,18 @@ button.bpop__harmony:hover { border-style: solid; color: #fff; }
 .eqr__hint { margin: .04rem 0 0; text-align: center; font-size: calc(.15 * var(--t)); color: var(--text-lo); min-height: .24rem; }
 .eqr__hint b { color: var(--text-hi); }
 .eqr__ok-icon { width: .2rem; height: .2rem; margin-right: .06rem; vertical-align: -.03rem; filter: brightness(0) invert(1); }
+
+/* 插件交互窗口（PLUGIN API v2，ui/offerOverlay.js）：0.3.1 的浮层版面，随 merge 一起带过来 */
+.offerov { inset: 0; z-index: 24; }
+.offerov__dock { position: absolute; top: .8rem; right: .16rem; z-index: 24; display: flex; flex-wrap: wrap; gap: .08rem; max-width: 80%; max-height: 25%; overflow: auto; }
+.offerov__dock button { min-height: .44rem; }
+.offerov .spov__inner { top: .3rem; overflow: auto; padding: .2rem; }
+.offerov .spov__head { flex-wrap: wrap; font-size: calc(.18 * var(--t)); }
+.offerov .spov__grid { flex: none; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: none; grid-auto-rows: auto; overflow: visible; }
+.offerov__tabs { display: flex; flex-wrap: wrap; gap: .08rem; }
+.offerov__slot { display: flex; flex-direction: column; gap: .08rem; min-width: 0; }
+.offerov .spcard { flex: 1; min-height: 1.7rem; height: auto; }
+.offerov .spcard__name { font-size: calc(.27 * var(--t)); white-space: normal; overflow-wrap: anywhere; }
+.offerov .spcard__desc { font-size: calc(.2 * var(--t)); display: block; overflow: visible; -webkit-line-clamp: unset; overflow-wrap: anywhere; }
+.offerov button { min-height: .44rem; }
+.offerov .spcard__icon { width: .6rem; height: .6rem; }

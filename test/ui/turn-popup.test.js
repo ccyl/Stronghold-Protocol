@@ -23,7 +23,7 @@ test('the official effectChoose sprites, all in the asset list; no drawn stand-i
   assert.equal(P.TURN_POPUP_MS, 1200);
 });
 
-test('screens/game.js: the disc on the shared draft\'s own turn, with the 轮到你 sound, once the art is in, never with reduced motion', () => {
+test('screens/game.js: the disc on the shared draft\'s own turn, with the 轮到你 sound, once the art is in, never with reduced motion', { skip: 'this branch reverted the 机变 UI to v0.2.6 on the maintainer’s request (2026-10-18): no 请选择策略 banner / turn disc' }, () => {
   const g = read('public/js/screens/game.js');
   assert.match(g, /const spMine = !!sp && !solo && sp\.turnPid === myId && !sp\.pickOf\.has\(myId\);/);
   assert.match(g, /useEffect\(\(\) => \{ preloadTurnPopupArt\(\); \}, \[\]\);/);
@@ -31,7 +31,7 @@ test('screens/game.js: the disc on the shared draft\'s own turn, with the 轮到
   assert.match(g, /<\$\{TurnPopup\} key=\$\{turnPop\} onDone=\$\{\(\) => setTurnPop\(0\)\} \/>/);
 });
 
-test('the stylesheet: every keyframe it uses is defined, no clicks caught, reduced motion hides it, the project\'s rules', () => {
+test('the stylesheet: every keyframe it uses is defined, no clicks caught, reduced motion hides it, the project\'s rules', { skip: 'this branch reverted the 机变 UI to v0.2.6 on the maintainer’s request (2026-10-18): no 请选择策略 banner / turn disc' }, () => {
   const css = read('public/css/screens/game-panels.css');
   const block = css.slice(css.indexOf('.sptp {'), css.indexOf('.sptp { display: none; }') + 30);
   const used = new Set([...block.matchAll(/animation:\s*([^;]+);/g)].map((m) => m[1].trim().split(/\s+/)[0]));

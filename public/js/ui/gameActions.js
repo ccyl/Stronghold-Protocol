@@ -101,6 +101,9 @@ export const actions = {
   choice: (idx, identityOrChoiceId = null) => act('g.choice', typeof identityOrChoiceId === 'string'
     ? { idx, choiceId: identityOrChoiceId }
     : { idx, ...draftRequestScope(identityOrChoiceId || {}) }),
+  // a plugin interaction window slot (PLUGIN API v2, docs/PLUGINS.md §10b): the window's seq guards a stale pick
+  offer: (offer, idx, refresh = false, cardId) => act(refresh ? 'g.offerRefresh' : 'g.offer',
+    { offerId: offer.id, pluginId: offer.pluginId, seq: offer.seq, idx, cardId }),
   ready: (ready) => act('g.ready', { ready }, { sfx: ready ? 'ready' : 'back' }),
   emote: (id) => act('g.emote', { id }, { quiet: true }),
   chat: (text) => act('g.chat', { text }, { quiet: true }),

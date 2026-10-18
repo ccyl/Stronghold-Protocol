@@ -50,7 +50,7 @@ import { DiyPanel, diyData } from './diy.js';
 import { LoadoutStats } from '../ui/loadoutStats.js';
 export { LoadoutStats, statsPreview } from '../ui/loadoutStats.js';
 import { diyCount, sanitizeDiyPicks, setPick, serializeDiy, parseDiyImport, DIY_IMPORT_MAX_BYTES } from '../ui/diyModel.js';
-import { skinsStore, setSkins } from '../ui/skins.js';
+import { skinsStore, setSkins, SKINS_KEY } from '../ui/skins.js';
 import { t, tParts, N_ } from '../../../shared/i18n.js';
 import { copyText } from '../ui/clipboard.js';
 import { toast } from '../ui/toasts.js';
@@ -409,7 +409,7 @@ function Detail({ m, chess, golden, entries, ops = {}, onChange, onOps, onReset,
               ${mo.isDefault ? html`<span class="lo-badge lo-badge--def lo-mod__def">${t('默认')}</span>` : null}
             </button>`)}
           </div>
-          ${modOpt ? html`<${ModuleInfo} m=${m} golden=${golden} opt=${modOpt} potential=${opsOf(ops, chess.charId).potential} />` : null}
+          ${modOpt ? html`<${ModuleInfo} m=${m} golden=${golden} opt=${modOpt} potential=${cv.potentialOn ? cv.potential : null} />` : null}
         </section>
       ` : null}
 
@@ -604,7 +604,7 @@ function LoadoutScreen({ st }) {
   const openExport = () => setIo(tab === 'ownership'
     ? { mode: 'export', kind: 'ownership', text: serializeOwnership(loadoutStore.get().notOwned) }
     : tab === 'diy' ? { mode: 'export', kind: 'diy', text: serializeDiy(loadoutStore.get().diy) }
-      : { mode: 'export', kind: 'loadout', text: serializeExport(loadoutStore.get().entries, { skins: skinsStore.get().entries, ops: loadoutStore.get().ops }) });
+      : { mode: 'export', kind: 'loadout', text: serializeExport(loadoutStore.get().entries, { skins: skinsStore.get()[SKINS_KEY] || {}, ops: loadoutStore.get().ops }) });
   const openImport = () => setIo({ mode: 'import', kind: tab, text: '' });
   const ioCopy = async () => {
     const ok = await copyText(ioText);
@@ -656,7 +656,7 @@ function LoadoutScreen({ st }) {
     const nOps = r.ops ?? 0;
     let skinsApplied = 0;
     if (res.skins && Object.keys(res.skins).length > 0) {
-      setSkins(mergeSkins(skinsStore.get().entries, res.skins));
+      setSkins(mergeSkins(skinsStore.get()[SKINS_KEY] || {}, res.skins));
       skinsApplied = Object.keys(res.skins).length;
     }
     // nothing survived sanitising (unknown chess, or every choice already the default): keep the current loadout

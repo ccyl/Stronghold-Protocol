@@ -85,6 +85,7 @@ import { ShopBar } from '../ui/shopBar.js';
 import { DetailPanel, resolveDetail } from '../ui/detailPanel.js';
 import { RewardOverlay } from '../ui/rewardOverlay.js';
 import { ChoiceOverlay } from '../ui/choiceOverlay.js';
+import { OfferOverlay, offerBlocksPrep } from '../ui/offerOverlay.js';
 import { EnemyDrawer } from '../ui/enemyDrawer.js';
 import { Ticker } from '../ui/ticker.js';
 import { EmoteWheel } from '../ui/emotes.js';
@@ -260,7 +261,9 @@ const [chatOpen, setChatOpen] = useState(false);
   const scoutBandOwner = scoutPid ? (players.find((p) => p.playerId === scoutPid)?.name || null) : null;
   const personalChoice = !spectator && alive ? normalizePersonalChoice(pub, priv, myId) : null;
   const hasPersonalChoice = !!personalChoice;
-  const editable = phase === PHASE.PREP && !!priv && alive && !priv.ready && !watchingOther && !hasPersonalChoice;
+  // a declared plugin window that blocks the phase (quorum ≠ none) also closes the prep intents
+  const hasOffers = !!pub?.offers?.length;
+  const editable = !offerBlocksPrep(pub?.offers) && phase === PHASE.PREP && !!priv && alive && !priv.ready && !watchingOther && !hasPersonalChoice;
   const showShop = !!priv && alive && (phase === PHASE.PREP || phase === PHASE.SP_DRAFT || phase === PHASE.ROUND_START) && !watchingOther;
   const layersDisabled = phase === PHASE.UNITE || isBossPhase(phase);
   const sp = phase === PHASE.SP_DRAFT ? normalizeSp(pub?.sp, players, myId, pub?.poolGroups) : null;
@@ -1392,6 +1395,8 @@ const [chatOpen, setChatOpen] = useState(false);
     const onKey = async (e) => {
       const act = shortcutFor(e, settingsStore.get().keys); // the player's key map (Settings > Shortcuts)
       const L = live.current;
+      // a visible plugin interaction window owns the keyboard: its own Escape/Tab handling must win over the match's
+      if (document.querySelector('.offerov[role="dialog"]')) return;
       // dialogs / the guide own the keyboard; behind the 本局信息 / 敌方情报 drawer only Esc (closing it) acts
       if (shortcutBlocked(act, { modal: !!document.querySelector('.modal, .guide'), drawer: !!L.drawer })) return;
       // Spectating, eliminated, watching another board, or AI 托管: prep shortcuts do nothing. Esc still closes,
@@ -1720,6 +1725,8 @@ const [chatOpen, setChatOpen] = useState(false);
         onRetreat=${retreatSel} onSell=${sellSel} onDestroy=${sellSel} />` : null}
     </div>
 
+    ${hasOffers && !sp && !personalChoice ? html`<${OfferOverlay} pub=${pub} myId=${myId}
+      readOnly=${spectator || !alive} onAction=${actions.offer} />` : null}
     ${sp ? html`<${ChoiceOverlay} pub=${pub} sp=${sp} myId=${myId} solo=${solo} busyToken=${spBusy} total=${total}
       onPick=${async (i, opts = {}) => {
         const token = { idx: i, draftId: opts.draftId, groupId: opts.groupId };
