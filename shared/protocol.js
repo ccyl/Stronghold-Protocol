@@ -1,14 +1,12 @@
 // Normative message catalogue (DESIGN §8). Used by server (validation) and client (building requests).
 // Every client→server message is `{ t, rid?, ...fields }`. Unknown `t` or invalid fields ⇒ ERR.BAD_MSG.
 
-import { DIFFICULTIES, NAME_MAX_LEN, ROOM_CODE_LEN, MAX_SEATS, EMOTES, GEO } from './constants.js';
+import { DIFFICULTIES, NAME_MAX_LEN, ROOM_CODE_LEN, MAX_SEATS, ROOM_CAPACITIES, MAX_DRAFT_CARDS, EMOTES, GEO } from './constants.js';
 import { isDroppableChess } from './standIn.js';
 import { diySlotIds, validateDiyPicks } from './diy.js';
 import { cultivatedStats, isPotential, isCultivate, POTENTIAL_DEFAULT, CULTIVATE_DEFAULT, hasPotentialData } from './potential.js';
 import { isContentHash } from './plugins/identity.js';
 import { isPluginId } from './plugins/manifest.js';
-import { isTestCommand } from './testMode.js';
-import { PLUGIN_OFFER_SLOTS } from './plugins/limits.js';
 
 // ---- tiny validators -------------------------------------------------------
 const isInt = (v, lo = -Infinity, hi = Infinity) => Number.isInteger(v) && v >= lo && v <= hi;
@@ -31,17 +29,23 @@ const isMap = (v, max, key, val) => {
 const isList = (v, max, item) => Array.isArray(v) && v.length <= max && v.every(item);
 const isScalar = (v) => isStr(v, 64) || isNum(v) || isBool(v);
 
+// A viewed group never grants authority: Match derives the player's own group, then checks these optional guards.
+const draftScope = { draftId: isId, groupId: (v) => isInt(v, 1, 5) };
+const draftScopeOptional = ['draftId', 'groupId'];
+
 // ---- client-side combat (DESIGN §14): b.progress / b.result payloads -------------------------------------------
 
-/** Size limits of a b.result payload (the whole frame also obeys the 64 KB inbound limit). */
-export const RESULT_LIMITS = Object.freeze({ players: 4, leaked: 400, unitsEnd: 64, unitStats: 160, layerGains: 40, mods: 16, unspawned: 400 });
+/** Size limits of a b.result payload (the whole frame also obeys the 64 KB inbound limit). `players` is the per-player
+ * map bound: this branch seats up to MAX_SEATS, so the official 4 rejected (and silently downgraded to b.yield) every
+ * client-authoritative result of a larger room. */
+export const RESULT_LIMITS = Object.freeze({ players: MAX_SEATS, sources: MAX_SEATS, leaked: 400, unitsEnd: 64, unitStats: 160, layerGains: 40, mods: 16, unspawned: 400 });
 const BIG = 1e13;
 const isStat = (v) => v === undefined || isNum(v, 0, BIG);
 const isModVal = (v) => v === null || isNum(v, -BIG, BIG) || isStr(v, 64) || isBool(v);
 const isLeak = (l) => isPlain(l) && isId(l.enemyKey)
   && (l.mods === undefined || l.mods === null || isMap(l.mods, RESULT_LIMITS.mods, (k) => isStr(k, 32), isModVal))
   && optional((v) => isNum(v, 0, 1000))(l.lpr) && nullable(isId)(l.sourcePlayerId) && nullable((v) => isStr(v, 16))(l.tag)
-  && optional(isBool)(l.counted) && optional(isBool)(l.boss) && optional(isBool)(l.spawned) && optional(isBool)(l.uniteRuntime);
+  && optional(isBool)(l.counted) && optional(isBool)(l.boss) && optional(isBool)(l.spawned);
 const isUnitEnd = (u) => isPlain(u) && nullable(isUid)(u.uid) && isNum(u.hpPct, 0, 1) && isNum(u.sp, 0, 1e5) && isBool(u.alive)
   && optional(isBool)(u.skillActive) && nullable(isId)(u.defId);
 const isUnitStat = (u) => isPlain(u) && nullable(isUid)(u.uid) && nullable(isId)(u.defId) && optional((v) => isStr(v, 16))(u.kind)
@@ -73,6 +77,19 @@ export function isBattleResult(v) {
     && (v.unspawned === undefined || isList(v.unspawned, RESULT_LIMITS.unspawned, isUnspawned))
     && optional((x) => isInt(x, 0, 1e9))(v.errors) && optional((x) => isNum(x, 0, BIG))(v.bossHpLeft);
 }
+
+// ---- 干员皮肤 (docs/SKINS.md): room.skins { skins } -----------------------------------------------------------
+
+/**
+ * `room.skins { skins }`: `skins` = `{ [baseChessId]: skinId }`.
+ * Unlike `room.loadout` these are PUBLIC: they ride in `Match.publicView().players[]` so a teammate sees your
+ * skin, which is the whole point of choosing one in a co-op match.
+ */
+export const SKIN_LIMITS = Object.freeze({ entries: 160, idLen: 64 });
+/** A skinId. NOT `isId`: those allow only `[A-Za-z0-9_\-.:]`, and skin ids carry `@` and `#` (`char_002_amiya@winter#1`). */
+export const isSkinId = (v) => typeof v === 'string' && v.length > 0 && v.length <= SKIN_LIMITS.idLen && /^[A-Za-z0-9_@#+.\-]+$/.test(v);
+/** Structural check of `room.skins.skins`. */
+export const isSkinSelection = (v) => isMap(v, SKIN_LIMITS.entries, isId, isSkinId);
 
 // ---- operator loadout (DESIGN §16): room.loadout { entries } -------------------------------------------------
 
@@ -262,88 +279,6 @@ export function checkLoadoutOps(ops, isOperator, changesWithPotential = null) {
   return { ok: true, ops: out };
 }
 
-// ---- 干员皮肤 (docs/SKINS.md): room.skins { skins } ------------------------------------------------------------
-
-/**
- * `room.skins { skins }`: `skins` = `{ [charId]: skinId }` — which appearance each operator wears, one entry per
- * OPERATOR, so it covers the normal chess, its elite and a 自选 slot fielding the same operator (the skin catalogue of
- * the composed asset manifest is grouped per operator too: `chars[charId].skins`, docs/PLUGINS.md §9).
- *
- * A skin comes from an enabled cosmetic plugin's overlay (one the server's owner installed, switched on by each player
- * in 设置 → 外观插件 — `scope: ["personal"]`, so a room is never part of it). Unlike `room.loadout` these are PUBLIC:
- * they ride in `Match.publicView().players[]`, which is how a teammate sees your skin.
- *
- * The wire refuses the shape of the whole map (a non-plain object, a key that is not an operator charId, a value that
- * is not a skinId, or more than `SKIN_LIMITS.entries` pairs). Whether the operator is one this room's content has is
- * `checkSkinSelection`: that entry is dropped and the rest kept. A skinId the manifest does not hold still draws the
- * operator's default model (`spineEntry`).
- */
-export const SKIN_LIMITS = Object.freeze({
-  // [ASSUMED] absolute ceiling of one message. The practical cap is the operator count of the room's content
-  // (checkSkinSelection drops the rest); 256 is above the vanilla roster (210) and the same order as the loadout's
-  // operator map. A larger map is refused whole, the way an over-long loadout is.
-  entries: 256, idLen: 64, charIdLen: 64,
-});
-/** A skinId. NOT `isId`: that allows only `[A-Za-z0-9_\-.:]`, while a skin key carries `@` and `#` (`char_002_amiya@winter#1`). The same character class as shared/plugins/visual.js `isSkinKey`. */
-export const isSkinId = (v) => typeof v === 'string' && v.length > 0 && v.length <= SKIN_LIMITS.idLen && /^[A-Za-z0-9_][A-Za-z0-9_@#+.\-]*$/.test(v);
-/**
- * An operator charId. Official ids are `char_<digits>_<token>` (character_table / data/chess.json: `char_498_inside`,
- * `char_1012_skadi2`, `char_4145_ulpia`, `char_616_pithst`). A plugin operator is `char_x_<id>`
- * (shared/plugins/recordsSchema.js). A chess id (`chess_char_1_01_a`) is not one: `isId` would accept it.
- */
-export const CHAR_ID = /^char_(?:x_[A-Za-z0-9_-]+|[0-9]+_[A-Za-z0-9_]+)$/;
-export const isCharId = (v) => typeof v === 'string' && v.length <= SKIN_LIMITS.charIdLen && CHAR_ID.test(v);
-/**
- * Structural check of `room.skins.skins`: a plain object of ≤ 256 entries, keyed by an operator charId, each value a
- * skinId. Anything else — an array, a null-prototype object, a chess id, a bad skin id, one more entry — is refused
- * as a whole (BAD_MSG). The room's own operator list is not known here.
- */
-export const isSkinSelection = (v) => isMap(v, SKIN_LIMITS.entries, isCharId, isSkinId);
-
-const SKIN_OPS = new WeakMap();
-/**
- * The operators a room's content has, as charIds: every chess record (hidden and golden share the base charId), the
- * stand-in bodies (`backups.units`), and the 自选 picks (`diy.ownedPool`, `diy.operators`). Not chess ids.
- * @param {{ chess?: Record<string, any>, backups?: any }|null|undefined} data
- * @returns {Set<string>}
- */
-export function operatorCharIds(data) {
-  if (!data || typeof data !== 'object') return new Set();
-  let ids = SKIN_OPS.get(data);
-  if (ids) return ids;
-  ids = new Set();
-  const chess = data.chess && typeof data.chess === 'object' ? data.chess : null;
-  if (chess) for (const c of Object.values(chess)) if (c && isCharId(c.charId)) ids.add(c.charId);
-  const backups = data.backups && typeof data.backups === 'object' ? data.backups : null;
-  const units = backups?.units && typeof backups.units === 'object' ? backups.units : null;
-  if (units) for (const id of Object.keys(units)) if (isCharId(id)) ids.add(id);
-  const diy = backups?.diy && typeof backups.diy === 'object' ? backups.diy : null;
-  if (Array.isArray(diy?.ownedPool)) for (const id of diy.ownedPool) if (isCharId(id)) ids.add(id);
-  const ops = diy?.operators && typeof diy.operators === 'object' ? diy.operators : null;
-  if (ops) for (const id of Object.keys(ops)) if (isCharId(id)) ids.add(id);
-  SKIN_OPS.set(data, ids);
-  return ids;
-}
-
-/**
- * A skin selection the room may store. The shape is `isSkinSelection` (a failure refuses the whole map). A charId the
- * room's content does not have is dropped; the rest is kept, so the stored map is at most the operator count, and at
- * most `SKIN_LIMITS.entries` [ASSUMED].
- * @param {any} skins
- * @param {(charId: string) => boolean} [hasOperator]
- * @returns {{ ok: true, skins: Record<string, string>, dropped: number } | { error: 'BAD_MSG', detail: string }}
- */
-export function checkSkinSelection(skins, hasOperator) {
-  if (!isSkinSelection(skins)) return { error: 'BAD_MSG', detail: 'bad skin selection' };
-  const out = {};
-  let dropped = 0;
-  for (const id of Object.keys(skins)) {
-    if (typeof hasOperator === 'function' && !hasOperator(id)) { dropped++; continue; }
-    out[id] = skins[id];
-  }
-  return { ok: true, skins: out, dropped };
-}
-
 // ---- operator ownership (干员持有, 0.2.0 补位): room.ownership { notOwned } -------------------------------------------
 
 /**
@@ -496,13 +431,12 @@ export const C2S = {
   hello: { name: (v) => isStr(v, NAME_MAX_LEN) && v.trim().length > 0, token: (v) => v == null || isStr(v, 64), version: (v) => v == null || isInt(v, 0, 1e6),
     noReplace: isBool, claimAt: (v) => isNum(v, 0, Number.MAX_SAFE_INTEGER), $optional: ['token', 'version', 'noReplace', 'claimAt'] },
   ping: { c: (v) => typeof v === 'number' && Number.isFinite(v) },
-  // test: only the literal true (DESIGN §34.8). Omit it for a normal room — `false` is a bad field, so a
-  // string cannot sneak in as "not a test". The server still refuses it unless SP_TEST_MODE is on.
-  'room.create': { mode: (v) => v === 'solo' || v === 'coop', difficulty: (v) => DIFFICULTIES.includes(v), test: (v) => v === true, $optional: ['test'] },
-  'room.join': { $optional: ['testAck'], testAck: (v) => v === true, code: (v) => isStr(v, ROOM_CODE_LEN + 2) && /^[A-Za-z0-9]+$/.test(v) },
+  'room.create': { mode: (v) => v === 'solo' || v === 'coop', difficulty: (v) => DIFFICULTIES.includes(v), capacity: (v) => ROOM_CAPACITIES.includes(v), $optional: ['capacity'] },
+  'room.join': { code: (v) => isStr(v, ROOM_CODE_LEN + 2) && /^[A-Za-z0-9]+$/.test(v) },
   'room.leave': {},
   'room.ready': { ready: isBool },
   'room.setDifficulty': { difficulty: (v) => DIFFICULTIES.includes(v) },
+  'room.setCapacity': { capacity: (v) => ROOM_CAPACITIES.includes(v) },
   // the co-op room option 「AI 队友最后选择」 (GitHub #338; host, before the match): the strategy and 机变 drafts order every
   // human seat before every AI seat (server/match/match/phases.js humansFirst); room.state.aiPicksLast
   'room.setAiPicksLast': { on: isBool },
@@ -517,19 +451,20 @@ export const C2S = {
   // operator loadout (DESIGN §16): stored per session/seat; accepted until the match leaves INFO_CHECK — `ops` (0.2.2):
   // the per-operator 潜能 / 练度 (absent = none set: every operator at 潜能 6, 精英2 Lv.60)
   'room.loadout': { entries: isLoadoutEntries, ops: isLoadoutOps, $optional: ['ops'] },
-  // 干员皮肤 (docs/SKINS.md): the appearances the player wears, keyed by operator charId; PUBLIC, so it is accepted in
-  // any room phase (the loadout locks at INFO_CHECK because it changes what a unit does; a skin changes only the model)
-  'room.skins': { skins: isSkinSelection },
   // operator ownership (干员持有, 0.2.0 补位): stored per session / seat; a match takes the list its seat had when it
   // started (an out-of-match setting — during a match it is stored for the next one: ROOM_STARTED)
   'room.ownership': { notOwned: isNotOwnedList },
   // 自选编队 (0.2.0 DIY): the player's DIY slot picks; stored per session / seat like room.ownership (a match takes the
   // picks its seat had when it started; during a match they are stored for the next one: ROOM_STARTED)
   'room.diy': { picks: isDiyPicks },
+  // 干员皮肤 (docs/SKINS.md): public, accepted in any room phase
+  'room.skins': { skins: isSkinSelection },
+  // 房间与局内文字聊天
+  'room.chat': { text: (v) => typeof v === 'string' && v.trim().length > 0 && v.length <= 120 },
   // spectator seats (remake feature, community report #26; MAX_SPECTATORS): take one of a co-op room's spectator seats —
   // in its lobby or while its match runs — never a player seat; the host frees one by playerId (the spectator gets
   // room.closed { reason: 'kicked' }). room.leave / g.leave leave a spectator seat like a player seat.
-  'room.spectate': { $optional: ['testAck'], testAck: (v) => v === true, code: (v) => isStr(v, ROOM_CODE_LEN + 2) && /^[A-Za-z0-9]+$/.test(v) },
+  'room.spectate': { code: (v) => isStr(v, ROOM_CODE_LEN + 2) && /^[A-Za-z0-9]+$/.test(v) },
   'room.removeSpectator': { playerId: isId },
   // the room's plugins (DESIGN §32, P1a; host, before the match — like a difficulty change it un-readies the others):
   // the plugins of this server the room switches on, in any order (the server closes the set over their requirements
@@ -548,14 +483,19 @@ export const C2S = {
   'room.consent': { cs: isContentHash, accept: isBool },
   'room.contentReady': { cs: isContentHash, ok: isBool, $optional: ['ok'] },
 
+  // matchmaking (quick match queue & room browser)
+  'match.queue': { mode: (v) => v === 'solo' || v === 'coop', difficulty: (v) => DIFFICULTIES.includes(v), fillBots: (v) => v == null || isBool(v), $optional: ['fillBots'] },
+  'match.cancel': {},
+  'room.list': {},
+
   // match
   'g.infoReady': { setupRevision: (v) => isInt(v, 0, 2 ** 31), $optional: ['setupRevision'] },
   'g.rerollVote': { voteId: (v) => isInt(v, 1, 2 ** 31), agree: isBool },
-  'g.band': { bandId: isId },
-  'g.bandSkip': {},
+  'g.band': { bandId: isId, ...draftScope, $optional: draftScopeOptional },
+  'g.bandSkip': { ...draftScope, $optional: draftScopeOptional },
   // the strategy highlighted in the draft screen (user playtest #4 item 4): a turn that runs out takes it while it is
   // free (Match.timeoutBand); absent / null clears it
-  'g.bandFocus': { bandId: nullable(isId), $optional: ['bandId'] },
+  'g.bandFocus': { bandId: nullable(isId), ...draftScope, $optional: ['bandId', ...draftScopeOptional] },
   'g.buy': { slot: (v) => isInt(v, 0, 15) },
   'g.refresh': {},
   'g.freeze': {},
@@ -568,15 +508,8 @@ export const C2S = {
   'g.equip': { itemUid: isUid, targetUid: isUid, replaceUid: nullable(isUid), $optional: ['replaceUid'] },
   'g.art': { itemUid: isUid, row: (v) => isInt(v, 0, GEO.ROWS - 1), col: (v) => isInt(v, 0, GEO.COLS - 1), dir: isDir, $optional: ['dir'] },
   'g.destroy': { uid: isUid },
-  // unequip (DESIGN §34.15): one equipped item back to the hand, else the visible temp window. Official rooms refuse it.
-  'g.unequip': { itemUid: isUid },
   'g.reward': { idx: (v) => isInt(v, 0, 5) },
-  'g.choice': { idx: (v) => isInt(v, 0, 5), choiceId: isId, $optional: ['choiceId'] },
-  // a plugin interaction window (PLUGIN API v2, docs/PLUGINS.md §10b): offerId is the window's declared id, idx the
-  // slot picked; g.offerRefresh redraws one slot (the window's own `refresh.perSlot` bounds how often). The host
-  // applies the window's declared effect primitive — a plugin never receives these messages itself.
-  'g.offer': { offerId: isId, pluginId: isId, seq: (v) => isInt(v, 0, 1000000), cardId: optional(isId), idx: (v) => isInt(v, 0, PLUGIN_OFFER_SLOTS - 1) },
-  'g.offerRefresh': { offerId: isId, pluginId: isId, seq: (v) => isInt(v, 0, 1000000), cardId: optional(isId), idx: (v) => isInt(v, 0, PLUGIN_OFFER_SLOTS - 1) },
+  'g.choice': { idx: (v) => isInt(v, 0, MAX_DRAFT_CARDS - 1), choiceId: isId, ...draftScope, $optional: ['choiceId', ...draftScopeOptional] },
   'g.ready': { ready: isBool },
   'g.emote': { id: (v) => EMOTES.includes(v) },
   // playerId: the player tapped in the team panel (a 联防 / boss pair field shows two) — what an eliminated viewer or a
@@ -586,13 +519,11 @@ export const C2S = {
   // solo pause (official PauseUp / ResumeUp, DESIGN §14): freezes the running battle (field clock, deadlines, the
   // browser's local runner) — solo matches only (co-op ⇒ WRONG_PHASE), only while a battle runs; m.public.paused
   'g.pause': { on: isBool },
+  'g.uniteSkipVote': { voteId: isId, $optional: ['voteId'] },
   // the stats the own board's units start their next battle with (user playtest #4 item 7; prep phases): answered by
   // the push m.unitStats { seq, round, units: [unitStatsEntry] }; `seq` is echoed so the client keeps the newest answer
   'g.unitStats': { seq: (v) => isInt(v, 0, 2 ** 31), $optional: ['seq'] },
   'g.leave': {},
-  // host test commands (DESIGN §34.8 phase 2). The server applies them only in a test match. `args` is checked
-  // again by shared/testMode.js parseTestArgs (ids, bounds). Unknown keys inside args fail there, not here.
-  'g.test': { cmd: isTestCommand, args: (v) => v === undefined || (isPlain(v) && Object.keys(v).length <= 8), $optional: ['args'] },
 
   // client-side combat (DESIGN §14): the authoritative client of a field reports its battle; a 联防 field adds
   // `left` = { [leakerId]: its enemies still standing (unspawned, alive, or through again) } (server/sim/spec.js
@@ -606,14 +537,13 @@ export const C2S = {
     resolved: (v) => isInt(v, 0, 1e5),
     leaks: (v) => isNum(v, 0, 1e6), bossDmg: (v) => isNum(v, 0, BIG),
     by: (v) => isMap(v, RESULT_LIMITS.players, isId, (x) => isNum(x, 0, BIG)), done: isBool,
-    left: (v) => isMap(v, RESULT_LIMITS.players, isId, (x) => isInt(x, 0, 1e5)),
+    left: (v) => isMap(v, RESULT_LIMITS.sources, isId, (x) => isInt(x, 0, 1e5)),
     leaksBy: (v) => isMap(v, RESULT_LIMITS.players, isId, (x) => isNum(x, 0, 1e6)),
     $optional: ['resolved', 'leaks', 'bossDmg', 'by', 'done', 'left', 'leaksBy'],
   },
-  // `cs` (DESIGN §32, optional): the content hash the reporting browser ran the battle on — its spec's `cs`. In a room
-  // with gameplay plugins (P1c, DESIGN §32.6) the match refuses a result without it or with another one (and runs the
-  // battle itself); a vanilla room's browser sends none
-  'b.result': { battleId: isId, result: isBattleResult, cs: isContentHash, $optional: ['cs'] },
+'b.result': { battleId: isId, result: isBattleResult, cs: isContentHash, $optional: ['cs'] },
+  // A result too large for the socket (or beyond the result list caps) is re-simulated by the server instead.
+  'b.yield': { battleId: isId },
   // A delegated bot layout rehearsal (DESIGN §14): the match's current host answers the candidates it was handed with
   // the S2C 'b.rehearsal' frame. `choice` is the index of the candidate its browser picked, in the order the task sent
   // them — a malicious or buggy client can only name one of the server's own candidate layouts, never a layout or a
@@ -630,7 +560,8 @@ export const C2S = {
 // Server → client message types (documentation + client dispatch table keys).
 export const S2C = [
   'welcome', 'ok', 'error', 'pong',
-  'room.state', 'room.closed',
+  'room.state', 'room.closed', 'room.list', 'room.chat',
+  'match.status', 'match.found', 'server.maintenance', 'lobby.stats',
   'm.public', 'm.private', 'm.field', 'm.toast', 'm.ticker', 'm.emote', 'm.result',
   // m.layer { playerId, bondId, add } — own live prep layer gain; ephemeral, never replayed on resync.
   'm.layer',
@@ -688,4 +619,47 @@ export function fxForm(ev) {
   const x = ev[4];
   if (!x || typeof x !== 'object' || x.id == null || !Object.hasOwn(x, 'form')) return undefined;
   return typeof x.form === 'string' ? x.form : null;
+}
+
+/**
+ * A skin selection the room may store. The shape is `isSkinSelection` (a failure refuses the whole map). A charId the
+ * room's content does not have is dropped; the rest is kept, so the stored map is at most the operator count, and at
+ * most `SKIN_LIMITS.entries` [ASSUMED].
+ * @param {any} skins
+ * @param {(charId: string) => boolean} [hasOperator]
+ * @returns {{ ok: true, skins: Record<string, string>, dropped: number } | { error: 'BAD_MSG', detail: string }}
+ */
+export function checkSkinSelection(skins, hasOperator) {
+  if (!isSkinSelection(skins)) return { error: 'BAD_MSG', detail: 'bad skin selection' };
+  const out = {};
+  let dropped = 0;
+  for (const id of Object.keys(skins)) {
+    if (typeof hasOperator === 'function' && !hasOperator(id)) { dropped++; continue; }
+    out[id] = skins[id];
+  }
+  return { ok: true, skins: out, dropped };
+}
+
+/**
+ * The operators a room's content has, as charIds: every chess record (hidden and golden share the base charId), the
+ * stand-in bodies (`backups.units`), and the 自选 picks (`diy.ownedPool`, `diy.operators`). Not chess ids.
+ * @param {{ chess?: Record<string, any>, backups?: any }|null|undefined} data
+ * @returns {Set<string>}
+ */
+export function operatorCharIds(data) {
+  if (!data || typeof data !== 'object') return new Set();
+  let ids = SKIN_OPS.get(data);
+  if (ids) return ids;
+  ids = new Set();
+  const chess = data.chess && typeof data.chess === 'object' ? data.chess : null;
+  if (chess) for (const c of Object.values(chess)) if (c && isCharId(c.charId)) ids.add(c.charId);
+  const backups = data.backups && typeof data.backups === 'object' ? data.backups : null;
+  const units = backups?.units && typeof backups.units === 'object' ? backups.units : null;
+  if (units) for (const id of Object.keys(units)) if (isCharId(id)) ids.add(id);
+  const diy = backups?.diy && typeof backups.diy === 'object' ? backups.diy : null;
+  if (Array.isArray(diy?.ownedPool)) for (const id of diy.ownedPool) if (isCharId(id)) ids.add(id);
+  const ops = diy?.operators && typeof diy.operators === 'object' ? diy.operators : null;
+  if (ops) for (const id of Object.keys(ops)) if (isCharId(id)) ids.add(id);
+  SKIN_OPS.set(data, ids);
+  return ids;
 }
