@@ -412,11 +412,15 @@ node\\LICENSE-node.txt    Node 自己的许可证（MIT）
 app\\                    游戏本体：server / shared / public（全部素材）/ data / scripts / tools
 启动游戏.bat             app\\scripts\\launch.mjs --no-setup
 启动游戏-插件沙箱.bat    同上，并开启插件脚本沙箱（--scripts sandbox）
+检查更新.bat             从发布方的隧道地址检查并应用更新（也可传入别的服务器地址）
+update-pubkey.pem        更新签名公钥（信任根，放在 app 之外，更新不会覆盖它）
 README-开箱即用.md       本文件
 LICENSE / NOTICE.md / THIRD-PARTY-NOTICES.md`
     : `app\\                    游戏本体：server / shared / public（全部素材）/ data / scripts / tools
 启动游戏.bat             app\\scripts\\launch.mjs --no-setup
 启动游戏-插件沙箱.bat    同上，并开启插件脚本沙箱（--scripts sandbox）
+检查更新.bat             从发布方的隧道地址检查并应用更新（也可传入别的服务器地址）
+update-pubkey.pem        更新签名公钥（信任根，放在 app 之外，更新不会覆盖它）
 README-开箱即用.md       本文件
 LICENSE / NOTICE.md / THIRD-PARTY-NOTICES.md
 
@@ -579,6 +583,14 @@ async function main() {
     await fsp.copyFile(src, path.join(out, f));
   }
 
+  // 更新信任根：放在客户端根目录（app 的上一级），tools/update.mjs 会自动发现（update-pubkey.pem）
+  await fsp.copyFile(path.join(ROOT, 'deploy', 'update-pubkey.pem'), path.join(out, 'update-pubkey.pem'));
+  // 一键更新：默认走发布方的隧道地址（自签证书由 tools/update.mjs 自动降级校验，签名仍验），也可传入别的服务器地址
+  await fsp.writeFile(path.join(out, '检查更新.bat'), bat([
+    'if "%~1"=="" (set "SRC=https://frp-say.com:17763") else (set "SRC=%~1")',
+    '"%NODE%" "%HERE%app\\tools\\update.mjs" apply --root "%HERE%app" --source "%SRC%"',
+    'pause',
+  ].join('\r\n')), 'latin1');
   await fsp.writeFile(path.join(out, '启动游戏.bat'), bat('"%NODE%" "%HERE%app\\scripts\\launch.mjs" --no-setup %*'), 'latin1');
   await fsp.writeFile(path.join(out, '启动游戏-插件沙箱.bat'), bat('"%NODE%" "%HERE%app\\scripts\\launch.mjs" --no-setup --scripts sandbox %*'), 'latin1');
   await fsp.writeFile(path.join(out, 'README-开箱即用.md'), bundleReadme({ version: nodeVersion, withNode: !!o.node }), 'utf8');

@@ -118,18 +118,33 @@ export function resolveSource(root, cli) {
   return null;
 }
 
+// [ASSUMED] 隧道（SakuraFrp 之类）用自签名证书时，Node 默认拒连（DEPTH_ZERO_SELF_SIGNED_CERT）。下面这些错误码
+// 只表示「证书不受信」，与「服务器没响应」是两回事：遇到时自动关掉 TLS 校验重试一次——真正的信任根是发布方签名
+// （公钥仍必须验过），所以这不降低安全性，只是不再让信封的印章挡住信的内容。
+let autoInsecure = false; // 一旦发现证书不受信，本次运行内所有请求沿用（下载包也走同一条通道）
+const CERT_CODES = new Set(['DEPTH_ZERO_SELF_SIGNED_CERT', 'SELF_SIGNED_CERT_IN_CHAIN', 'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
+  'CERT_HAS_EXPIRED', 'ERR_TLS_CERT_ALTNAME_INVALID', 'UNABLE_TO_GET_ISSUER_CERT_LOCALLY']);
+
 function fetchUrl(url, { timeout, insecure }) {
+  insecure = insecure || autoInsecure;
   const args = insecure ? { headers: { 'Cache-Control': 'no-cache' } } : {};
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeout);
   const prev = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
   if (insecure) process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-  return fetch(url, { ...args, signal: ctrl.signal, cache: 'no-store' }).finally(() => {
+  const restore = () => {
     clearTimeout(timer);
     if (insecure) {
       if (prev === undefined) delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
       else process.env.NODE_TLS_REJECT_UNAUTHORIZED = prev;
     }
+  };
+  return fetch(url, { ...args, signal: ctrl.signal, cache: 'no-store' }).finally(restore).catch((err) => {
+    const code = err?.cause?.code || err?.code || '';
+    if (insecure || !CERT_CODES.has(code)) throw err;
+    autoInsecure = true;
+    console.warn(`[update] ${url} 的 TLS 证书不受信任（${code}），改为忽略证书校验重试；发布方签名仍会校验。`);
+    return fetchUrl(url, { timeout, insecure: true });
   });
 }
 
