@@ -145,7 +145,9 @@ export function registerMeta(registry) {
       const itemIds = (target.items || []).map((it) => it.id);
       const copy = ctx.grantChess(target.id, { requirePool: false, source: 'item:chess_item_6_02_m' });
       if (!copy) { ev.error = 'HAND_FULL'; return; }
-      for (const itemId of itemIds) ctx.grantItem(itemId, { source: 'item:chess_item_6_02_m' });
+      // copy: true — the duplicated equipment does not need shop stock (it duplicates what the operator already wears;
+      // pool.held still counts it). Without this the copy was refused with 装备库存不足 whenever the pool was drained.
+      for (const itemId of itemIds) ctx.grantItem(itemId, { source: 'item:chess_item_6_02_m', copy: true });
     },
   }));
 

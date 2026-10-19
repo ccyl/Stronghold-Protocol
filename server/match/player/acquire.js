@@ -269,17 +269,19 @@ export class PlayerAcquire {
    * is actually kept, record the copies that did not fit (`need` minus `left` before the gain). A failed stow or
    * merge records nothing. Fixed gift families stay unlimited without a debt entry. Every other grant still refuses.
    */
-  acquireItem(itemId, { source = 'grant', toTemp = false, silent = false, deferMerge = false, requirePool = true, displayed = false } = {}) {
+  acquireItem(itemId, { source = 'grant', toTemp = false, silent = false, deferMerge = false, requirePool = true, displayed = false, copy = false } = {}) {
     const rec = this.gd.item(itemId);
     if (!rec) return null;
     // Only the fixed operator-gift families can overdraw. Several unrelated strategy grants also pass
     // requirePool:false; they must retain their stock limit (for example commercial packaging).
     // This branch checks the player's own group stock (itemPoolFor).
+    // `copy`: an effect that duplicates a thing already owned (画卷's equipment) does not draw from the shop's stock —
+    // the copy is still a held piece (pool.held counts it), it just may not be refused for lack of stock.
     const unlimitedGift = !requirePool && this.gd.isUnlimitedGiftItem(itemId);
     const pool = this.m.itemPoolFor(this);
     const leftBefore = pool.left(itemId);
     const need = pool.need(itemId);
-    if (!unlimitedGift && !displayed && !pool.canGain(itemId)) {
+    if (!copy && !unlimitedGift && !displayed && !pool.canGain(itemId)) {
       this.m.toast(this, 'warn', '装备库存不足，未获得该装备');
       return null;
     }
