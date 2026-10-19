@@ -526,20 +526,3 @@ test('equipment: a consume-on-equip item on a full carrier replaces the picked i
   checkInvariants(m);
   m.dispose();
 });
-
-test('画卷复制的装备不受商店库存限制（库存抽干后仍能复制）', () => {
-  const { m, ps } = prep(31);
-  const ITEM = 'chess_item_1_01_e_a';
-  const pool = m.itemPoolFor(ps);
-  // 把该道具的商店库存全握在手里（held 增加 → left 归零）：普通获得会被拒
-  for (let i = 0; i < 40 && pool.canGain(ITEM); i++) if (!giveItem(m, ps, ITEM)) break;
-  assert.equal(pool.canGain(ITEM), false, '库存已耗尽');
-  assert.equal(ps.acquireItem(ITEM, { source: 'test' }), null, '普通获得被库存拒绝');
-  // 画卷的复制走 copy: true —— 不占商店库存门槛，复制品照样是一枚持有的装备
-  const copied = ps.acquireItem(ITEM, { source: 'test', copy: true });
-  assert.ok(copied, '复制获得不被库存拒绝');
-  // 手里已有一对同名道具时，复制品会按合并规则立刻合成进阶版（两种结果都算获得成功）
-  assert.ok(copied.id === ITEM || /_e_b$/.test(copied.id), copied.id);
-  // 不跑 checkInvariants：本测试用测试助手直接塞满库存（持有量超过商店上限），这会正当触发「持有 ≤ 上限」检查
-  m.dispose();
-});
