@@ -12,8 +12,23 @@ export function ChatBox({ active: controlledActive, onToggle, showTrigger = cont
   const active = controlledActive !== undefined ? controlledActive : internalActive;
   const setActive = onToggle || setInternalActive;
   const [draft, setDraft] = useState('');
+  // 日志默认显示，最后一条消息之后 12 秒自动淡出（输入中或鼠标停在上方时保持），也可以手动隐藏/显示 ——
+  // 之前聊天记录一直挂在左下角、永不消失，挡住棋盘视野。
+  const [logShown, setLogShown] = useState(true);
+  const hoverRef = useRef(false);
+  const hideTimer = useRef(null);
   const inputRef = useRef(null);
   const logRef = useRef(null);
+
+  useEffect(() => {
+    if (!messages.length) return undefined;
+    setLogShown(true);
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => {
+      if (!hoverRef.current && !active) setLogShown(false);
+    }, 12000);
+    return () => { if (hideTimer.current) clearTimeout(hideTimer.current); };
+  }, [messages.length, active]);
 
   // Auto-scroll to bottom on new message
   useEffect(() => {
@@ -93,8 +108,24 @@ export function ChatBox({ active: controlledActive, onToggle, showTrigger = cont
 
   return html`
     <div class=${`chat-panel ${active ? 'is-active' : ''}`}>
+      ${messages.length ? html`
+        <div class="chat-bar__head">
+          <button
+            type="button"
+            class="chat-toggle"
+            aria-expanded=${logShown || active ? 'true' : 'false'}
+            title=${logShown || active ? t('隐藏聊天记录') : t('显示聊天记录')}
+            onClick=${() => setLogShown((v) => !v)}
+          >${logShown || active ? t('隐藏') : t('显示')}${!logShown && !active ? html`<span class="chat-toggle__n num">${messages.length}</span>` : null}</button>
+        </div>` : null}
       <!-- Tactical Chat Stream (pass-through clicks, expands on hover/active) -->
-      <div class="chat-log" ref=${logRef}>
+      <div
+        class=${`chat-log ${logShown || active ? '' : 'is-hidden'}`}
+        ref=${logRef}
+        aria-hidden=${logShown || active ? 'false' : 'true'}
+        onMouseEnter=${() => { hoverRef.current = true; setLogShown(true); }}
+        onMouseLeave=${() => { hoverRef.current = false; }}
+      >
         ${messages.map((m, i) => {
           const seatLabel = m.isSpectator ? t('观战') : `P${(m.seat ?? 0) + 1}`;
           const colorCls = getSeatColorClass(m.seat, m.isSpectator);

@@ -1153,3 +1153,20 @@
   border: 1px solid var(--line); border-radius: 2px; pointer-events: auto;
 }
 .unite-vote__count { font-size: max(.13rem, 10px); color: var(--text-lo); white-space: nowrap; }
+
+/* ---- 聊天记录自动淡出与开关 (ui/chatBox.js) -------------------------------------------------------------------
+   之前聊天记录常驻左下角、永不消失，会挡住棋盘。现在最后一条消息 12 秒后淡出，鼠标移上去或输入时保持，
+   头部还有一个「隐藏 / 显示」小开关，隐藏时用数字标出新消息条数。 */
+.chat-log { transition: opacity .35s ease, visibility .35s ease; }
+.chat-log.is-hidden { opacity: 0; visibility: hidden; }
+.chat-bar__head { display: flex; justify-content: flex-start; pointer-events: none; }
+.chat-toggle {
+  display: inline-flex; align-items: center; gap: .04rem; padding: .03rem .08rem;
+  font: inherit; font-size: max(.12rem, 10px); color: var(--text-lo); cursor: pointer; pointer-events: auto;
+  background: rgba(8, 11, 10, .82); border: 1px solid var(--line); border-radius: 2px;
+}
+.chat-toggle:hover { color: var(--text-md); border-color: var(--line-3); }
+.chat-toggle__n {
+  min-width: .16rem; padding: 0 .03rem; text-align: center; color: #0b1520; background: var(--mint-400);
+  border-radius: .08rem; font-size: max(.11rem, 9px); font-weight: 700;
+}
