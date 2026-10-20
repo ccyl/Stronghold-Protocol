@@ -82,12 +82,15 @@ function makeData(src) {
 
 // Mobile devices have constrained VRAM and thermal envelopes; capping mobile DPR (board 1.5) prevents GPU OOM and
 // render-process crashes while keeping desktop sharp — this branch's Android high-refresh work (D014).
+// Desktop high quality stays at the upstream 2: raising it to 3 pushed the board's render targets (and the scene
+// water's reflection cube) past what some GPUs hold, which showed up as the official scenes' water falling back to a
+// flat green colour instead of its normal-mapped surface.
 const isMobile = typeof navigator !== 'undefined' && (/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
   || (navigator.maxTouchPoints > 1 && !globalThis.matchMedia?.('(pointer: fine)').matches));
-const QUALITY_RES = isMobile ? { high: 2, medium: 1.5, low: 1 } : { high: 3, medium: 1.5, low: 1 };
+const QUALITY_RES = { high: 2, medium: 1.5, low: 1 };
 
 /** Pixel-ratio cap of the 3D board canvas per quality (its fill cost is the PBR board, not the sprites). */
-const BOARD_RES = isMobile ? { high: 1.5, medium: 1.25, low: 1 } : { high: 3, medium: 1.25, low: 1 };
+const BOARD_RES = isMobile ? { high: 1.5, medium: 1.25, low: 1 } : { high: 2, medium: 1.25, low: 1 };
 
 /**
  * Before a renderer is destroyed: free its GL copies of every texture / buffer / geometry / framebuffer it
