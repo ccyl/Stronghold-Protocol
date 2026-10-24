@@ -91,6 +91,38 @@ test('logging out clears the mirror so the next login starts clean', () => {
   assert.deepEqual(Object.keys(out.keys), ['settings']);
 });
 
+test('every account request uses net.request(type, fields) — the client API, not a message object', async () => {
+  const { net } = await import('../../public/js/net.js');
+  const { bindAccount, loginAccount, logoutAccount, changePassphrase, renameAccount, pullProfile, accountStore } = await import('../../public/js/ui/account.js');
+  accountStore.set({ bound: true, uid: 1000, name: 'T' }); // pullProfile only runs for a bound account
+  const calls = [];
+  const origRequest = net.request;
+  const origSetName = net.setName;
+  net.request = (t, fields) => { calls.push([t, fields]); return Promise.resolve({ t: 'ok' }); };
+  net.setName = () => {};
+  try {
+    await bindAccount('p', 'n');
+    await bindAccount('p');
+    await loginAccount('p');
+    await logoutAccount();
+    await changePassphrase('old', 'new');
+    await renameAccount('n');
+    await pullProfile();
+  } finally {
+    net.request = origRequest;
+    net.setName = origSetName;
+  }
+  assert.deepEqual(calls, [
+    ['auth.bind', { pass: 'p', name: 'n' }],
+    ['auth.bind', { pass: 'p' }],
+    ['auth.login', { pass: 'p' }],
+    ['auth.logout', undefined],
+    ['auth.pass', { oldPass: 'old', newPass: 'new' }],
+    ['auth.rename', { name: 'n' }],
+    ['profile.pull', undefined],
+  ]);
+});
+
 test('localProfileKeys reports only the keys present', () => {
   pref('lang', 'ko');
   assert.deepEqual(localProfileKeys(), { lang: 'ko' });

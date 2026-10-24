@@ -182,7 +182,7 @@ export async function bindAccount(pass, name) {
   ensureSession(name);
   accountStore.set({ conflict: null });
   // name 可省略：服务端用这条连接当前的代号
-  return net.request(name ? { t: 'auth.bind', pass, name } : { t: 'auth.bind', pass });
+  return name ? net.request('auth.bind', { pass, name }) : net.request('auth.bind', { pass });
 }
 
 /** Log in (bind an existing account) — the server pushes its profile, which is merged into this device. */
@@ -190,27 +190,27 @@ export async function loginAccount(pass) {
   ensureSession('');
   accountStore.set({ conflict: null });
   reloadAfterApply = true; // the server pushes this account's profile right after the login
-  return net.request({ t: 'auth.login', pass });
+  return net.request('auth.login', { pass });
 }
 
 /** Unbind: the profile stays on this device and play continues as a guest. */
 export async function logoutAccount() {
   ensureSession('');
   resetSyncMirror();
-  return net.request({ t: 'auth.logout' });
+  return net.request('auth.logout');
 }
 
 /** Change the passphrase (the old one proves ownership; the new one must be free). */
 export async function changePassphrase(oldPass, newPass) {
   ensureSession('');
   accountStore.set({ conflict: null });
-  return net.request({ t: 'auth.pass', oldPass, newPass });
+  return net.request('auth.pass', { oldPass, newPass });
 }
 
 /** Rename the account (the UID stays). */
 export async function renameAccount(name) {
   ensureSession(name);
-  return net.request({ t: 'auth.rename', name });
+  return net.request('auth.rename', { name });
 }
 
 /**
@@ -221,14 +221,14 @@ export async function renameAccount(name) {
 export async function pushProfile() {
   ensureSession('');
   if (!isBound()) return false;
-  const payload = { t: 'profile.push', keys: {} };
+  const payload = { keys: {} };
   const collected = collectPush();
   if (collected) {
     payload.keys = collected.keys;
     // remember the pushed values only once the server accepted them
     accountStore.set({ syncing: true });
     try {
-      await net.request(payload);
+      await net.request('profile.push', payload);
       savePref(SYNC_MIRROR_KEY, collected.mirror);
       accountStore.set({ lastSync: Date.now() });
       return true;
@@ -247,7 +247,7 @@ export async function pullProfile({ reload = false } = {}) {
   ensureSession('');
   if (!isBound()) return null;
   if (reload) reloadAfterApply = true;
-  return net.request({ t: 'profile.pull' });
+  return net.request('profile.pull');
 }
 
 /** The last-synced stats signature (a new match changes it: record count and the newest record's id/time). */
@@ -269,12 +269,12 @@ export async function syncProfile() {
   const collected = collectPush();
   const sig = statsSignature(stats);
   const statsChanged = !!stats && sig !== loadPref(STATS_SIG_KEY, '');
-  const payload = { t: 'profile.push', keys: collected ? collected.keys : {} };
+  const payload = { keys: collected ? collected.keys : {} };
   if (statsChanged) payload.stats = stats;
   if (!collected && !statsChanged) return false;
   accountStore.set({ syncing: true });
   try {
-    await net.request(payload);
+    await net.request('profile.push', payload);
     if (collected) savePref(SYNC_MIRROR_KEY, collected.mirror);
     if (statsChanged) savePref(STATS_SIG_KEY, sig);
     accountStore.set({ lastSync: Date.now(), syncing: false });
