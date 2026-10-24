@@ -130,7 +130,8 @@ export function accountSubscribe() {
   }));
   offs.push(net.on('profile.state', (m) => {
     if (!m || typeof m !== 'object') return;
-    applyProfileStats(m.stats || null);
+    const merged = applyProfileStats(m.stats || null);
+    if (merged) savePref(STATS_SIG_KEY, statsSignature(merged));
     const res = applyProfileKeys(m.keys || {});
     accountStore.set({ rev: Number(m.rev) || 0, lastSync: Date.now(), conflict: null });
     // keys the local side won are pushed straight away, so the account matches this device too
@@ -209,21 +210,33 @@ export async function pullProfile() {
   return net.request({ t: 'profile.pull' });
 }
 
+/** The last-synced stats signature (a new match changes it: record count and the newest record's id/time). */
+export const STATS_SIG_KEY = 'syncStatsSig';
+
+const statsSignature = (stats) => {
+  const recs = stats && Array.isArray(stats.records) ? stats.records : [];
+  const first = recs[0] || {};
+  return `${recs.length}:${first.id || ''}:${Number(first.t) || 0}`;
+};
+
 /**
- * The periodic sync: push local edits and the stats envelope when the account is bound and the socket is online.
- * Called by the app's timer (main.js); a no-op otherwise.
+ * The periodic sync: push local edits and, when they changed since the last push, the stats envelope — only while
+ * the account is bound and the socket is online. Called by the app's timer (main.js); a no-op otherwise.
  */
 export async function syncProfile() {
   if (!isBound() || !net.connected) return false;
   const stats = loadStats();
   const collected = collectPush();
+  const sig = statsSignature(stats);
+  const statsChanged = !!stats && sig !== loadPref(STATS_SIG_KEY, '');
   const payload = { t: 'profile.push', keys: collected ? collected.keys : {} };
-  if (stats && Array.isArray(stats.records) && stats.records.length) payload.stats = stats;
-  if (!collected && !payload.stats) return false;
+  if (statsChanged) payload.stats = stats;
+  if (!collected && !statsChanged) return false;
   accountStore.set({ syncing: true });
   try {
     await net.request(payload);
     if (collected) savePref(SYNC_MIRROR_KEY, collected.mirror);
+    if (statsChanged) savePref(STATS_SIG_KEY, sig);
     accountStore.set({ lastSync: Date.now(), syncing: false });
     return true;
   } catch {
