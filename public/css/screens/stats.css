@@ -359,3 +359,12 @@
 }
 .sp-coarse .st-tab, .sp-coarse .st-table tr.is-clickable td { min-height: 30px; }
 @media (prefers-reduced-motion: reduce) { .st { animation: none; } }
+
+/* ---- 账号（个人界面，docs/ACCOUNTS.md）----------------------------------------------------------------------- */
+.st-account { display: flex; align-items: center; gap: .08rem; flex-wrap: wrap; margin-top: .06rem; }
+.st-account__tag {
+  padding: .01rem .06rem; font-family: var(--font-num); font-size: max(.12rem, 10px); color: var(--text-lo);
+  background: rgba(8, 11, 10, .7); border: 1px solid var(--line);
+}
+.st-account__tag.is-bound { color: #0b1520; background: var(--mint-400); border-color: transparent; }
+.st-account__name { font-size: max(.14rem, 11px); color: var(--text-md); }

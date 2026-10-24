@@ -2397,5 +2397,8 @@
   "输入你的口令即可登录；这台设备上的资料会和账号里的合并。": "Enter your passphrase to sign in; this device's profile is merged with the account's.",
   "退出登录": "Sign out",
   "隐藏": "Hide",
-  "隐藏聊天记录": "Hide the chat log"
+  "隐藏聊天记录": "Hide the chat log",
+  "UID {uid}": "UID {uid}",
+  "游客": "Guest",
+  "未绑定账号": "No account bound"
 }

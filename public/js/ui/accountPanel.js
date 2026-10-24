@@ -53,7 +53,7 @@ export function AccountPanel({ open, onClose }) {
     if (!pass) { toast(t('请输入口令'), 'warn'); return; }
     await loginAccount(pass);
     setPass('');
-    const pulled = await pullProfile().catch(() => null);
+    const pulled = await pullProfile({ reload: true }).catch(() => null);
     if (pulled) toast(t('已登录，资料已同步'), 'info');
   });
 
@@ -72,7 +72,7 @@ export function AccountPanel({ open, onClose }) {
 
   const syncNow = () => run(async () => {
     const pushed = await pushProfile();
-    const pulled = await pullProfile().catch(() => null);
+    const pulled = await pullProfile({ reload: true }).catch(() => null);
     toast(pushed || pulled ? t('已同步') : t('没有需要同步的改动'), 'info');
   });
 

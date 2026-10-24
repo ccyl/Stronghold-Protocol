@@ -34,6 +34,8 @@ import {
   trophyMedalOf, strategyBadgeIds, bondMemberChess, highestBondRecord,
 } from '../ui/stats.js';
 import { t, N_ } from '../../../shared/i18n.js';
+import { accountStore } from '../ui/account.js';
+import { AccountPanel } from '../ui/accountPanel.js';
 
 const cx = (...p) => p.flat().filter(Boolean).join(' ');
 
@@ -137,6 +139,9 @@ function ModdedSwitch({ agg }) {
 /** 总览: cards, the per-difficulty table, the six titles, and the line about what counts. */
 function Overview({ agg, gd, nickname, records }) {
   useData('chess', 'items', 'backups');
+  // 个人界面（维护者的定义）就是统计页的这块：账号状态与绑定/登录入口（docs/ACCOUNTS.md）
+  const acc = useStore((s) => s, Object.is, accountStore);
+  const [accountOpen, setAccountOpen] = useState(false);
   const rows = DIFFICULTIES.filter((d) => agg.byDifficulty[d]).concat(Object.keys(agg.byDifficulty).filter((d) => !DIFFICULTIES.includes(d)));
   const fonts = uiUrl(gd.m, 'statistics/fontStyles');
   const titles = (Array.isArray(gd.config?.titles) ? gd.config.titles : []).map((x) => ({ ...x, count: agg.titles[x.id]?.count || 0 }));
@@ -150,6 +155,12 @@ function Overview({ agg, gd, nickname, records }) {
       <div class="st-mode-summary">
         <div class="st-profile">
           <b class="st-profile__name">Dr. ${nickname || t('未知')}</b>
+          <div class="st-account" data-testid="stats-account">
+            <span class=${`st-account__tag${acc.bound ? ' is-bound' : ''}`}>${acc.bound ? t('UID {uid}', { uid: acc.uid }) : t('游客')}</span>
+            <span class="st-account__name">${acc.bound ? acc.name : t('未绑定账号')}</span>
+            <${Button} variant="ghost" size="sm" icon="user" onClick=${() => setAccountOpen(true)}>${acc.bound ? t('账号') : t('绑定账号')}<//>
+          </div>
+          <${AccountPanel} open=${accountOpen} onClose=${() => setAccountOpen(false)} />
           <div class="st-profile__trophies" title=${t('累计本机保留战绩中获得的奖杯')}>
             <${Img} src=${uiUrl(gd.m, `medalIcon/${trophyMedalOf(agg.trophies, gd.config?.trophies?.medals)?.iconId || ''}`)}
               class="st-profile__medal" fallback=${html`<${Icon} name="crown" />`} />

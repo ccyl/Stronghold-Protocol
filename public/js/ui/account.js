@@ -26,6 +26,10 @@ import { loadStats, saveStats } from './stats.js';
 /** The last-synced values of the profile keys (a plain object saved as one preference). */
 export const SYNC_MIRROR_KEY = 'syncMirror';
 
+/** Set by a user-initiated login / pull: when the next profile.state actually writes keys, the page reloads so the
+ *  in-memory stores (settings, skins, the DIY store …) read the synced preferences. A background sync never sets it. */
+let reloadAfterApply = false;
+
 /** The connection's account, as the UI reads it. `conflict` = { operation, uid } of a passphrase the server refused. */
 export const accountStore = createStore({
   bound: false,
@@ -136,6 +140,11 @@ export function accountSubscribe() {
     accountStore.set({ rev: Number(m.rev) || 0, lastSync: Date.now(), conflict: null });
     // keys the local side won are pushed straight away, so the account matches this device too
     if (res.kept.length) pushProfile().catch(() => {});
+    // a user-initiated login/pull that really changed the preferences: reload so every store reads them
+    if (reloadAfterApply && res.applied.length) {
+      reloadAfterApply = false;
+      setTimeout(() => { try { globalThis.location?.reload?.(); } catch { /* ignore */ } }, 700);
+    }
     return res;
   }));
   return () => { for (const off of offs) { try { off(); } catch { /* ignore */ } } };
@@ -160,6 +169,7 @@ export async function bindAccount(pass, name) {
 /** Log in (bind an existing account) — the server pushes its profile, which is merged into this device. */
 export async function loginAccount(pass) {
   accountStore.set({ conflict: null });
+  reloadAfterApply = true; // the server pushes this account's profile right after the login
   return net.request({ t: 'auth.login', pass });
 }
 
@@ -204,9 +214,14 @@ export async function pushProfile() {
   return false;
 }
 
-/** Read the account's profile back (the server pushes it). */
-export async function pullProfile() {
+/**
+ * Read the account's profile back (the server pushes it).
+ * @param {{ reload?: boolean }} [opts] `reload`: this is a user-initiated pull — when it changes the preferences the
+ *   page reloads so the in-memory stores read them (docs/ACCOUNTS.md §3)
+ */
+export async function pullProfile({ reload = false } = {}) {
   if (!isBound()) return null;
+  if (reload) reloadAfterApply = true;
   return net.request({ t: 'profile.pull' });
 }
 
