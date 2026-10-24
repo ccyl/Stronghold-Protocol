@@ -899,13 +899,16 @@ export function TextField({ label, micro, value, onInput, onEnter, placeholder, 
     }
     onInput?.(v);
   };
+  // 0 会禁用输入：一次切换里同一个 input 被复用时（maxLength 由 12 变成 undefined），Preact 会把 DOM 的 maxLength
+  // 设成 0，于是这个框再也输不进字。只在给到正的整数时才输出这个属性，其余情况让浏览器保持默认（无限）。
+  const maxLen = Number.isInteger(maxLength) && maxLength > 0 ? maxLength : undefined;
   const id = useMemo(() => `tf-${Math.random().toString(36).slice(2, 8)}`, []);
   return html`<label class=${cx('field', `field--${size}`, disabled && 'is-disabled', invalid && 'is-invalid', cls)} for=${id}>
     ${label || micro ? html`<span class="field__label">${label}${micro ? html`<span class="micro">${micro}</span>` : null}</span>` : null}
     <span class="field__box brackets">
       ${icon ? html`<${Icon} name=${icon} class="field__icon" />` : null}
       <input type=${type} id=${id} ref=${ref} class="field__input" name=${name} value=${value} placeholder=${placeholder}
-        maxLength=${maxLength} disabled=${disabled} autocomplete="off" spellcheck=${false}
+        maxLength=${maxLen} disabled=${disabled} autocomplete="off" spellcheck=${false}
         onInput=${handle}
         oncompositionstart=${() => { composing.current = true; }}
         oncompositionend=${(e) => { composing.current = false; handle(e); }}

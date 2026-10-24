@@ -123,16 +123,16 @@ export function AccountPanel({ open, onClose }) {
       </div>
       ${mode === 'bind' ? html`
         <p class="acct-hint">${t('口令是唯一的登录凭证：只要记住口令就能在任何设备登录。口令不限制强度，但一旦泄露，别人就能登录你的账号。')}</p>
-        <${TextField} label=${t('账号名')} value=${name} maxLength=${12} onInput=${setName} placeholder=${acc.name || ''} />
-        <${TextField} label=${t('口令')} type="password" value=${pass} onInput=${setPass} />
-        <${TextField} label=${t('再输入一次口令')} type="password" value=${pass2} onInput=${setPass2} />
+        <${TextField} key="bind-name" label=${t('账号名')} value=${name} maxLength=${12} onInput=${setName} placeholder=${acc.name || ''} />
+        <${TextField} key="bind-pass" label=${t('口令')} type="password" value=${pass} onInput=${setPass} />
+        <${TextField} key="bind-pass2" label=${t('再输入一次口令')} type="password" value=${pass2} onInput=${setPass2} />
         ${pass && pass2 && pass !== pass2 ? html`<p class="acct-conflict" role="alert">${t('两次输入的口令不一致')}</p>` : null}
         <div class="acct-actions">
           <${Button} variant="primary" onClick=${bind} disabled=${busy || !pass}>${t('绑定账号')}<//>
         </div>
       ` : html`
         <p class="acct-hint">${t('输入你的口令即可登录；这台设备上的资料会和账号里的合并。')}</p>
-        <${TextField} label=${t('口令')} type="password" value=${pass} onInput=${setPass} />
+        <${TextField} key="login-pass" label=${t('口令')} type="password" value=${pass} onInput=${setPass} autoFocus=${true} />
         <div class="acct-actions">
           <${Button} variant="primary" onClick=${login} disabled=${busy || !pass}>${t('登录')}<//>
         </div>
