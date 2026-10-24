@@ -84,4 +84,5 @@ android/app/src/main/assets/bundle.sha256
 public/dev/simcheck/data/
 
 # --- accounts (this branch): server-side account data written at runtime, never committed (docs/ACCOUNTS.md) ---
-accounts/
+# 只忽略项目根目录下的运行期账号库；server/accounts/ 是代码，必须入库。/accounts/
+/accounts/
