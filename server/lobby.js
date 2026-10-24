@@ -1152,6 +1152,7 @@ export class Lobby {
     // 账号名可省略：用这条连接当前的代号（面板没填账号名时也照常绑定）
     const name = typeof msg.name === 'string' && msg.name.trim() ? msg.name : (session.name || '');
     const res = await s.bind({ pass: msg.pass, name });
+    this.log?.info?.(`[accounts] bind attempt (${session.name}) → ${res.error || ('uid ' + res.uid)}`);
     if (res.error === 'PASS_TAKEN') {
       sendSession(session, { t: 'auth.conflict', operation: 'bind', uid: res.uid });
       return fail(ERR.PASS_TAKEN, String(res.uid));
@@ -1172,6 +1173,7 @@ export class Lobby {
     if (!s) return fail(ERR.INTERNAL, 'accounts disabled');
     if (!this._authAllowed(session)) return fail(ERR.RATE, 'auth too fast');
     const res = await s.login({ pass: msg.pass });
+    this.log?.info?.(`[accounts] login attempt (${session.name}) → ${res.error || ('uid ' + res.uid)}`);
     if (!res.ok) return fail(ERR.PASS_UNKNOWN);
     s.bindSession(session.token, res.uid);
     this.pushAccountState(session);

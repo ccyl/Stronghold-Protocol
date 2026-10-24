@@ -618,7 +618,12 @@ export class Network {
       return;
     }
     const reason = validateC2S(msg);
-    if (reason) { this.reply(conn, errorMsg(ERR.BAD_MSG, rid, reason)); return; }
+    if (reason) {
+      // a malformed C2S message is otherwise silent: log it so a client-side bug is diagnosable from the server
+      this.log.warn(`[net] ${conn.ip} invalid ${String(msg.t).slice(0, 32)}: ${reason}`);
+      this.reply(conn, errorMsg(ERR.BAD_MSG, rid, reason));
+      return;
+    }
 
     if (msg.t === 'ping') {
       const pong = { t: 'pong', c: msg.c, s: now };

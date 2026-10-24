@@ -35,7 +35,8 @@ export function AccountPanel({ open, onClose }) {
     if (err?.code === 'RATE') { toast(t('操作过于频繁，请稍后再试'), 'warn'); return; }
     // NetError carries the server's text in `message` (msg/detail are the raw frame fields)
     console.warn('[account] request failed', err?.code, err?.serverMsg, err?.detail, err);
-    toast(err?.message || t('操作失败，请重试'), 'warn');
+    const reason = err?.detail ? `（${err.detail}）` : '';
+    toast(String(err?.message || t('操作失败，请重试')) + reason, 'warn');
   };
 
   const run = async (fn) => {
