@@ -491,7 +491,8 @@ export const C2S = {
   // ownership; the new one is checked for uniqueness like a bind), auth.rename changes the display name (the UID stays).
   // profile.push merges per key (later stamp wins) and the stats records by record id; it answers the merged result, so
   // one push is a full sync. profile.pull reads the account's profile back.
-  'auth.bind': { pass: isPass, name: isAccountName },
+  // name 可省略：缺省用这条连接当前的名字（游客的代号）
+  'auth.bind': { pass: isPass, name: optional(isAccountName) },
   'auth.login': { pass: isPass },
   'auth.logout': {},
   'auth.pass': { oldPass: isPass, newPass: isPass },

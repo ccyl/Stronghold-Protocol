@@ -163,7 +163,8 @@ export function resetSyncMirror() {
  */
 export async function bindAccount(pass, name) {
   accountStore.set({ conflict: null });
-  return net.request({ t: 'auth.bind', pass, name });
+  // name 可省略：服务端用这条连接当前的代号
+  return net.request(name ? { t: 'auth.bind', pass, name } : { t: 'auth.bind', pass });
 }
 
 /** Log in (bind an existing account) — the server pushes its profile, which is merged into this device. */

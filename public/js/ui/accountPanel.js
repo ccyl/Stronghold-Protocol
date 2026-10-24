@@ -7,7 +7,7 @@
 import { useEffect, useState } from '../../vendor/hooks.module.js';
 import { html, Modal, Button, TextField, MicroLabel } from './components.js';
 import { t } from '../../../shared/i18n.js';
-import { useStore } from '../store.js';
+import { store, useStore } from '../store.js';
 import {
   accountStore, bindAccount, loginAccount, logoutAccount, changePassphrase, renameAccount, pullProfile, pushProfile,
 } from './account.js';
@@ -19,7 +19,8 @@ export function AccountPanel({ open, onClose }) {
   const [mode, setMode] = useState('bind');
   const [pass, setPass] = useState('');
   const [pass2, setPass2] = useState('');
-  const [name, setName] = useState('');
+  // 账号名默认取当前代号：留空会让「绑定账号」变成一次无效请求
+  const [name, setName] = useState(() => store.get().me?.name || '');
   const [oldPass, setOldPass] = useState('');
   const [newPass, setNewPass] = useState('');
   const [busy, setBusy] = useState(false);
@@ -44,7 +45,8 @@ export function AccountPanel({ open, onClose }) {
   const bind = () => run(async () => {
     if (pass !== pass2) { toast(t('两次输入的口令不一致'), 'warn'); return; }
     if (!pass) { toast(t('口令不能为空'), 'warn'); return; }
-    await bindAccount(pass, name.trim() || acc.name || '');
+    const accountName = (name.trim() || acc.name || '').trim();
+    await bindAccount(pass, accountName || undefined);
     toast(t('账号已绑定'), 'info');
     setPass(''); setPass2('');
   });

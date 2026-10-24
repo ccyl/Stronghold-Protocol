@@ -1149,7 +1149,9 @@ export class Lobby {
     const s = this.accountsStore();
     if (!s) return fail(ERR.INTERNAL, 'accounts disabled');
     if (!this._authAllowed(session)) return fail(ERR.RATE, 'auth too fast');
-    const res = await s.bind({ pass: msg.pass, name: msg.name });
+    // 账号名可省略：用这条连接当前的代号（面板没填账号名时也照常绑定）
+    const name = typeof msg.name === 'string' && msg.name.trim() ? msg.name : (session.name || '');
+    const res = await s.bind({ pass: msg.pass, name });
     if (res.error === 'PASS_TAKEN') {
       sendSession(session, { t: 'auth.conflict', operation: 'bind', uid: res.uid });
       return fail(ERR.PASS_TAKEN, String(res.uid));

@@ -57,6 +57,16 @@ test('accounts', async (t) => {
     assert.deepEqual(await d.waitFor('auth.state', (m) => m.bound === true), { t: 'auth.state', bound: true, uid: 1000, name: 'Alice' });
   });
 
+  await t.test('binding without an account name falls back to the connection name', async () => {
+    const c = await connect('NoName');
+    await c.waitFor('auth.state');
+    assert.equal((await c.request({ t: 'auth.bind', pass: 'noname-pass' })).t, 'ok');
+    const st = await c.waitFor('auth.state', (m) => m.bound === true);
+    assert.equal(st.name, 'NoName');
+    // 空字符串不是合法的账号名（客户端在没填名字时干脆不发这个字段）
+    assert.equal((await c.request({ t: 'auth.bind', pass: 'noname-pass-2', name: '' })).code, 'BAD_MSG');
+  });
+
   await t.test('profile push merges per key and reaches the other device', async () => {
     const a = await connect('A');
     await a.waitFor('auth.state');
