@@ -81,7 +81,7 @@ function makeData(src) {
 }
 
 // Mobile devices have constrained VRAM and thermal envelopes; capping mobile DPR (board 1.5) prevents GPU OOM and
-// render-process crashes while keeping desktop sharp — this branch's Android high-refresh work (D014).
+// render-process crashes while keeping desktop sharp — this branch's Android high-refresh work.
 // Desktop high quality stays at the upstream 2: raising it to 3 pushed the board's render targets (and the scene
 // water's reflection cube) past what some GPUs hold, which showed up as the official scenes' water falling back to a
 // flat green colour instead of its normal-mapped surface.

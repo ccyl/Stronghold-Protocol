@@ -137,3 +137,19 @@
 - 新客户端请求携带当前轮 voteId，过期轮次或其他回合的投票标识被拒绝；旧无标识请求兼容。最后一轮或候补耗尽时不显示投票。HUD 显示当前/计划轮次，例如 3/5，按钮、提示与通过消息均明确「后续全部联防」。
 - 原因：二十人房两轮可能不足，利用更多合格队友，同时允许多数真人缩短无胜算的后续流程。用户担心即时切轮压力；选择正常结束后取消全部后续，沿用当前生命周期，避免直接中断带来的旧浏览器战斗和漏怪收尾问题。真实带宽峰值尚未测量，不据源码推断宣称性能已验证。
 - 依据：[本次联防记录](records/2026-10-08-06-group-unite-rounds.md)；实现入口 [playerCapacity.js](../../shared/playerCapacity.js)、[unite.js](../../server/match/unite.js)、[unitePhase.js](../../server/match/match/unitePhase.js)、[hud.js](../../public/js/ui/hud.js)。替代 D006，保留其投票资格、多数规则和结算边界。
+
+## D014
+
+**生效：本分支自带一套内部使用的账号系统（用户名 + 4 位 UID + 唯一口令），只解决资料与战绩的跨设备同步。**
+
+- 目标是「资料跨设备同步」与「战绩跨设备」，不用于对外开放认证；不登录照常玩，游客资料仍在浏览器里。
+- 账号 = 显示名（可改，不唯一）+ UID（1000–9999，顺序分配、不复用）+ 口令（**全局唯一**，因此登录只输口令）。
+  口令不限制强度（维护者决定），只以 scrypt 哈希存储；唯一性用 `HMAC-SHA256(独立密钥文件, NFC(口令))` 的查表键判断。
+- 绑定（游客 → 账号）在标题画面的账号面板完成；口令重复时报「与 UID xxxx 重复」。玩家可以自己改口令（需旧口令）。
+- 同步范围：`settings`、`diy`、`skins`、`ownership`、`loadout`、`lang`；不含 `lobby.*`、`screenFit`、`recentRooms`、
+  `ui-plugins`。规则为按键后写胜出（`{value, at}`，平手服务器胜）+ 本机三路比较（`sp.pref.syncMirror`）；战绩按记录
+  id 合并，上限 1000 条。
+- 存储：项目根目录 `accounts/`（不在 git、不在更新包与打包内），`accounts.json` 原子写 + `.bak`，密钥单独放 `secret`（0600）；
+  会话 `token → uid` 只在内存里。运维用 `tools/account-admin.mjs`（list / reset / remove / export）。
+- 原因：内部朋友局需要换设备接着用、换设备看战绩；不引入第三方登录（与自托管/隧道部署冲突），也不做服务端战绩记账
+  （后续工作）。详见 [ACCOUNTS.md](../ACCOUNTS.md)。

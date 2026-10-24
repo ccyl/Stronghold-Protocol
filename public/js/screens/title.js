@@ -38,6 +38,8 @@ import { scriptOf } from '../../../shared/i18nPacks.js';
 import { GIcon } from '../ui/gameComponents.js';
 import { SettingsModal } from '../ui/settings.js';
 import { PreloadPill, PreloadModal } from '../ui/preloadModal.js';
+import { AccountPanel } from '../ui/accountPanel.js';
+import { accountStore } from '../ui/account.js';
 import { installedCount } from '../content.js';
 import { sanitizeName, isValidName } from '../ui/playerName.js';
 
@@ -172,6 +174,8 @@ export function TitleScreen() {
     if (currentName) setName((draft) => draft || currentName);
   }, [currentName]);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const acc = useStore((s) => s, Object.is, accountStore);
   const [preloadOpen, setPreloadOpen] = useState(false);
   // the list of the server's plugins once loaded (ui/pluginPanel.js — a component in state: set through an updater)
   const [Installed, setInstalled] = useState(null);
@@ -263,6 +267,8 @@ export function TitleScreen() {
           <span>${STATUS_TEXT[conn.status] ? t(STATUS_TEXT[conn.status]) : conn.status}</span>
           ${conn.status === 'online' ? html`<${PingPill} ms=${conn.ping} />` : null}
           <${GuideButton} class="title-guide" label=${t('玩法说明')} />
+          <button type="button" class="title-account fsbtn tapx${acc.bound ? ' is-bound' : ''}" aria-label=${t('账号')} title=${acc.bound ? t('账号 · UID {uid}', { uid: acc.uid }) : t('账号')}
+            onClick=${() => setAccountOpen(true)}><${GIcon} name="user" />${acc.bound ? html`<b class="title-account__uid num">${acc.uid}</b>` : null}</button>
           <button type="button" class="title-settings fsbtn tapx" aria-label=${t('设置')} title=${t('设置')}
             onClick=${() => setSettingsOpen(true)}><${GIcon} name="gear" /></button>
           <${FullscreenButton} class="title-fs" />
@@ -276,6 +282,7 @@ export function TitleScreen() {
 
     <${SettingsModal} open=${settingsOpen} onClose=${() => setSettingsOpen(false)} />
     <${PreloadModal} open=${preloadOpen} onClose=${() => setPreloadOpen(false)} />
+    <${AccountPanel} open=${accountOpen} onClose=${() => setAccountOpen(false)} />
 
     <footer class="title-foot">
       <div class="title-foot__col">

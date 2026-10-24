@@ -389,7 +389,7 @@ export class Lobby {
    *   plugins", "Gameplay plugins"); hosts: the match hosts a room with gameplay plugins runs its match in
    *   (server/match/host/index.js; none: such a match runs here, unit tests)
    */
-  constructor({ registry, log = noopLog, MatchClass = DefaultMatch, getData = defaultGetData, now = Date.now, seedFn, content = null, plugins = null, hosts = null, options = {} }) {
+  constructor({ registry, log = noopLog, MatchClass = DefaultMatch, getData = defaultGetData, now = Date.now, seedFn, content = null, plugins = null, hosts = null, accounts = null, options = {} }) {
     this.registry = registry;
     /** the vanilla content set every room plays (header "Content identity"), or null */
     this.vanilla = content && isContentHash(content.cs) ? Object.freeze({ cs: content.cs, vanilla: true, plugins: Object.freeze([]) }) : null;
@@ -400,6 +400,8 @@ export class Lobby {
     this.log = log;
     this.MatchClass = MatchClass;
     this.getData = getData;
+    /** 账号存储 (this branch: 内部账号, docs/ACCOUNTS.md) — null when the server runs without accounts */
+    this.accounts = accounts;
     this.now = now;
     this.seedFn = seedFn || (() => randomInt(2 ** 32));
     const testModeOpt = options.testMode;
@@ -587,6 +589,8 @@ export class Lobby {
    * @param {{ resumed: boolean, repeat: boolean }} info
    */
   onHello(session, { resumed, repeat }) {
+    // 账号状态（this branch: 内部账号, docs/ACCOUNTS.md）：新连接也要，客户端据此显示「游客 / UID xxxx」
+    this.pushAccountState(session);
     if (this.maintenance && session.ws) {
       sendSession(session, {
         t: 'server.maintenance',
@@ -721,6 +725,14 @@ export class Lobby {
       case 'room.diy': return this.diy(session, msg);
       case 'room.skins': return this.skins(session, msg);
       case 'room.chat': return this.chat(session, msg);
+      // 账号（this branch: 内部账号, docs/ACCOUNTS.md）
+      case 'auth.bind': return this.bindAccount(session, msg);
+      case 'auth.login': return this.loginAccount(session, msg);
+      case 'auth.logout': return this.logoutAccount(session);
+      case 'auth.pass': return this.changePass(session, msg);
+      case 'auth.rename': return this.renameAccount(session, msg);
+      case 'profile.push': return this.pushProfile(session, msg);
+      case 'profile.pull': return this.pullProfile(session);
       case 'room.spectate': { this.matchmaker.removePlayer(session.playerId); return this.spectate(session, msg); }
       case 'room.removeSpectator': return this.removeSpectator(session, msg);
       case 'match.queue': session.wantsLobbyStats = true; return this.matchmaker.enqueue(session, msg);
@@ -1092,6 +1104,142 @@ export class Lobby {
       seat.ready = ready;
       this.broadcastState(room);
     }
+    return OK;
+  }
+
+  // ---- 账号（this branch: 内部账号, docs/ACCOUNTS.md） -----------------------------------------------------------
+  //
+  // 口令是唯一凭证：登录只输口令；UID（1000–9999）由服务端顺序分配、永不复用。游客照常玩，登录后才同步资料
+  // （profile.state）与战绩。所有口令操作都过 store.allowAttempt 的按连接限流，失败不回显口令。
+
+  /** The account store, or null when this server runs without accounts (tests, tooling). */
+  accountsStore() {
+    const s = this.accounts;
+    return s && s.loaded ? s : null;
+  }
+
+  /** Push this connection's account state (`auth.state`) to the client. */
+  pushAccountState(session) {
+    const s = this.accountsStore();
+    if (!s || !session.ws) return;
+    const st = s.stateFor(session.token);
+    sendSession(session, st.bound ? { t: 'auth.state', bound: true, uid: st.uid, name: st.name } : { t: 'auth.state', bound: false });
+  }
+
+  /** Push an account's profile to the client (`profile.state`): the merged result of a login / pull / push. */
+  pushProfileState(session, snap) {
+    if (!session.ws || !snap) return;
+    sendSession(session, { t: 'profile.state', rev: Number(snap.rev) || 0, keys: snap.keys || {}, stats: snap.stats || null });
+  }
+
+  /** One passphrase operation's rate-limit gate (per connection). */
+  _authAllowed(session) {
+    const s = this.accountsStore();
+    return !!s && s.allowAttempt(session.token || session.playerId);
+  }
+
+  /** The account UID bound to this connection, or null. */
+  accountUid(session) {
+    const s = this.accountsStore();
+    return s ? s.sessionUid(session.token) : null;
+  }
+
+  /** auth.bind {pass, name}: 游客 → 账号（注册并绑定当前连接）。口令重复时报冲突账号的 UID。 */
+  async bindAccount(session, msg) {
+    const s = this.accountsStore();
+    if (!s) return fail(ERR.INTERNAL, 'accounts disabled');
+    if (!this._authAllowed(session)) return fail(ERR.RATE, 'auth too fast');
+    const res = await s.bind({ pass: msg.pass, name: msg.name });
+    if (res.error === 'PASS_TAKEN') {
+      sendSession(session, { t: 'auth.conflict', operation: 'bind', uid: res.uid });
+      return fail(ERR.PASS_TAKEN, String(res.uid));
+    }
+    if (res.error === 'PASS_WEAK') return fail(ERR.PASS_WEAK);
+    if (res.error === 'BAD_NAME') return fail(ERR.BAD_MSG, 'bad name');
+    if (!res.ok) return fail(ERR.INTERNAL, 'bind failed');
+    s.bindSession(session.token, res.uid);
+    this.pushAccountState(session);
+    this.pushProfileState(session, s.snapshot(res.uid));
+    this.log?.info?.(`[accounts] uid ${res.uid} bound (${session.name})`);
+    return OK;
+  }
+
+  /** auth.login {pass}: 绑定一个已有账号，并把它的资料推给客户端（客户端自行与本机合并）。 */
+  async loginAccount(session, msg) {
+    const s = this.accountsStore();
+    if (!s) return fail(ERR.INTERNAL, 'accounts disabled');
+    if (!this._authAllowed(session)) return fail(ERR.RATE, 'auth too fast');
+    const res = await s.login({ pass: msg.pass });
+    if (!res.ok) return fail(ERR.PASS_UNKNOWN);
+    s.bindSession(session.token, res.uid);
+    this.pushAccountState(session);
+    this.pushProfileState(session, res);
+    this.log?.info?.(`[accounts] uid ${res.uid} logged in (${session.name})`);
+    return OK;
+  }
+
+  /** auth.logout: 解绑（资料留在本机，仍可离线玩）。 */
+  logoutAccount(session) {
+    const s = this.accountsStore();
+    if (s) s.unbindSession(session.token);
+    this.pushAccountState(session);
+    return OK;
+  }
+
+  /** auth.pass {oldPass, newPass}: 玩家自己改口令（旧口令证明归属，新口令同样查重）。 */
+  async changePass(session, msg) {
+    const s = this.accountsStore();
+    if (!s) return fail(ERR.INTERNAL, 'accounts disabled');
+    const uid = this.accountUid(session);
+    if (uid == null) return fail(ERR.NOT_BOUND);
+    if (!this._authAllowed(session)) return fail(ERR.RATE, 'auth too fast');
+    const res = await s.changePass({ uid, oldPass: msg.oldPass, newPass: msg.newPass });
+    if (res.error === 'PASS_TAKEN') {
+      sendSession(session, { t: 'auth.conflict', operation: 'pass', uid: res.uid });
+      return fail(ERR.PASS_TAKEN, String(res.uid));
+    }
+    if (res.error === 'PASS_WEAK') return fail(ERR.PASS_WEAK);
+    if (res.error === 'PASS_UNKNOWN') return fail(ERR.PASS_UNKNOWN);
+    if (!res.ok) return fail(ERR.INTERNAL, 'pass change failed');
+    this.log?.info?.(`[accounts] uid ${uid} changed its passphrase`);
+    return OK;
+  }
+
+  /** auth.rename {name}: 改账号显示名（UID 不变）。 */
+  renameAccount(session, msg) {
+    const s = this.accountsStore();
+    if (!s) return fail(ERR.INTERNAL, 'accounts disabled');
+    const uid = this.accountUid(session);
+    if (uid == null) return fail(ERR.NOT_BOUND);
+    const res = s.rename({ uid, name: msg.name });
+    if (res.error === 'BAD_NAME') return fail(ERR.BAD_MSG, 'bad name');
+    if (!res.ok) return fail(ERR.INTERNAL, 'rename failed');
+    this.pushAccountState(session);
+    return OK;
+  }
+
+  /** profile.push {keys, stats}: 按键后写胜出合并、战绩按记录 id 合并，答复合并后的整份资料。 */
+  pushProfile(session, msg) {
+    const s = this.accountsStore();
+    if (!s) return fail(ERR.INTERNAL, 'accounts disabled');
+    const uid = this.accountUid(session);
+    if (uid == null) return fail(ERR.NOT_BOUND);
+    const res = s.push(uid, { keys: msg.keys, stats: msg.stats });
+    if (res.error === 'TOO_BIG') return fail(ERR.TOO_BIG);
+    if (!res.ok) return fail(ERR.INTERNAL, 'push failed');
+    this.pushProfileState(session, res);
+    return OK;
+  }
+
+  /** profile.pull: 读回账号的资料。 */
+  pullProfile(session) {
+    const s = this.accountsStore();
+    if (!s) return fail(ERR.INTERNAL, 'accounts disabled');
+    const uid = this.accountUid(session);
+    if (uid == null) return fail(ERR.NOT_BOUND);
+    const snap = s.snapshot(uid);
+    if (!snap.ok) return fail(ERR.INTERNAL, 'pull failed');
+    this.pushProfileState(session, snap);
     return OK;
   }
 

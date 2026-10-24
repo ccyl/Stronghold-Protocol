@@ -540,3 +540,28 @@ html[data-script="alphabetic"] .title-login .btn--xl { letter-spacing: .3em; }
 .notice-card__meta { margin: 0; font-size: calc(.13 * var(--t)); color: var(--text-dim); overflow-wrap: anywhere; }
 .notice-card__title { margin: .02rem 0; font-size: calc(.16 * var(--t)); color: var(--text-hi); overflow-wrap: anywhere; }
 .notice-card__body { margin: 0; font-size: calc(.15 * var(--t)); color: var(--text-md); line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; -webkit-user-select: text; user-select: text; }
+
+/* ---- 账号（this branch: 内部账号, docs/ACCOUNTS.md） ------------------------------------------------------------
+   标题栏的账号按钮（已绑定时角上显示 UID）与账号面板的排版。 */
+.title-account { position: relative; }
+.title-account.is-bound { border-color: var(--mint-700, var(--line-3)); }
+.title-account__uid {
+  position: absolute; right: -.02rem; bottom: -.05rem; padding: 0 .03rem;
+  font-size: max(.1rem, 8px); line-height: 1.3; color: #0b1520; background: var(--mint-400); border-radius: .04rem;
+}
+.acct-dlg .modal__body { display: flex; flex-direction: column; gap: .1rem; }
+.acct-dlg .modal__box { width: min(7.2rem, 92vw); }
+.acct-state { display: flex; align-items: center; gap: .1rem; padding: .06rem .08rem; background: rgba(8, 11, 10, .55); border: 1px solid var(--line); }
+.acct-state__uid { font-family: var(--font-num); font-size: max(.18rem, 13px); color: var(--mint-400); }
+.acct-state__name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: max(.16rem, 12px); color: var(--text-hi); }
+.acct-hint { margin: 0; font-size: max(.14rem, 11px); line-height: 1.6; color: var(--text-lo); }
+.acct-tabs { display: flex; gap: .06rem; }
+.acct-tab {
+  flex: 1 1 0; padding: .06rem .08rem; font: inherit; font-size: max(.15rem, 11px); color: var(--text-lo); cursor: pointer;
+  background: rgba(8, 11, 10, .6); border: 1px solid var(--line);
+}
+.acct-tab.is-on { color: var(--text-hi); border-color: var(--mint-400); }
+.acct-row { display: flex; align-items: flex-end; gap: .08rem; flex-wrap: wrap; }
+.acct-row > * { flex: 1 1 2.2rem; min-width: 0; }
+.acct-actions { display: flex; gap: .08rem; flex-wrap: wrap; }
+.acct-conflict { margin: 0; padding: .05rem .08rem; font-size: max(.14rem, 11px); color: #ffb4a8; background: rgba(120, 30, 20, .28); border-left: 2px solid #d4623f; }

@@ -11,6 +11,17 @@ import { Network, SessionRegistry, NET_DEFAULTS } from '../net.js';
 import { Lobby } from '../lobby.js';
 import { splitUrl } from './common.js';
 import { netOptionsFrom, lobbyOptionsFrom } from './config.js';
+import { AccountStore } from '../accounts/store.js';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+/** 账号数据的存放目录（this branch: 内部账号, docs/ACCOUNTS.md）：`SP_ACCOUNTS_DIR`，默认是项目根目录下的 accounts/
+ *  —— 不在 git 里、不在更新包里（打包只收版本库跟踪的文件），里面是本机所有账号与资料。 */
+const APP_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+export function accountsDir(opts = {}) {
+  const fromEnv = typeof process !== 'undefined' && process.env ? process.env.SP_ACCOUNTS_DIR : undefined;
+  return opts.accountsDir || fromEnv || path.join(APP_ROOT, 'accounts');
+}
 
 /** Inbound WebSocket frame limit (DESIGN §8). */
 export const WS_MAX_PAYLOAD = 64 * 1024;
@@ -62,7 +73,17 @@ export function createSessionStack(opts, { data, log, content = null, plugins = 
   const netOptions = netOptionsFrom(opts);
   const registry = new SessionRegistry({ reconnectWindowMs: netOptions.reconnectWindowMs ?? NET_DEFAULTS.reconnectWindowMs });
   const lobbyOptions = lobbyOptionsFrom(opts);
-  const lobby = new Lobby({ registry, log, MatchClass: opts.MatchClass, getData: () => data, seedFn: opts.seedFn, content, plugins, hosts, options: lobbyOptions });
+  // 账号存储（this branch: 内部账号）——初始化失败不让服务器起不来：住内存的游客对局照常，只是登录不可用
+  let accounts = null;
+  if (opts.accounts !== false) {
+    try {
+      accounts = opts.accounts || new AccountStore({ dir: accountsDir(opts), log }).init();
+    } catch (e) {
+      log?.warn?.('[accounts] disabled: ' + (e && e.message ? e.message : String(e)));
+      accounts = null;
+    }
+  }
+  const lobby = new Lobby({ registry, log, MatchClass: opts.MatchClass, getData: () => data, seedFn: opts.seedFn, content, plugins, hosts, accounts, options: lobbyOptions });
   const network = new Network({ registry, handler: lobby, log, options: netOptions });
   return { registry, lobby, network };
 }

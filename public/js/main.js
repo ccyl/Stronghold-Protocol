@@ -57,6 +57,7 @@ import { StatsHost } from './screens/stats.js';
 import { installRehearsal } from './battle/rehearsal.js';
 import { recordResult, installStatsRecorder } from './ui/stats.js';
 import { installLoadoutSync, installOwnershipSync, installDiySync, installSkinsSync } from './ui/loadoutSync.js';
+import { accountSubscribe, syncProfile } from './ui/account.js';
 import { startBuildGuard } from './ui/buildGuard.js';
 import { MAX_SEATS } from '../../shared/constants.js';
 import { initLang, useLang, tickerText } from './ui/lang.js';
@@ -563,6 +564,11 @@ async function boot() {
   installOwnershipSync({ net });
   installDiySync({ net });
   installSkinsSync({ net });
+  // 账号（this branch: 内部账号, docs/ACCOUNTS.md）：收到 auth.state / auth.conflict / profile.state 时更新状态与资料，
+  // 并每 60 秒把本机的改动与战绩推给已绑定的账号。
+  accountSubscribe();
+  const accountTimer = setInterval(() => { syncProfile().catch(() => {}); }, 60_000);
+  window.addEventListener('pagehide', () => clearInterval(accountTimer), { once: true });
   // the room's cosmetic plugins and the player's own over the art manifest (content.js; nothing is fetched without them)
   installContent({ toast });
   // a room with gameplay plugins: its content set downloaded, checked and shown (content.js — DESIGN §32.6)

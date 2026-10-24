@@ -193,6 +193,13 @@ export const ERR = Object.freeze({
   TEST_CONFIRM: 'TEST_CONFIRM',
   TEST_DISABLED: 'TEST_DISABLED',
   TEST_FORBIDDEN: 'TEST_FORBIDDEN',
+  // 账号（this branch: 内部账号, docs/ACCOUNTS.md）：口令已被占用（detail = 冲突账号的 UID）、口令不存在、
+  // 口令为空、当前连接没有绑定账号、推送的资料超过上限
+  PASS_TAKEN: 'PASS_TAKEN',
+  PASS_UNKNOWN: 'PASS_UNKNOWN',
+  PASS_WEAK: 'PASS_WEAK',
+  NOT_BOUND: 'NOT_BOUND',
+  TOO_BIG: 'TOO_BIG',
   INTERNAL: 'INTERNAL',
 });
 
@@ -204,6 +211,8 @@ export const ERR_TEXT = {
   BAD_TILE: N_('无法部署在该位置'), BAD_TARGET: N_('无效的目标'), SOLD_OUT: N_('已售出'), MAX_LEVEL: N_('调度中心已达最高等级'),
   NOT_YOUR_TURN: N_('尚未轮到你'), ALREADY: N_('已完成该操作'), TEMP_NOT_EMPTY: N_('临时整备区不为空'), ELIMINATED: N_('你已被淘汰'),
   SPECTATOR: N_('观战中无法进行该操作'), MAINTENANCE: N_('服务器即将维护，暂时关闭入口'), INTERNAL: N_('服务器内部错误'),
+  PASS_TAKEN: N_('该口令已被其他账号使用'), PASS_UNKNOWN: N_('口令不正确'), PASS_WEAK: N_('口令不能为空'),
+  NOT_BOUND: N_('当前连接还没有绑定账号'), TOO_BIG: N_('要同步的数据太大'),
   PLUGIN_UNKNOWN: N_('本服务器没有安装该插件'), PLUGIN_BLOCKED: N_('该插件不能在房间中启用'), PLUGIN_DEPENDENCY: N_('缺少该插件需要的其他插件'),
   PLUGIN_CONFLICT: N_('所选插件互相冲突'), PLUGIN_LIMIT: N_('所选插件的素材总量超出本服务器的上限'),
   PLUGIN_RULE_CONFLICT: N_('两个插件把同一个规则开关设成了不同的选项'),

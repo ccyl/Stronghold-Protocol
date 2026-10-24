@@ -9,6 +9,7 @@ import { diySlotIds, validateDiyPicks } from './diy.js';
 import { cultivatedStats, isPotential, isCultivate, POTENTIAL_DEFAULT, CULTIVATE_DEFAULT, hasPotentialData } from './potential.js';
 import { isContentHash } from './plugins/identity.js';
 import { isPluginId } from './plugins/manifest.js';
+import { isPass, isAccountName, isStamp, isStatsEnvelope, PROFILE_KEYS, PROFILE_LIMITS } from './accounts.js';
 
 // ---- tiny validators -------------------------------------------------------
 const isInt = (v, lo = -Infinity, hi = Infinity) => Number.isInteger(v) && v >= lo && v <= hi;
@@ -20,6 +21,14 @@ const isNum = (v, lo = -Infinity, hi = Infinity) => typeof v === 'number' && Num
 const isPlain = (v) => !!v && typeof v === 'object' && !Array.isArray(v) && Object.getPrototypeOf(v) === Object.prototype;
 const optional = (check) => (v) => v === undefined || check(v);
 const nullable = (check) => (v) => v === null || v === undefined || check(v);
+
+/**
+ * The `keys` map of profile.push: known profile keys only, each `{ value, at }` with a numeric stamp. The entry
+ * values themselves are size-checked and sanitised by shared/accounts.js on the server (a push is never refused for
+ * one bad entry — it is dropped).
+ */
+const isProfileKeys = (v) => isPlain(v) && Object.keys(v).length <= PROFILE_LIMITS.keys
+  && Object.entries(v).every(([k, e]) => PROFILE_KEYS.includes(k) && isPlain(e) && isStamp(e.at) && Object.hasOwn(e, 'value'));
 /** A plain object with at most `max` own keys, every key passing `key` and every value passing `val`. */
 const isMap = (v, max, key, val) => {
   if (!isPlain(v)) return false;
@@ -475,6 +484,20 @@ export const C2S = {
   'room.skins': { skins: isSkinSelection },
   // 房间与局内文字聊天
   'room.chat': { text: (v) => typeof v === 'string' && v.trim().length > 0 && v.length <= 120 },
+  // 账号（this branch: 内部账号, docs/ACCOUNTS.md）: the passphrase is unique, so login needs only the passphrase.
+  // A guest keeps playing with everything in localStorage; binding adds cross-device profile sync and the match
+  // history. auth.bind registers the account of this connection (guest → account), auth.login binds an existing one,
+  // auth.logout unbinds it (the profile stays on the device), auth.pass changes the passphrase (the old one proves
+  // ownership; the new one is checked for uniqueness like a bind), auth.rename changes the display name (the UID stays).
+  // profile.push merges per key (later stamp wins) and the stats records by record id; it answers the merged result, so
+  // one push is a full sync. profile.pull reads the account's profile back.
+  'auth.bind': { pass: isPass, name: isAccountName },
+  'auth.login': { pass: isPass },
+  'auth.logout': {},
+  'auth.pass': { oldPass: isPass, newPass: isPass },
+  'auth.rename': { name: isAccountName },
+  'profile.push': { keys: isProfileKeys, stats: optional(isStatsEnvelope) },
+  'profile.pull': {},
   // spectator seats (remake feature, community report #26; MAX_SPECTATORS): take one of a co-op room's spectator seats —
   // in its lobby or while its match runs — never a player seat; the host frees one by playerId (the spectator gets
   // room.closed { reason: 'kicked' }). room.leave / g.leave leave a spectator seat like a player seat.
@@ -584,6 +607,11 @@ export const C2S = {
 export const S2C = [
   'welcome', 'ok', 'error', 'pong',
   'room.state', 'room.closed', 'room.list', 'room.chat',
+  // 账号（this branch: 内部账号, docs/ACCOUNTS.md）
+  //   auth.state { bound, uid?, name? } — this connection's account (after hello, bind, login, logout, rename)
+  //   auth.conflict { operation, uid } — the passphrase is taken by UID `uid` (bind / auth.pass); the client shows it
+  //   profile.state { rev, keys, stats } — the account's profile after login / pull / push (the merged result)
+  'auth.state', 'auth.conflict', 'profile.state',
   'match.status', 'match.found', 'server.maintenance', 'lobby.stats',
   'm.public', 'm.private', 'm.field', 'm.toast', 'm.ticker', 'm.emote', 'm.result',
   // m.layer { playerId, bondId, add } — own live prep layer gain; ephemeral, never replayed on resync.
