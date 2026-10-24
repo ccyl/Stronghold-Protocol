@@ -33,7 +33,9 @@ export function AccountPanel({ open, onClose }) {
     if (err?.code === 'PASS_UNKNOWN') { toast(t('口令不正确'), 'warn'); return; }
     if (err?.code === 'PASS_WEAK') { toast(t('口令不能为空'), 'warn'); return; }
     if (err?.code === 'RATE') { toast(t('操作过于频繁，请稍后再试'), 'warn'); return; }
-    toast(err?.msg || t('操作失败，请重试'), 'warn');
+    // NetError carries the server's text in `message` (msg/detail are the raw frame fields)
+    console.warn('[account] request failed', err?.code, err?.serverMsg, err?.detail, err);
+    toast(err?.message || t('操作失败，请重试'), 'warn');
   };
 
   const run = async (fn) => {

@@ -18,8 +18,8 @@
 // them (settings, the DIY store, skins …) keeps its in-memory copy until it reloads, so the account panel lives on the
 // title screen — the one place where a reload costs nothing.
 
-import { net } from '../net.js';
-import { createStore, loadPref, savePref } from '../store.js';
+import { net, identity } from '../net.js';
+import { store, createStore, loadPref, savePref } from '../store.js';
 import { PROFILE_KEYS, mergeProfileKeys, mergeStats, isUid } from '../../../shared/accounts.js';
 import { loadStats, saveStats } from './stats.js';
 
@@ -158,10 +158,28 @@ export function resetSyncMirror() {
 // ---- requests -------------------------------------------------------------------------------------------------
 
 /**
+ * The account requests need a session (the server's `hello`), but the 个人界面 (the stats screen) opens from the title
+ * screen too, where the player may not have pressed 开始 yet. `net.setName` opens the socket and sends hello; a request
+ * made while the session is still being established is queued and goes out when it is online (public/js/net.js
+ * request()). The callsign falls back to the account name, then to the last identity, so binding never needs a press
+ * of 开始 first.
+ * @param {string} [fallbackName]
+ */
+export function ensureSession(fallbackName) {
+  if (net.status === 'online' || net.name) return true;
+  let callsign = String(fallbackName || '').trim();
+  if (!callsign) { try { callsign = String(store.get()?.me?.name || '').trim(); } catch { callsign = ''; } }
+  if (!callsign) { try { callsign = String(identity.loadName?.() || '').trim(); } catch { callsign = ''; } }
+  net.setName(callsign || 'Doctor');
+  return true;
+}
+
+/**
  * Bind (register) an account for this connection: the passphrase is the login credential and must be unique.
  * @param {string} pass @param {string} name
  */
 export async function bindAccount(pass, name) {
+  ensureSession(name);
   accountStore.set({ conflict: null });
   // name 可省略：服务端用这条连接当前的代号
   return net.request(name ? { t: 'auth.bind', pass, name } : { t: 'auth.bind', pass });
@@ -169,6 +187,7 @@ export async function bindAccount(pass, name) {
 
 /** Log in (bind an existing account) — the server pushes its profile, which is merged into this device. */
 export async function loginAccount(pass) {
+  ensureSession('');
   accountStore.set({ conflict: null });
   reloadAfterApply = true; // the server pushes this account's profile right after the login
   return net.request({ t: 'auth.login', pass });
@@ -176,18 +195,21 @@ export async function loginAccount(pass) {
 
 /** Unbind: the profile stays on this device and play continues as a guest. */
 export async function logoutAccount() {
+  ensureSession('');
   resetSyncMirror();
   return net.request({ t: 'auth.logout' });
 }
 
 /** Change the passphrase (the old one proves ownership; the new one must be free). */
 export async function changePassphrase(oldPass, newPass) {
+  ensureSession('');
   accountStore.set({ conflict: null });
   return net.request({ t: 'auth.pass', oldPass, newPass });
 }
 
 /** Rename the account (the UID stays). */
 export async function renameAccount(name) {
+  ensureSession(name);
   return net.request({ t: 'auth.rename', name });
 }
 
@@ -197,6 +219,7 @@ export async function renameAccount(name) {
  * @returns {Promise<boolean>} whether anything was sent
  */
 export async function pushProfile() {
+  ensureSession('');
   if (!isBound()) return false;
   const payload = { t: 'profile.push', keys: {} };
   const collected = collectPush();
@@ -221,6 +244,7 @@ export async function pushProfile() {
  *   page reloads so the in-memory stores read them (docs/ACCOUNTS.md §3)
  */
 export async function pullProfile({ reload = false } = {}) {
+  ensureSession('');
   if (!isBound()) return null;
   if (reload) reloadAfterApply = true;
   return net.request({ t: 'profile.pull' });
