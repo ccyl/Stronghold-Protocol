@@ -33,7 +33,7 @@ export const MAX_DRAFT_CARDS = 6;
  * A spectator never counts as a player, may not act, and watches like an eliminated player (server/lobby.js spectate,
  * server/match/match/watch.js addSpectator).
  */
-export const MAX_SPECTATORS = 2;
+// 观战席数量不再单独设上限：与房间容量相同（server/lobby.js room.spectate）
 export const ROOM_CODE_LEN = 4;
 export const NAME_MAX_LEN = 12;
 
@@ -163,7 +163,7 @@ export const ERR = Object.freeze({
   ALREADY: 'ALREADY',
   TEMP_NOT_EMPTY: 'TEMP_NOT_EMPTY',
   ELIMINATED: 'ELIMINATED',
-  SPECTATOR: 'SPECTATOR',         // a spectator seat only watches (MAX_SPECTATORS)
+  SPECTATOR: 'SPECTATOR',         // a spectator seat only watches (as many seats as the room's capacity)
   MAINTENANCE: 'MAINTENANCE',     // server maintenance in progress / shutting down
   // room.setPlugins (DESIGN §32): a plugin this server has not installed; one a room cannot switch on in this version
   // (not a cosmetic or content plugin it loads, not of the room's scope, or not allowed by the server owner's

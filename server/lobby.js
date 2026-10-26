@@ -163,7 +163,7 @@
 
 import os from 'node:os';
 import { randomBytes, randomInt } from 'node:crypto';
-import { DIFFICULTIES, ERR, MAX_SEATS, DEFAULT_SEATS, ROOM_CAPACITIES, MAX_SPECTATORS, ROOM_CODE_LEN, modeIdFor } from '../shared/constants.js';
+import { DIFFICULTIES, ERR, MAX_SEATS, DEFAULT_SEATS, ROOM_CAPACITIES, ROOM_CODE_LEN, modeIdFor } from '../shared/constants.js';
 import { checkLoadout, checkLoadoutOps, cultivationCharIds, checkNotOwned, checkDiyPicks, charPotentialChanges, checkSkinSelection, operatorCharIds } from '../shared/protocol.js';
 import { getCpuUsagePercent } from './admin.js';
 import { encode, isDroppable, isErrCode, sendRaw, sendSession } from './net.js';
@@ -282,7 +282,7 @@ export class Room {
     /** @type {(Seat | null)[]} */
     this.capacity = mode === 'solo' ? 1 : capacity;
     this.seats = new Array(this.capacity).fill(null);
-    /** @type {{ playerId: string, name: string, connected: boolean }[]} spectator seats, ≤ MAX_SPECTATORS (header) */
+    /** @type {{ playerId: string, name: string, connected: boolean }[]} spectator seats, ≤ the room's capacity (header) */
     this.spectators = [];
     /** @type {any} running Match instance */
     this.match = null;
@@ -1062,7 +1062,8 @@ export class Lobby {
     }
     if (cur && cur.match) return fail(ERR.ROOM_STARTED, 'leave your running match first');
     if (room.mode === 'solo') return fail(ERR.ROOM_FULL, 'solo room');
-    if (room.spectators.length >= MAX_SPECTATORS) return fail(ERR.ROOM_FULL, 'no free spectator seat');
+    // 观战席与博士席位一样多：房间容量是多少，就能坐多少个观战者
+    if (room.spectators.length >= room.capacity) return fail(ERR.ROOM_FULL, 'no free spectator seat');
     if (cur) this.removeMember(cur, session.playerId);
     room.spectators.push({ playerId: session.playerId, name: session.name, connected: session.connected });
     session.roomCode = room.code;

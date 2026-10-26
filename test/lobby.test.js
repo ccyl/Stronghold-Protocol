@@ -19,7 +19,7 @@ import { sanitizeName, TokenBucket, SessionRegistry, clientAddress, normalizeIp,
 import { StubMatch as Match } from '../server/match/StubMatch.js';
 import { Match as RealMatch } from '../server/match/Match.js';
 import { TestClient } from './helpers/wsClient.js';
-import { ERR, BASE_SEATS, MAX_SEATS, MAX_SPECTATORS, PHASE, EMOTES } from '../shared/constants.js';
+import { ERR, BASE_SEATS, MAX_SEATS, PHASE, EMOTES } from '../shared/constants.js';
 
 const CODE_RE = new RegExp(`^[${CODE_ALPHABET}]{4}$`);
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
@@ -778,16 +778,19 @@ describe('websocket lobby', () => {
       await expectError(s1, msg, ERR.NOT_HOST);
     }
     await expectError(s1, { t: 'g.ready', ready: true }, ERR.WRONG_PHASE);
-    // the cap; spectators never count toward the players: two player seats still free
+    // the cap: as many spectator seats as the room's capacity (BASE_SEATS); spectators never count toward the players
     const s2 = await pool.player('Watcher2');
     await expectOk(s2, { t: 'room.spectate', code: st.code });
-    assert.equal(MAX_SPECTATORS, 2);
     const s3 = await pool.player('Watcher3');
-    await expectError(s3, { t: 'room.spectate', code: st.code }, ERR.ROOM_FULL);
+    await expectOk(s3, { t: 'room.spectate', code: st.code });
+    const w4 = await pool.player('Watcher4');
+    await expectOk(w4, { t: 'room.spectate', code: st.code });
+    const w5 = await pool.player('Watcher5');
+    await expectError(w5, { t: 'room.spectate', code: st.code }, ERR.ROOM_FULL);
     await joinRoom(s3, st.code);
     await expectOk(host, { t: 'room.addBot' });
     const full = await host.waitFor('room.state', (s) => s.seats.every(Boolean));
-    assert.equal(full.spectators.length, 2);
+    assert.equal(full.spectators.length, 3); // s1, s2 (still spectating) and w4
     await expectOk(s3, { t: 'room.ready', ready: true });
     await expectOk(guest, { t: 'room.ready', ready: true });
     // a spectator in the lobby takes a free player seat with room.join of the same code
@@ -795,7 +798,10 @@ describe('websocket lobby', () => {
     await expectOk(host, { t: 'room.removeBot', seat: 3 });
     const sat = await joinRoom(s2, st.code);
     assert.equal(seatOf(sat, s2.id).seat, 3);
-    assert.deepEqual(sat.spectators.map((x) => x.playerId), [s1.id]);
+    assert.deepEqual(sat.spectators.map((x) => x.playerId), [s1.id, w4.id]);
+    // w4 leaves so the rest of the flow keeps its earlier expectations
+    await expectOk(w4, { t: 'room.leave' });
+    await host.waitFor('room.state', (s) => !s.spectators.some((x) => x.playerId === w4.id));
     // leave
     host.clearInbox();
     await expectOk(s1, { t: 'room.leave' });
@@ -1183,7 +1189,7 @@ describe('websocket lobby', () => {
         assert.equal(sess.roomCode, room.code);
       }
       // spectator seats: capped, none in solo rooms, never also a player (here or elsewhere), never the host
-      assert.ok(room.spectators.length <= MAX_SPECTATORS, `room ${room.code} spectator cap`);
+      assert.ok(room.spectators.length <= (room.capacity || BASE_SEATS), `room ${room.code} spectator cap`);
       if (room.mode === 'solo') assert.equal(room.spectators.length, 0, 'no spectator seat in a solo room');
       for (const sp of room.spectators) {
         assert.ok(!seen.has(sp.playerId), 'a spectator is seated (or spectating) twice');
