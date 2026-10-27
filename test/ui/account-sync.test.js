@@ -67,6 +67,23 @@ test('pulling applies untouched keys and keeps locally edited ones', () => {
   assert.deepEqual(Object.keys(out.keys), ['diy'], 'the kept key is the one pushed next');
 });
 
+test('a user-initiated login forces the account values over this device\'s own copies', () => {
+  // 这台设备以前保存过设置（镜子为空 → 三路比较会把它当成"本地改过"而保留），登录时必须改成账号的值
+  pref('settings', { bgm: 0.1 });
+  pref('loadout', { ops: 'local' });
+  const remote = {
+    settings: { value: { bgm: 0.8 }, at: 500 },
+    loadout: { value: { ops: 'account' }, at: 500 },
+  };
+  const kept = applyProfileKeys(remote);
+  assert.deepEqual(kept.kept.sort(), ['loadout', 'settings'], 'background sync keeps local edits');
+  assert.deepEqual(read('settings'), { bgm: 0.1 });
+  const forced = applyProfileKeys(remote, { force: true });
+  assert.deepEqual(forced.applied.sort(), ['loadout', 'settings']);
+  assert.deepEqual(read('settings'), { bgm: 0.8 });
+  assert.deepEqual(read('loadout'), { ops: 'account' });
+});
+
 test('a key that is absent locally is simply taken from the account', () => {
   const res = applyProfileKeys({ lang: { value: 'ja', at: 10 }, skins: { value: { a: 'x' }, at: 10 } });
   assert.deepEqual(res.applied.sort(), ['lang', 'skins']);

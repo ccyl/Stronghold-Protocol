@@ -30,6 +30,12 @@ export const SYNC_MIRROR_KEY = 'syncMirror';
  *  in-memory stores (settings, skins, the DIY store …) read the synced preferences. A background sync never sets it. */
 let reloadAfterApply = false;
 
+/** Set by a user-initiated login / pull: the account's values win over this device's own copies. Without it a device
+ *  that ever saved a preference (mirror empty, local value present) counts every local key as "edited here" and keeps
+ *  it — the account then never reaches a second device. A background sync keeps the three-way rule, so it cannot
+ *  clobber an edit the user has not pushed yet. */
+let forceApplyNext = false;
+
 /** The connection's account, as the UI reads it. `conflict` = { operation, uid } of a passphrase the server refused. */
 export const accountStore = createStore({
   bound: false,
@@ -89,7 +95,7 @@ export function collectPush(at = Date.now()) {
  * @param {Record<string, { value: any, at: number }>} remote
  * @returns {{ applied: string[], kept: string[] }}
  */
-export function applyProfileKeys(remote) {
+export function applyProfileKeys(remote, { force = false } = {}) {
   const mirror = loadPref(SYNC_MIRROR_KEY, {});
   const local = localProfileKeys();
   const applied = [];
@@ -98,7 +104,7 @@ export function applyProfileKeys(remote) {
   for (const key of PROFILE_KEYS) {
     const r = remote && remote[key];
     if (!r) continue;
-    const localEdited = local[key] !== undefined && !same(local[key], mirror[key]);
+    const localEdited = !force && local[key] !== undefined && !same(local[key], mirror[key]);
     if (localEdited) { kept.push(key); continue; }
     savePref(key, r.value);
     nextMirror[key] = r.value;
@@ -136,7 +142,9 @@ export function accountSubscribe() {
     if (!m || typeof m !== 'object') return;
     const merged = applyProfileStats(m.stats || null);
     if (merged) savePref(STATS_SIG_KEY, statsSignature(merged));
-    const res = applyProfileKeys(m.keys || {});
+    const force = forceApplyNext;
+    forceApplyNext = false;
+    const res = applyProfileKeys(m.keys || {}, { force });
     accountStore.set({ rev: Number(m.rev) || 0, lastSync: Date.now(), conflict: null });
     // keys the local side won are pushed straight away, so the account matches this device too
     if (res.kept.length) pushProfile().catch(() => {});
@@ -182,7 +190,10 @@ export async function bindAccount(pass, name) {
   ensureSession(name);
   accountStore.set({ conflict: null });
   // name 可省略：服务端用这条连接当前的代号
-  return name ? net.request('auth.bind', { pass, name }) : net.request('auth.bind', { pass });
+  const res = name ? await net.request('auth.bind', { pass, name }) : await net.request('auth.bind', { pass });
+  // 绑定后立刻把本机资料推成账号的初始资料，不等 60 秒定时同步
+  pushProfile().catch(() => {});
+  return res;
 }
 
 /** Log in (bind an existing account) — the server pushes its profile, which is merged into this device. */
@@ -190,6 +201,7 @@ export async function loginAccount(pass) {
   ensureSession('');
   accountStore.set({ conflict: null });
   reloadAfterApply = true; // the server pushes this account's profile right after the login
+  forceApplyNext = true;   // the account's values win over this device's own copies
   return net.request('auth.login', { pass });
 }
 
@@ -246,7 +258,7 @@ export async function pushProfile() {
 export async function pullProfile({ reload = false } = {}) {
   ensureSession('');
   if (!isBound()) return null;
-  if (reload) reloadAfterApply = true;
+  if (reload) { reloadAfterApply = true; forceApplyNext = true; }
   return net.request('profile.pull');
 }
 
@@ -264,7 +276,7 @@ const statsSignature = (stats) => {
  * the account is bound and the socket is online. Called by the app's timer (main.js); a no-op otherwise.
  */
 export async function syncProfile() {
-  if (!isBound() || !net.connected) return false;
+  if (!isBound() || net.status !== 'online') return false; // net has no `connected` flag: status is 'online' | 'connecting' | …
   const stats = loadStats();
   const collected = collectPush();
   const sig = statsSignature(stats);

@@ -79,7 +79,7 @@ export function ChatBox({ active: controlledActive, onToggle, showTrigger = cont
       console.warn('[chat] send failed', err);
       if (err?.code === 'RATE' || err?.error === 'RATE') {
         toast(t('发言过于频繁，请稍候'), 'warn');
-      } else if (!net.connected || !store.get().session?.entered) {
+      } else if (net.status !== 'online' || !store.get().session?.entered) {
         // 离线/单机调试模式回退
         pushChatMessage({
           playerId: store.get().session?.playerId || 'me',
