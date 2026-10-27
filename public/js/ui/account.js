@@ -16,8 +16,8 @@
 
 import { net, identity } from '../net.js';
 import { store, createStore, loadPref, savePref } from '../store.js';
-import { PROFILE_KEYS, isUid } from '../../../shared/accounts.js';
-import { loadStats, appendRecord, recordListeners, saveStats } from './stats.js';
+import { PROFILE_KEYS, isUid, jsonBytes } from '../../../shared/accounts.js';
+import { loadStats, appendRecord, recordListeners, saveStats, compactRecord } from './stats.js';
 
 /** The last stats cursor this device has seen from the account (`sp.pref.statsSeq`). */
 export const STATS_SEQ_KEY = 'statsSeq';
@@ -170,12 +170,42 @@ const toastStatsPulled = (n) => { for (const fn of pulledListeners) { try { fn(n
 export async function addStatsRecord(record) {
   if (!isBound() || !record || !record.id) return false;
   if (net.status !== 'online') return false;
+  const fitted = fitRecord(record);
+  if (!fitted) return false;
   try {
-    await net.request('stats.add', { records: [record] });
+    await net.request('stats.add', { records: [fitted] });
     return true;
   } catch {
     return false;
   }
+}
+
+/** Shrink one record until it is small enough to send: a full settlement of a 20-player room can pass 64 KB, and the
+ *  socket closes on a bigger frame (the account keeps the compact summary — the local copy stays full). */
+export function fitRecord(rec, maxBytes = 24 * 1024) {
+  if (!rec) return null;
+  if (jsonBytes(rec) <= maxBytes) return rec;
+  try {
+    const small = compactRecord(rec);
+    return jsonBytes(small) <= maxBytes ? small : null;
+  } catch { return null; }
+}
+
+/** Split records into frames that stay under `budget` bytes (each record pre-fitted; oversized ones are dropped). */
+export function chunkRecords(records, budget = 24 * 1024) {
+  const chunks = [];
+  let cur = [];
+  let bytes = 2; // []
+  for (const raw of Array.isArray(records) ? records : []) {
+    const rec = fitRecord(raw, Math.max(1024, budget - 1024));
+    if (!rec) continue;
+    const size = jsonBytes(rec) + 1;
+    if (cur.length && bytes + size > budget) { chunks.push(cur); cur = []; bytes = 2; }
+    cur.push(rec);
+    bytes += size;
+  }
+  if (cur.length) chunks.push(cur);
+  return chunks;
 }
 
 /** One-shot wait for the next `stats.state` matching `pred` (the server answers a request with a push). */
@@ -205,9 +235,9 @@ export async function uploadMissingStats() {
   const answer = await wait;
   const missing = Array.isArray(answer?.missing) ? answer.missing : [];
   const toSend = missing.map((id) => byId.get(id)).filter(Boolean);
+  // 按字节切批：完整结算（20 人房）一条就可能几十 KB，帧超过 64 KB 服务端会直接断开连接
   let sent = 0;
-  for (let i = 0; i < toSend.length; i += 20) {
-    const chunk = toSend.slice(i, i + 20);
+  for (const chunk of chunkRecords(toSend)) {
     try {
       await net.request('stats.add', { records: chunk });
       sent += chunk.length;

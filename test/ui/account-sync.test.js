@@ -58,6 +58,28 @@ test('an account key that is absent locally is still written by a download', () 
   assert.equal(read('lang'), 'ja');
 });
 
+test('chunkRecords keeps every stats frame well under the 64 KB socket limit', async () => {
+  const { chunkRecords, fitRecord } = await import('../../public/js/ui/account.js');
+  const { jsonBytes } = await import('../../shared/accounts.js');
+  const small = (i) => ({ id: 'r' + i, t: i, victory: true });
+  const chunks = chunkRecords(Array.from({ length: 60 }, (_, i) => small(i)));
+  assert.ok(chunks.length >= 1);
+  let total = 0;
+  for (const c of chunks) {
+    total += c.length;
+    assert.ok(jsonBytes(c) <= 24 * 1024, 'each frame stays inside the budget');
+  }
+  assert.equal(total, 60, 'every record is sent');
+  // a record bigger than the budget is compacted (and fits), never sent as an oversized frame
+  const huge = { id: 'huge', t: 1, victory: true, players: [{ playerId: 'p', stats: {} }], pad: 'x'.repeat(40_000) };
+  assert.ok(jsonBytes(huge) > 24 * 1024);
+  const fit = fitRecord(huge);
+  assert.ok(fit && jsonBytes(fit) <= 24 * 1024);
+  const only = chunkRecords([huge]);
+  assert.equal(only.length, 1);
+  assert.ok(jsonBytes(only[0]) <= 24 * 1024);
+});
+
 test('the stats cursor lives in its own preference', () => {
   assert.equal(STATS_SEQ_KEY, 'statsSeq');
   globalThis.localStorage.setItem(`sp.pref.${STATS_SEQ_KEY}`, '12');
