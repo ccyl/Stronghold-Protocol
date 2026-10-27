@@ -369,6 +369,20 @@ export class AccountStore {
   }
 
   /**
+   * Which of these record ids the account does not have yet — the backfill's question, so a device with a long local
+   * history sends only what is missing instead of re-sending everything (docs/ACCOUNTS.md §3).
+   * @param {number} uid @param {string[]} ids
+   * @returns {{ ok: true, missing: string[] } | { error: 'NO_ACCOUNT' }}
+   */
+  missingIds(uid, ids) {
+    const acc = this.account(uid);
+    if (!acc) return { error: 'NO_ACCOUNT' };
+    const have = new Set(((acc.stats && acc.stats.list) || []).map((e) => e.id));
+    const want = (Array.isArray(ids) ? ids : []).filter((id) => typeof id === 'string' && id && !have.has(id));
+    return { ok: true, missing: [...new Set(want)].slice(0, PROFILE_LIMITS.records) };
+  }
+
+  /**
    * The records a device has not seen yet (`seq > since`), oldest first — what a login pulls in to fill the local
    * history (docs/ACCOUNTS.md §3).
    * @param {number} uid @param {number} since

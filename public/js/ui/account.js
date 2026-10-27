@@ -163,7 +163,7 @@ const toastStatsPulled = (n) => { for (const fn of pulledListeners) { try { fn(n
 /**
  * Append one stored match record to the account (`stats.add`). Idempotent on the server (record id); a failure is
  * silent — the record stays on this device and the next 「补齐」/login sends what the account lacks? No: this is the
- * only upload path, so a failure is retried by `uploadStats()` (the panel's 「上传本机战绩」).
+ * only upload path; a failure is retried by the next `uploadMissingStats()` (a login or 「从账号补齐战绩」).
  * @param {any} record
  * @returns {Promise<boolean>}
  */
@@ -178,20 +178,36 @@ export async function addStatsRecord(record) {
   }
 }
 
-/** Send up to `max` of this device's records (oldest first) that the account may not have — the first-login backfill. */
-export async function uploadStats(max = 40) {
+/** One-shot wait for the next `stats.state` matching `pred` (the server answers a request with a push). */
+function nextStatsState(pred, ms = 5000) {
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = (v) => { if (done) return; done = true; try { off(); } catch { /* ignore */ } resolve(v); };
+    const off = net.on('stats.state', (m) => { if (!done && pred(m)) finish(m); });
+    setTimeout(() => finish(null), ms);
+  });
+}
+
+/**
+ * Backfill the account with every local record it does not have yet: ask `stats.missing` for the ids the account
+ * lacks, then send exactly those in batches of 20. A device with a long local history uploads all of it (previously
+ * only the oldest 20 were ever sent), and a second run sends nothing.
+ * @returns {Promise<number>} how many records this device uploaded
+ */
+export async function uploadMissingStats() {
   if (!isBound()) return 0;
   ensureSession('');
-  const seq = Number(loadPref(STATS_SEQ_KEY, 0)) || 0;
-  const stats = loadStats();
-  const list = Array.isArray(stats.records) ? stats.records : [];
-  if (!list.length) return 0;
-  // the account holds `seq` records; this device sends its oldest `max` (idempotent on the server)
-  const batch = list.slice(-Math.max(1, Math.min(20, max)));
+  const local = (loadStats()?.records || []).filter((r) => r && r.id);
+  if (!local.length) return 0;
+  const byId = new Map(local.map((r) => [r.id, r]));
+  const wait = nextStatsState((m) => Array.isArray(m.missing));
+  await net.request('stats.missing', { ids: local.slice(0, 1000).map((r) => r.id) });
+  const answer = await wait;
+  const missing = Array.isArray(answer?.missing) ? answer.missing : [];
+  const toSend = missing.map((id) => byId.get(id)).filter(Boolean);
   let sent = 0;
-  for (let i = 0; i < batch.length; i += 20) {
-    const chunk = batch.slice(i, i + 20).filter((r) => r && r.id);
-    if (!chunk.length) continue;
+  for (let i = 0; i < toSend.length; i += 20) {
+    const chunk = toSend.slice(i, i + 20);
     try {
       await net.request('stats.add', { records: chunk });
       sent += chunk.length;
@@ -211,7 +227,7 @@ export async function syncStats() {
   const before = Number(accountStore.get().statsSeq) || 0;
   accountStore.set({ busy: true });
   try {
-    await uploadStats(20);
+    await uploadMissingStats();
     await net.request('stats.since', { seq: Number(loadPref(STATS_SEQ_KEY, 0)) || 0 });
     return Math.max(0, (Number(accountStore.get().statsSeq) || 0) - before);
   } finally {

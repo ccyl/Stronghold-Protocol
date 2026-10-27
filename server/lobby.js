@@ -735,6 +735,7 @@ export class Lobby {
       case 'profile.pull': return this.pullProfile(session);
       case 'stats.add': return this.addStats(session, msg);
       case 'stats.since': return this.statsSince(session, msg);
+      case 'stats.missing': return this.statsMissing(session, msg);
       case 'room.spectate': { this.matchmaker.removePlayer(session.playerId); return this.spectate(session, msg); }
       case 'room.removeSpectator': return this.removeSpectator(session, msg);
       case 'match.queue': session.wantsLobbyStats = true; return this.matchmaker.enqueue(session, msg);
@@ -1248,6 +1249,18 @@ export class Lobby {
     if (res.error === 'TOO_BIG') return fail(ERR.TOO_BIG);
     if (!res.ok) return fail(ERR.INTERNAL, 'stats add failed');
     sendSession(session, { t: 'stats.state', seq: res.seq, entries: [] });
+    return OK;
+  }
+
+  /** stats.missing {ids}: 补齐的第一步——账号还缺哪些记录。 */
+  statsMissing(session, msg) {
+    const s = this.accountsStore();
+    if (!s) return fail(ERR.INTERNAL, 'accounts disabled');
+    const uid = this.accountUid(session);
+    if (uid == null) return fail(ERR.NOT_BOUND);
+    const res = s.missingIds(uid, msg.ids);
+    if (!res.ok) return fail(ERR.INTERNAL, 'stats missing failed');
+    sendSession(session, { t: 'stats.state', seq: s.account(uid)?.stats?.seq || 0, entries: [], missing: res.missing });
     return OK;
   }
 

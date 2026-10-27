@@ -102,6 +102,17 @@ test('stats are appended with a per-account seq and deduped by record id', async
   assert.equal(s.statsSince(uid, 0).entries.length, 1000);
 });
 
+test('missingIds answers exactly the records the account does not hold', async (t) => {
+  const s = store(scratch(t));
+  const { uid } = await s.bind({ pass: 'p', name: 'A' });
+  const rec = (id, tt) => ({ id, t: tt });
+  s.addStats(uid, [rec('a', 1), rec('b', 2)]);
+  assert.deepEqual(s.missingIds(uid, ['a', 'b', 'c', 'd']), { ok: true, missing: ['c', 'd'] });
+  assert.deepEqual(s.missingIds(uid, ['a']).missing, []);
+  assert.deepEqual(s.missingIds(uid, []).missing, []);
+  assert.equal(s.missingIds(uid, ['a', 'a', 'e']).missing.join(','), 'e', 'duplicates collapse');
+});
+
 test('sessions bind a reconnect token to an account; logout forgets it', async (t) => {
   const s = store(scratch(t));
   const { uid } = await s.bind({ pass: 'p', name: 'A' });

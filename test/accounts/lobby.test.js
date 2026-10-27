@@ -128,6 +128,11 @@ test('accounts', async (t) => {
     // a malformed batch is refused before it reaches the store
     const bad = await b.request({ t: 'stats.add', records: [{ t: 1 }] });
     assert.equal(bad.code, 'BAD_MSG');
+    // 补齐的第一步：问账号缺哪些 id（本机历史再长，也只补交缺的那几条）
+    await b.request({ t: 'stats.missing', ids: ['m1', 'm2', 'm9', 'm10'] });
+    const missing = await b.waitFor('stats.state', (m) => Array.isArray(m.missing));
+    assert.deepEqual(missing.missing, ['m9', 'm10']);
+    assert.equal(missing.seq, 2);
   });
 
   await t.test('changing the passphrase needs the old one and keeps uniqueness', async () => {

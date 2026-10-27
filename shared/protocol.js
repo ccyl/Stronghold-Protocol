@@ -34,6 +34,9 @@ const isRecord = (v) => isPlain(v) && typeof v.id === 'string' && v.id.length > 
 /** A batch of match records (one match per entry; at most 20 per request so one frame stays small). */
 const isRecordList = (v) => Array.isArray(v) && v.length > 0 && v.length <= 20 && v.every(isRecord);
 
+/** A list of record ids (≤ 1000, each ≤ 64 chars) — the backfill's question. */
+const isIdList = (v) => Array.isArray(v) && v.length <= 1000 && v.every((x) => typeof x === 'string' && x.length > 0 && x.length <= 64);
+
 const isProfileKeys = (v) => isPlain(v) && Object.keys(v).length <= PROFILE_LIMITS.keys
   && Object.entries(v).every(([k, e]) => PROFILE_KEYS.includes(k) && isPlain(e) && Object.hasOwn(e, 'value'));
 /** A plain object with at most `max` own keys, every key passing `key` and every value passing `val`. */
@@ -511,6 +514,8 @@ export const C2S = {
   //   stats.since {seq}   — 登录补齐：请求 seq 之后的记录（服务端回 stats.state）
   'stats.add': { records: isRecordList },
   'stats.since': { seq: (v) => isInt(v, 0, 2 ** 40) },
+  // stats.missing {ids} — 补齐的第一步：问账号哪些记录它还没有（回 stats.state.missing），只补交缺的那些
+  'stats.missing': { ids: isIdList },
   // spectator seats (remake feature, community report #26; MAX_SPECTATORS): take one of a co-op room's spectator seats —
   // in its lobby or while its match runs — never a player seat; the host frees one by playerId (the spectator gets
   // room.closed { reason: 'kicked' }). room.leave / g.leave leave a spectator seat like a player seat.
@@ -624,8 +629,8 @@ export const S2C = [
   //   auth.state { bound, uid?, name? } — this connection's account (after hello, bind, login, logout, rename)
   //   auth.conflict { operation, uid } — the passphrase is taken by UID `uid` (bind / auth.pass); the client shows it
   //   profile.state { rev, keys, at } — the account's profile keys (a login, or the answer to profile.pull)
-  //   stats.state { seq, entries: [{ seq, record }] } — after stats.add / stats.since: the account's stats cursor and
-  //   the records the caller had not seen (entries empty for stats.add)
+  //   stats.state { seq, entries: [{ seq, record }], missing? } — after stats.add / stats.since: the account's stats
+  //   cursor and the records the caller had not seen (entries empty for stats.add); `missing` answers stats.missing
   'auth.state', 'auth.conflict', 'profile.state', 'stats.state',
   'match.status', 'match.found', 'server.maintenance', 'lobby.stats',
   'm.public', 'm.private', 'm.field', 'm.toast', 'm.ticker', 'm.emote', 'm.result',
