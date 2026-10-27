@@ -565,3 +565,8 @@ html[data-script="alphabetic"] .title-login .btn--xl { letter-spacing: .3em; }
 .acct-row > * { flex: 1 1 2.2rem; min-width: 0; }
 .acct-actions { display: flex; gap: .08rem; flex-wrap: wrap; }
 .acct-conflict { margin: 0; padding: .05rem .08rem; font-size: max(.14rem, 11px); color: #ffb4a8; background: rgba(120, 30, 20, .28); border-left: 2px solid #d4623f; }
+
+/* 账号面板里的两块资料/战绩（docs/ACCOUNTS.md） */
+.acct-block { display: flex; flex-direction: column; gap: .05rem; padding: .06rem .08rem; background: rgba(8, 11, 10, .45); border: 1px solid var(--line); }
+.acct-block__h { display: flex; align-items: baseline; gap: .08rem; margin: 0; font-size: max(.15rem, 11px); font-weight: 700; color: var(--text-hi); }
+.acct-block__h small { font-weight: 400; font-size: max(.12rem, 10px); color: var(--text-lo); }

@@ -1,5 +1,4 @@
-// 账号同步的客户端规则（docs/ACCOUNTS.md §3）: 按键后写胜出 + 本机三路比较（自上次同步后没动过的键接受服务器值，
-// 动过的键保留本机值并在下次推送时获胜），战绩按记录 id 合并。
+// 账号同步的客户端规则（docs/ACCOUNTS.md §3）：资料是手动上传/下载（整体替换），战绩是追加（按记录 id 去重）。
 
 import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
@@ -16,7 +15,7 @@ class MemoryStorage {
 globalThis.localStorage = new MemoryStorage();
 
 const {
-  SYNC_MIRROR_KEY, collectPush, applyProfileKeys, localProfileKeys, resetSyncMirror,
+  localProfileKeys, applyAccountKeys, ensureSession, STATS_SEQ_KEY,
 } = await import('../../public/js/ui/account.js');
 const { PROFILE_KEYS } = await import('../../shared/accounts.js');
 
@@ -27,91 +26,65 @@ beforeEach(() => {
   globalThis.localStorage.clear();
 });
 
-test('nothing changed since the last sync → nothing to push', () => {
+test('localProfileKeys reports the synced set only', () => {
+  pref('lang', 'ko');
   pref('settings', { bgm: 0.5 });
-  pref(SYNC_MIRROR_KEY, { settings: { bgm: 0.5 } });
-  assert.equal(collectPush(100), null);
+  pref('lobby.mode', 'solo');
+  assert.deepEqual(localProfileKeys(), { lang: 'ko', settings: { bgm: 0.5 } });
 });
 
-test('only the keys that differ from the mirror are pushed, with one stamp', () => {
-  pref('settings', { bgm: 0.5 });
-  pref('diy', { 'chess_char_6_diy1_a': { charId: 'char_498_inside' } });
-  pref('lang', 'en');
-  pref(SYNC_MIRROR_KEY, { settings: { bgm: 0.5 }, lang: 'en' });
-  const out = collectPush(777);
-  assert.deepEqual(Object.keys(out.keys).sort(), ['diy']);
-  assert.deepEqual(out.keys.diy, { value: { 'chess_char_6_diy1_a': { charId: 'char_498_inside' } }, at: 777 });
-  assert.deepEqual(out.mirror, {
-    settings: { bgm: 0.5 },
-    lang: 'en',
-    diy: { 'chess_char_6_diy1_a': { charId: 'char_498_inside' } },
-  });
+test('the synced keys are exactly the documented set', () => {
+  assert.deepEqual([...PROFILE_KEYS].sort(), ['diy', 'lang', 'loadout', 'ownership', 'settings', 'skins']);
 });
 
-test('pulling applies untouched keys and keeps locally edited ones', () => {
-  pref('settings', { bgm: 0.5 }); // untouched since the last sync
-  pref('diy', { local: 1 });      // edited since the last sync
-  pref(SYNC_MIRROR_KEY, { settings: { bgm: 0.5 }, diy: { local: 0 } });
-  const remote = {
-    settings: { value: { bgm: 0.9 }, at: 200 },
-    diy: { value: { server: 2 }, at: 300 },
-  };
-  const res = applyProfileKeys(remote);
-  assert.deepEqual(res.applied, ['settings']);
-  assert.deepEqual(res.kept, ['diy']);
-  assert.deepEqual(read('settings'), { bgm: 0.9 }, 'the untouched key took the server value');
-  assert.deepEqual(read('diy'), { local: 1 }, 'the local edit survived');
-  // the mirror now records the applied value; the kept key still needs a push
-  assert.deepEqual(read(SYNC_MIRROR_KEY).settings, { bgm: 0.9 });
-  const out = collectPush(400);
-  assert.deepEqual(Object.keys(out.keys), ['diy'], 'the kept key is the one pushed next');
-});
-
-test('a user-initiated login forces the account values over this device\'s own copies', () => {
-  // 这台设备以前保存过设置（镜子为空 → 三路比较会把它当成"本地改过"而保留），登录时必须改成账号的值
+test('a download replaces this device keys and leaves the unsynced ones alone', () => {
   pref('settings', { bgm: 0.1 });
-  pref('loadout', { ops: 'local' });
-  const remote = {
-    settings: { value: { bgm: 0.8 }, at: 500 },
-    loadout: { value: { ops: 'account' }, at: 500 },
-  };
-  const kept = applyProfileKeys(remote);
-  assert.deepEqual(kept.kept.sort(), ['loadout', 'settings'], 'background sync keeps local edits');
-  assert.deepEqual(read('settings'), { bgm: 0.1 });
-  const forced = applyProfileKeys(remote, { force: true });
-  assert.deepEqual(forced.applied.sort(), ['loadout', 'settings']);
-  assert.deepEqual(read('settings'), { bgm: 0.8 });
-  assert.deepEqual(read('loadout'), { ops: 'account' });
+  pref('diy', { old: 1 });
+  pref('lobby.mode', 'coop');
+  const n = applyAccountKeys({
+    settings: { value: { bgm: 0.9 } },
+    diy: { value: { fresh: 2 } },
+    loadout: { value: { ops: 'x' } },
+  });
+  assert.equal(n, 3);
+  assert.deepEqual(read('settings'), { bgm: 0.9 });
+  assert.deepEqual(read('diy'), { fresh: 2 });
+  assert.deepEqual(read('loadout'), { ops: 'x' });
+  assert.equal(read('lobby.mode'), 'coop', 'a key outside the set is never touched');
 });
 
-test('a key that is absent locally is simply taken from the account', () => {
-  const res = applyProfileKeys({ lang: { value: 'ja', at: 10 }, skins: { value: { a: 'x' }, at: 10 } });
-  assert.deepEqual(res.applied.sort(), ['lang', 'skins']);
-  assert.deepEqual(res.kept, []);
+test('an account key that is absent locally is still written by a download', () => {
+  applyAccountKeys({ lang: { value: 'ja' } });
   assert.equal(read('lang'), 'ja');
 });
 
-test('the profile keys are exactly the synced set', () => {
-  assert.deepEqual([...PROFILE_KEYS].sort(), ['diy', 'lang', 'loadout', 'ownership', 'settings', 'skins']);
-  // keys outside the set are never touched by a pull
-  applyProfileKeys({ 'lobby.mode': { value: 'solo', at: 10 } });
-  assert.equal(globalThis.localStorage.getItem('sp.pref.lobby.mode'), null);
+test('the stats cursor lives in its own preference', () => {
+  assert.equal(STATS_SEQ_KEY, 'statsSeq');
+  globalThis.localStorage.setItem(`sp.pref.${STATS_SEQ_KEY}`, '12');
+  assert.equal(Number(read(STATS_SEQ_KEY)), 12);
 });
 
-test('logging out clears the mirror so the next login starts clean', () => {
-  pref(SYNC_MIRROR_KEY, { settings: { bgm: 0.5 } });
-  resetSyncMirror();
-  assert.deepEqual(read(SYNC_MIRROR_KEY), {});
-  // with no mirror, every key this device has counts as an edit to push
-  pref('settings', { bgm: 0.5 });
-  const out = collectPush(1);
-  assert.deepEqual(Object.keys(out.keys), ['settings']);
-});
-
-test('every account request uses net.request(type, fields) — the client API, not a message object', async () => {
+test('ensureSession opens a session with a sensible callsign', async () => {
   const { net } = await import('../../public/js/net.js');
-  const { bindAccount, loginAccount, logoutAccount, changePassphrase, renameAccount, pullProfile, accountStore } = await import('../../public/js/ui/account.js');
-  accountStore.set({ bound: true, uid: 1000, name: 'T' }); // pullProfile only runs for a bound account
+  const calls = [];
+  const orig = net.setName;
+  net.setName = (n) => { calls.push(n); net.name = n; };
+  try {
+    assert.equal(ensureSession('桃酥小狗'), true);
+    assert.deepEqual(calls, ['桃酥小狗']);
+    // an existing name means no further hello
+    assert.equal(ensureSession('other'), true);
+    assert.deepEqual(calls, ['桃酥小狗']);
+  } finally {
+    net.setName = orig;
+    net.name = null;
+  }
+});
+
+test('every account request uses net.request(type, fields)', async () => {
+  const { net } = await import('../../public/js/net.js');
+  const { bindAccount, loginAccount, logoutAccount, changePassphrase, renameAccount, accountStore } = await import('../../public/js/ui/account.js');
+  accountStore.set({ bound: true, uid: 1000, name: 'T' });
   const calls = [];
   const origRequest = net.request;
   const origSetName = net.setName;
@@ -124,23 +97,18 @@ test('every account request uses net.request(type, fields) — the client API, n
     await logoutAccount();
     await changePassphrase('old', 'new');
     await renameAccount('n');
-    await pullProfile();
   } finally {
     net.request = origRequest;
     net.setName = origSetName;
   }
-  assert.deepEqual(calls, [
+  // 绑定成功后会顺手整份上传一次（profile.push），所以只看 auth.* 的调用顺序
+  const authCalls = calls.filter(([t]) => t.startsWith('auth.'));
+  assert.deepEqual(authCalls.slice(0, 6), [
     ['auth.bind', { pass: 'p', name: 'n' }],
     ['auth.bind', { pass: 'p' }],
     ['auth.login', { pass: 'p' }],
     ['auth.logout', undefined],
     ['auth.pass', { oldPass: 'old', newPass: 'new' }],
     ['auth.rename', { name: 'n' }],
-    ['profile.pull', undefined],
   ]);
-});
-
-test('localProfileKeys reports only the keys present', () => {
-  pref('lang', 'ko');
-  assert.deepEqual(localProfileKeys(), { lang: 'ko' });
 });

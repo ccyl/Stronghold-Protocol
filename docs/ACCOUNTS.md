@@ -28,17 +28,26 @@
 
 ## 3. 同步规则
 
-**同步的键**（`PROFILE_KEYS`）：`settings`、`diy`（自选编队）、`skins`（换装）、`ownership`（持有）、
-`loadout`（潜能/练度）、`lang`。
-**不同步**：`lobby.*`（上次的房间选项）、`screenFit`、`recentRooms`、`ui-plugins`（这台设备的界面布局）。
+两类数据的模型**故意不同**：资料由玩家决定，战绩只增不改。
 
-- **按键后写胜出**：每条 `{ value, at }`，`at` 是写入时刻（毫秒）；服务器按 `at` 合并，平手时服务器侧胜出。
-- **本机三路比较**：`sp.pref.syncMirror` 记住"上次同步时的值"。拉取时，本机值仍等于镜子 → 接受服务器值；
-  本机值不同（用户本地改过、还没推）→ 保留本机值并在下一次推送时获胜。推送时只推与镜子不同的键。
-- **战绩按记录 id 合并**（`shared/accounts.js mergeStats`）：同一局在两台设备上只算一条；合并结果按 `t` 倒序、
-  上限 1000 条。
-- **推送时机**：登录后、每 60 秒（`main.js`）以及账号面板的「立即同步」。服务器在每次 `profile.push` 后回推
-  合并后的完整资料（`profile.state`），所以一次推送就是一次双向同步。
+**资料**（`PROFILE_KEYS`）：`settings`、`diy`（自选编队）、`skins`（换装）、`ownership`（持有）、
+`loadout`（潜能/练度）、`lang`。不同步：`lobby.*`、`screenFit`、`recentRooms`、`ui-plugins`。
+
+- **手动上传 / 手动下载**（个人界面两个按钮，各自先弹确认框）：
+  - 上传 = 用本机这套**整体替换**账号里的（账号只有一个"资料时间"）；
+  - 下载 = 用账号那套**整体替换**本机，然后自动刷新一次页面（内存里的 store 才会读到新值）。
+- **没有自动同步、没有合并、没有三路比较**：谁覆盖谁由玩家决定。绑定账号时自动上传一次作为初始资料。
+
+**战绩**：**追加式**，存在服务端。
+
+- 每局结束（结算或中途退出），客户端用 `stats.add` 把这一局的记录**追加**到账号；服务端按记录的 `id` 去重，
+  并给它分配一个递增的 `seq`。
+- 登录（以及面板的「从账号补齐战绩」）时，客户端用 `stats.since { seq }` 拉取自己还没见过的记录
+  （`sp.pref.statsSeq` 是这台设备的游标），按 `id` 合并进本机历史。
+- 第一次登录会把本机已有的战绩补交上去（一批 ≤ 20 条，服务端按 `id` 去重）。
+- 账号里的战绩按现有规则有界：最近 1000 局、记录先压缩再上传（一帧 ≤ 64 KB）。
+
+战绩是客户端生成的，服务端不做可信校验——内部私服，够用。
 
 ## 4. 服务端与存储
 
@@ -54,12 +63,14 @@
 
 ## 5. 协议
 
-C→S：`auth.bind {pass, name}` · `auth.login {pass}` · `auth.logout` · `auth.pass {oldPass, newPass}` ·
-`auth.rename {name}` · `profile.push {keys, stats?}` · `profile.pull`
+C→S：`auth.bind {pass, name?}` · `auth.login {pass}` · `auth.logout` · `auth.pass {oldPass, newPass}` ·
+`auth.rename {name}` · `profile.push {keys}`（上传，整体替换）· `profile.pull`（下载）·
+`stats.add {records}`（≤ 20 条/批）· `stats.since {seq}`
 S→C：`auth.state {bound, uid?, name?}`（hello / bind / login / logout / rename 之后）·
-`auth.conflict {operation, uid}`（口令被占用）· `profile.state {rev, keys, stats}`
+`auth.conflict {operation, uid}`（口令被占用）· `profile.state {rev, keys, at}` ·
+`stats.state {seq, entries: [{seq, record}]}`
 错误码：`PASS_TAKEN`（detail 是冲突账号的 UID）、`PASS_UNKNOWN`、`PASS_WEAK`、`NOT_BOUND`、`TOO_BIG`。
-上限：单键 64 KB、全部键 256 KB、战绩 800 KB / 1000 条（`PROFILE_LIMITS`）。
+上限：单键 64 KB、全部键 256 KB、单条战绩 64 KB、账号最多 1000 条战绩（`PROFILE_LIMITS`）。
 
 ## 6. 运维
 

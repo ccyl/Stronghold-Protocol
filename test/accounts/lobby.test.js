@@ -45,7 +45,10 @@ test('accounts', async (t) => {
     const st = await c.waitFor('auth.state', (m) => m.bound === true);
     assert.deepEqual(st, { t: 'auth.state', bound: true, uid: 1000, name: 'Alice' });
     const prof = await c.waitFor('profile.state');
-    assert.deepEqual(prof, { t: 'profile.state', rev: 0, keys: {}, stats: null });
+    assert.equal(prof.t, 'profile.state');
+    assert.deepEqual(prof.keys, {});
+    assert.equal(prof.rev, 0);
+    assert.ok(prof.at > 0, 'the profile carries when the account was last written');
     // a second bind with the same passphrase names the holder and pushes the conflict
     const d = await connect('Alice2');
     await d.waitFor('auth.state');
@@ -67,31 +70,64 @@ test('accounts', async (t) => {
     assert.equal((await c.request({ t: 'auth.bind', pass: 'noname-pass-2', name: '' })).code, 'BAD_MSG');
   });
 
-  await t.test('profile push merges per key and reaches the other device', async () => {
+  await t.test('the manual upload replaces the account profile and reaches the other device', async () => {
     const a = await connect('A');
     await a.waitFor('auth.state');
     await a.request({ t: 'auth.bind', pass: 'sync-pass', name: 'Sync' });
     await a.waitFor('profile.state');
-    assert.equal((await a.request({ t: 'profile.push', keys: { settings: { value: { bgm: 0.4 }, at: 100 } } })).t, 'ok');
+    assert.equal((await a.request({ t: 'profile.push', keys: { settings: { value: { bgm: 0.4 } }, diy: { value: { a: 1 } } } })).t, 'ok');
     let prof = await a.waitFor('profile.state', (m) => m.rev === 1);
-    assert.deepEqual(prof.keys.settings, { value: { bgm: 0.4 }, at: 100 });
-    // the other device logs in and reads the same profile
+    assert.deepEqual(Object.keys(prof.keys).sort(), ['diy', 'settings']);
+    // the other device logs in and downloads exactly that set
     const b = await connect('B');
     await b.waitFor('auth.state');
     assert.equal((await b.request({ t: 'auth.login', pass: 'sync-pass' })).t, 'ok');
     prof = await b.waitFor('profile.state');
-    assert.deepEqual(prof.keys.settings, { value: { bgm: 0.4 }, at: 100 });
-    // a later push wins, an older one does not; stats merge by record id
-    assert.equal((await b.request({ t: 'profile.push', keys: { settings: { value: { bgm: 0.9 }, at: 200 } } })).t, 'ok');
-    await b.waitFor('profile.state', (m) => m.rev === 2);
-    assert.equal((await a.request({ t: 'profile.push', keys: { settings: { value: { bgm: 0.1 }, at: 150 } } })).t, 'ok');
-    const merged = await a.waitFor('profile.state', (m) => m.rev === 3);
-    assert.deepEqual(merged.keys.settings, { value: { bgm: 0.9 }, at: 200 });
-    await b.request({ t: 'profile.push', keys: {}, stats: { v: 2, records: [{ id: 'm1', t: 10, victory: true }] } });
-    await b.waitFor('profile.state', (m) => m.rev === 4);
-    await a.request({ t: 'profile.push', keys: {}, stats: { v: 2, records: [{ id: 'm1', t: 10, victory: true }, { id: 'm2', t: 20, victory: false }] } });
-    const stats = await a.waitFor('profile.state', (m) => m.rev === 5);
-    assert.deepEqual(stats.stats.records.map((r) => r.id), ['m2', 'm1']);
+    assert.deepEqual(prof.keys.settings.value, { bgm: 0.4 });
+    assert.deepEqual(prof.keys.diy.value, { a: 1 });
+    // an upload from the other device REPLACES the set: the keys it does not carry are gone
+    assert.equal((await b.request({ t: 'profile.push', keys: { settings: { value: { bgm: 0.9 } } } })).t, 'ok');
+    const replaced = await b.waitFor('profile.state', (m) => m.rev === 2);
+    assert.deepEqual(Object.keys(replaced.keys), ['settings']);
+    // a download on the first device now reads the replaced set
+    await a.request({ t: 'profile.pull' });
+    const pulled = await a.waitFor('profile.state');
+    assert.deepEqual(pulled.keys.settings.value, { bgm: 0.9 });
+    assert.equal('diy' in pulled.keys, false);
+  });
+
+  await t.test('match records are appended with a seq, deduped by id, and pulled by cursor', async () => {
+    const a = await connect('R1');
+    await a.waitFor('auth.state');
+    await a.request({ t: 'auth.bind', pass: 'stats-pass', name: 'R' });
+    await a.waitFor('profile.state');
+    const rec = (id, t) => ({ id, t, victory: true, roundsPassed: 3, myId: 'x' });
+    // two matches
+    assert.equal((await a.request({ t: 'stats.add', records: [rec('m1', 10)] })).t, 'ok');
+    const s1 = await a.waitFor('stats.state');
+    assert.equal(s1.seq, 1);
+    assert.deepEqual(s1.entries, []);
+    assert.equal((await a.request({ t: 'stats.add', records: [rec('m2', 20)] })).t, 'ok');
+    assert.equal((await a.waitFor('stats.state')).seq, 2);
+    // the same id again does not add a record
+    assert.equal((await a.request({ t: 'stats.add', records: [rec('m1', 10)] })).t, 'ok');
+    assert.equal((await a.waitFor('stats.state')).seq, 2, 'idempotent by record id');
+    // another device logs in and asks for everything after its cursor
+    const b = await connect('R2');
+    await b.waitFor('auth.state');
+    assert.equal((await b.request({ t: 'auth.login', pass: 'stats-pass' })).t, 'ok');
+    await b.waitFor('profile.state');
+    await b.request({ t: 'stats.since', seq: 0 });
+    const pulled = await b.waitFor('stats.state');
+    assert.equal(pulled.seq, 2);
+    assert.deepEqual(pulled.entries.map((e) => e.record.id), ['m1', 'm2']);
+    // a cursor at 1 only returns the newer record
+    await b.request({ t: 'stats.since', seq: 1 });
+    const since = await b.waitFor('stats.state');
+    assert.deepEqual(since.entries.map((e) => e.record.id), ['m2']);
+    // a malformed batch is refused before it reaches the store
+    const bad = await b.request({ t: 'stats.add', records: [{ t: 1 }] });
+    assert.equal(bad.code, 'BAD_MSG');
   });
 
   await t.test('changing the passphrase needs the old one and keeps uniqueness', async () => {

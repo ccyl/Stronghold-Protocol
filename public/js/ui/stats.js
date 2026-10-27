@@ -612,6 +612,9 @@ export function recordToResult(rec) {
   return res;
 }
 
+/** Listeners called with every record that is actually stored (the account uploader, ui/account.js). */
+export const recordListeners = new Set();
+
 /**
  * Append one record: replays (same content id) are dropped, newest first, capped at MAX_RECORDS.
  * @param {{ v: number, records: any[] }} stats
@@ -632,6 +635,7 @@ function storeRecord(rec) {
   if (stats.newer) return null;
   const { stats: next, added } = appendRecord(stats, rec);
   if (added && !saveStats(next)) console.warn('[stats] localStorage write failed (quota?), record not persisted');
+  if (added) for (const fn of recordListeners) { try { fn(rec); } catch (err) { console.warn('[stats] record listener failed', err); } }
   return added ? rec : null;
 }
 

@@ -44,7 +44,7 @@ test('login needs only the passphrase and answers the account with its profile',
   assert.equal(r.uid, a.uid);
   assert.equal(r.name, 'Alice');
   assert.deepEqual(r.keys, {});
-  assert.equal(r.stats, null);
+  assert.equal(r.statsSeq, 0);
   assert.deepEqual(await s.login({ pass: 'secret-2' }), { error: 'PASS_UNKNOWN' });
   assert.deepEqual(await s.login({ pass: '' }), { error: 'PASS_UNKNOWN' });
 });
@@ -64,37 +64,42 @@ test('changing the passphrase requires the old one and keeps uniqueness', async 
   assert.equal((await s.login({ pass: 'admin-set' })).uid, a.uid);
 });
 
-test('profile push merges per key (later stamp wins) and answers the merged set', async (t) => {
+test('profile push replaces the account set (manual upload), unknown keys are dropped', async (t) => {
   const s = store(scratch(t));
   const { uid } = await s.bind({ pass: 'p', name: 'A' });
   let r = s.push(uid, { keys: { settings: { value: { bgm: 0.5 }, at: 100 }, diy: { value: { a: 1 }, at: 100 } } });
   assert.equal(r.ok, true);
   assert.deepEqual(r.keys.settings.value, { bgm: 0.5 });
-  // an older push does not overwrite, a newer one does; unknown keys are dropped
+  // a second upload REPLACES the set: the keys it does not carry are gone; unknown keys are dropped
   r = s.push(uid, { keys: { settings: { value: { bgm: 0.9 }, at: 50 }, bogus: { value: 1, at: 999 } } });
-  assert.deepEqual(r.keys.settings, { value: { bgm: 0.5 }, at: 100 });
-  assert.equal('bogus' in r.keys, false);
-  r = s.push(uid, { keys: { settings: { value: { bgm: 0.2 }, at: 200 } } });
-  assert.deepEqual(r.keys.settings, { value: { bgm: 0.2 }, at: 200 });
-  assert.deepEqual(r.keys.diy, { value: { a: 1 }, at: 100 });
+  assert.deepEqual(Object.keys(r.keys), ['settings']);
+  assert.deepEqual(r.keys.settings.value, { bgm: 0.9 });
   // a fresh login reads the same profile back
   const login = await s.login({ pass: 'p' });
-  assert.deepEqual(login.keys.settings, { value: { bgm: 0.2 }, at: 200 });
-  assert.equal(login.rev, 3);
+  assert.deepEqual(login.keys.settings.value, { bgm: 0.9 });
+  assert.equal(login.rev, 2);
 });
 
-test('stats merge by record id and answer one envelope', async (t) => {
+test('stats are appended with a per-account seq and deduped by record id', async (t) => {
   const s = store(scratch(t));
   const { uid } = await s.bind({ pass: 'p', name: 'A' });
   const rec = (id, tt) => ({ id, t: tt, victory: true, roundsPassed: 3 });
-  let r = s.push(uid, { keys: {}, stats: { v: 2, records: [rec('m1', 10), rec('m2', 20)] } });
-  assert.deepEqual(r.stats.records.map((x) => x.id), ['m2', 'm1']);
-  // the same id from the other device is one record; a new one is appended
-  r = s.push(uid, { keys: {}, stats: { v: 2, records: [rec('m1', 10), rec('m3', 30)] } });
-  assert.deepEqual(r.stats.records.map((x) => x.id), ['m3', 'm2', 'm1']);
-  // the server drops malformed entries and caps the envelope
-  const big = s.push(uid, { keys: {}, stats: { v: 2, records: [rec('x', 1)], pad: 'y'.repeat(900_000) } });
+  let r = s.addStats(uid, [rec('m1', 10), rec('m2', 20)]);
+  assert.deepEqual([r.seq, r.added], [2, 2]);
+  // the same ids again change nothing; a new one gets the next seq
+  r = s.addStats(uid, [rec('m1', 10), rec('m3', 30)]);
+  assert.deepEqual([r.seq, r.added], [3, 1]);
+  // a device asks only for what it has not seen
+  const since0 = s.statsSince(uid, 0);
+  assert.deepEqual(since0.entries.map((e) => e.record.id), ['m1', 'm2', 'm3']);
+  const since2 = s.statsSince(uid, 2);
+  assert.deepEqual(since2.entries.map((e) => [e.seq, e.record.id]), [[3, 'm3']]);
+  // an oversized record is refused
+  const big = s.addStats(uid, [{ id: 'huge', t: 1, pad: 'y'.repeat(80_000) }]);
   assert.equal(big.error, 'TOO_BIG');
+  // the list is bounded: the oldest records fall off
+  for (let i = 0; i < 1005; i++) s.addStats(uid, [rec('x' + i, 100 + i)]);
+  assert.equal(s.statsSince(uid, 0).entries.length, 1000);
 });
 
 test('sessions bind a reconnect token to an account; logout forgets it', async (t) => {

@@ -1,50 +1,36 @@
 // public/js/ui/account.js — the account system's browser side (this branch: 内部账号, docs/ACCOUNTS.md)
 //
-// The server owns the account (server/accounts/store.js); this module keeps the connection's state, sends the
-// account requests, and syncs the profile:
+// The server owns the account (server/accounts/store.js); this module keeps the connection's state, sends the account
+// requests, and drives the two halves of the data the account holds — with deliberately DIFFERENT models:
 //
-//   * accountStore { bound, uid, name, rev, conflict, syncing, lastSync } — what the UI renders;
-//   * accountSubscribe(): the S2C side (auth.state / auth.conflict / profile.state) — installed once at boot;
-//   * bindAccount / loginAccount / logoutAccount / changePassphrase / renameAccount — one request each;
-//   * pushProfile() / pullProfile() — the sync itself.
+//   * 资料 (干员调配 / 自选编队 / 持有 / 换装 / 设置 / 语言) — MANUAL. 「上传到账号」 replaces the account's set with this
+//     device's; 「从账号下载」 replaces this device's with the account's (then reloads so every store re-reads it).
+//     There is no background merging: the player decides which side wins, and the panel shows when the account was
+//     last written. (The first automatic sync design — per-key last-write-wins with a three-way mirror — silently kept
+//     the wrong side on any device that had ever saved a preference; a manual action is predictable.)
+//   * 战绩 (match records) — APPEND-ONLY on the server. Every record this device stores is sent with `stats.add`; the
+//     server numbers it with a per-account `seq` and dedupes by the record id. A login (and the panel's 「补齐」)
+//     pulls `stats.since { seq }` so a device gets exactly the matches it has not seen. No conflicts, no merging.
 //
-// Sync model: last write wins per key, with a local three-way check so a device never overwrites an edit it has not
-// pushed yet. `sp.pref.syncMirror` holds the values as they were at the last successful sync: a local key that still
-// equals its mirror is "untouched" and the remote entry wins; a key that differs is the user's own newer edit and is
-// pushed instead (the server then merges it in by its stamp). The stats records merge by record id (shared/accounts.js
-// mergeStats), which is idempotent: the same match on two devices is one record.
-//
-// Applying a PULLED profile (login, manual pull) writes the preferences into localStorage. A page that already read
-// them (settings, the DIY store, skins …) keeps its in-memory copy until it reloads, so the account panel lives on the
-// title screen — the one place where a reload costs nothing.
+// The account panel lives in the stats screen (the 个人界面). Nothing here runs while the connection is a guest.
 
 import { net, identity } from '../net.js';
 import { store, createStore, loadPref, savePref } from '../store.js';
-import { PROFILE_KEYS, mergeProfileKeys, mergeStats, isUid } from '../../../shared/accounts.js';
-import { loadStats, saveStats } from './stats.js';
+import { PROFILE_KEYS, isUid } from '../../../shared/accounts.js';
+import { loadStats, appendRecord, recordListeners, saveStats } from './stats.js';
 
-/** The last-synced values of the profile keys (a plain object saved as one preference). */
-export const SYNC_MIRROR_KEY = 'syncMirror';
-
-/** Set by a user-initiated login / pull: when the next profile.state actually writes keys, the page reloads so the
- *  in-memory stores (settings, skins, the DIY store …) read the synced preferences. A background sync never sets it. */
-let reloadAfterApply = false;
-
-/** Set by a user-initiated login / pull: the account's values win over this device's own copies. Without it a device
- *  that ever saved a preference (mirror empty, local value present) counts every local key as "edited here" and keeps
- *  it — the account then never reaches a second device. A background sync keeps the three-way rule, so it cannot
- *  clobber an edit the user has not pushed yet. */
-let forceApplyNext = false;
+/** The last stats cursor this device has seen from the account (`sp.pref.statsSeq`). */
+export const STATS_SEQ_KEY = 'statsSeq';
 
 /** The connection's account, as the UI reads it. `conflict` = { operation, uid } of a passphrase the server refused. */
 export const accountStore = createStore({
   bound: false,
   uid: null,
   name: '',
-  rev: 0,
+  profileAt: 0,   // when the account's 资料 was last written (ms epoch)
+  statsSeq: 0,    // how many match records the account holds
   conflict: null,
-  syncing: false,
-  lastSync: 0,
+  busy: false,
 });
 
 /** Whether an account is bound to this connection. */
@@ -61,118 +47,19 @@ export function localProfileKeys() {
   return out;
 }
 
-const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
-
-/**
- * The keys this device must push: the local values that differ from the last synced mirror. Unchanged keys are left
- * out (the server already has them), so a push is small and its stamps only cover real edits.
- * @param {number} at stamp for the pushed entries
- * @returns {{ keys: Record<string, { value: any, at: number }>, mirror: Record<string, any> } | null}
- *   null when nothing changed
- */
-export function collectPush(at = Date.now()) {
-  const mirror = loadPref(SYNC_MIRROR_KEY, {});
-  const local = localProfileKeys();
-  /** @type {Record<string, { value: any, at: number }>} */
-  const keys = {};
-  /** @type {Record<string, any>} */
-  const next = { ...mirror };
-  let changed = false;
+/** Replace this device's profile keys with the account's (the download). @param {Record<string, any>} keys */
+export function applyAccountKeys(keys) {
+  let n = 0;
   for (const key of PROFILE_KEYS) {
-    const v = local[key];
-    if (v === undefined) continue;
-    if (same(v, mirror[key])) continue;
-    keys[key] = { value: v, at };
-    next[key] = v;
-    changed = true;
-  }
-  return changed ? { keys, mirror: next } : null;
-}
-
-/**
- * Apply the server's profile keys to this device with the three-way rule: a key this device edited since the last
- * sync keeps its value (it is pushed instead); every other key takes the server's entry.
- * @param {Record<string, { value: any, at: number }>} remote
- * @returns {{ applied: string[], kept: string[] }}
- */
-export function applyProfileKeys(remote, { force = false } = {}) {
-  const mirror = loadPref(SYNC_MIRROR_KEY, {});
-  const local = localProfileKeys();
-  const applied = [];
-  const kept = [];
-  const nextMirror = { ...mirror };
-  for (const key of PROFILE_KEYS) {
-    const r = remote && remote[key];
+    const r = keys && keys[key];
     if (!r) continue;
-    const localEdited = !force && local[key] !== undefined && !same(local[key], mirror[key]);
-    if (localEdited) { kept.push(key); continue; }
     savePref(key, r.value);
-    nextMirror[key] = r.value;
-    applied.push(key);
+    n++;
   }
-  savePref(SYNC_MIRROR_KEY, nextMirror);
-  return { applied, kept };
+  return n;
 }
 
-/** Merge the server's stats envelope into this device's records (by id) and keep it. */
-export function applyProfileStats(stats) {
-  if (!stats) return null;
-  const merged = mergeStats(loadStats(), stats);
-  saveStats(merged);
-  return merged;
-}
-
-/** The S2C side: install once at boot (main.js). Returns an unsubscribe that is normally never used. */
-export function accountSubscribe() {
-  const offs = [];
-  offs.push(net.on('auth.state', (m) => {
-    if (!m || typeof m !== 'object') return;
-    if (m.bound === true && isUid(m.uid)) {
-      accountStore.set({ bound: true, uid: m.uid, name: typeof m.name === 'string' ? m.name : '', conflict: null });
-    } else {
-      accountStore.set({ bound: false, uid: null, name: '', conflict: null });
-    }
-  }));
-  offs.push(net.on('auth.conflict', (m) => {
-    if (!m || typeof m !== 'object') return;
-    const uid = isUid(m.uid) ? m.uid : null;
-    accountStore.set({ conflict: { operation: String(m.operation || ''), uid } });
-  }));
-  offs.push(net.on('profile.state', (m) => {
-    if (!m || typeof m !== 'object') return;
-    const merged = applyProfileStats(m.stats || null);
-    if (merged) savePref(STATS_SIG_KEY, statsSignature(merged));
-    const force = forceApplyNext;
-    forceApplyNext = false;
-    const res = applyProfileKeys(m.keys || {}, { force });
-    accountStore.set({ rev: Number(m.rev) || 0, lastSync: Date.now(), conflict: null });
-    // keys the local side won are pushed straight away, so the account matches this device too
-    if (res.kept.length) pushProfile().catch(() => {});
-    // a user-initiated login/pull that really changed the preferences: reload so every store reads them
-    if (reloadAfterApply && res.applied.length) {
-      reloadAfterApply = false;
-      setTimeout(() => { try { globalThis.location?.reload?.(); } catch { /* ignore */ } }, 700);
-    }
-    return res;
-  }));
-  return () => { for (const off of offs) { try { off(); } catch { /* ignore */ } } };
-}
-
-/** Clear the local mirror (logout: the next login starts from a clean three-way comparison). */
-export function resetSyncMirror() {
-  savePref(SYNC_MIRROR_KEY, {});
-}
-
-// ---- requests -------------------------------------------------------------------------------------------------
-
-/**
- * The account requests need a session (the server's `hello`), but the 个人界面 (the stats screen) opens from the title
- * screen too, where the player may not have pressed 开始 yet. `net.setName` opens the socket and sends hello; a request
- * made while the session is still being established is queued and goes out when it is online (public/js/net.js
- * request()). The callsign falls back to the account name, then to the last identity, so binding never needs a press
- * of 开始 first.
- * @param {string} [fallbackName]
- */
+/** The account requests need a session; the 个人界面 opens from the title screen too (net.request queues until online). */
 export function ensureSession(fallbackName) {
   if (net.status === 'online' || net.name) return true;
   let callsign = String(fallbackName || '').trim();
@@ -182,33 +69,185 @@ export function ensureSession(fallbackName) {
   return true;
 }
 
+/** Set by 「从账号下载」: the next profile.state replaces this device's profile and reloads the page. */
+let applyNext = false;
+
+/** The S2C side: install once at boot (main.js). Returns an unsubscribe that is normally never used. */
+export function accountSubscribe() {
+  const offs = [];
+  offs.push(net.on('auth.state', (m) => {
+    if (!m || typeof m !== 'object') return;
+    if (m.bound === true && isUid(m.uid)) {
+      accountStore.set({ bound: true, uid: m.uid, name: typeof m.name === 'string' ? m.name : '', conflict: null });
+    } else {
+      accountStore.set({ bound: false, uid: null, name: '', conflict: null, profileAt: 0, statsSeq: 0 });
+    }
+  }));
+  offs.push(net.on('auth.conflict', (m) => {
+    if (!m || typeof m !== 'object') return;
+    const uid = isUid(m.uid) ? m.uid : null;
+    accountStore.set({ conflict: { operation: String(m.operation || ''), uid } });
+  }));
+  offs.push(net.on('profile.state', (m) => {
+    if (!m || typeof m !== 'object') return;
+    const at = Number(m.at) || 0;
+    accountStore.set({ profileAt: at, conflict: null });
+    if (!applyNext) return; // a login's informational push: the player presses 「从账号下载」 when they want it
+    applyNext = false;
+    applyAccountKeys(m.keys || {});
+    setTimeout(() => { try { globalThis.location?.reload?.(); } catch { /* ignore */ } }, 400);
+  }));
+  offs.push(net.on('stats.state', (m) => {
+    if (!m || typeof m !== 'object') return;
+    const seq = Number(m.seq) || 0;
+    if (seq) savePref(STATS_SEQ_KEY, seq);
+    accountStore.set({ statsSeq: seq });
+    const entries = Array.isArray(m.entries) ? m.entries : [];
+    if (!entries.length) return;
+    let stats = loadStats();
+    let added = 0;
+    for (const e of entries) {
+      if (!e || !e.record) continue;
+      const res = appendRecord(stats, e.record);
+      stats = res.stats;
+      if (res.added) added++;
+    }
+    if (added) saveStats(stats);
+    if (added) toastStatsPulled(added);
+  }));
+  return () => { for (const off of offs) { try { off(); } catch { /* ignore */ } } };
+}
+
+// ---- 资料（手动） ----------------------------------------------------------------------------------------------
+
 /**
- * Bind (register) an account for this connection: the passphrase is the login credential and must be unique.
- * @param {string} pass @param {string} name
+ * 「上传到账号」: replace the account's profile keys with this device's set. The panel confirms first.
+ * @returns {Promise<boolean>}
  */
+export async function uploadProfile() {
+  if (!isBound()) return false;
+  ensureSession('');
+  accountStore.set({ busy: true });
+  try {
+    const keys = {};
+    for (const [k, v] of Object.entries(localProfileKeys())) keys[k] = { value: v };
+    await net.request('profile.push', { keys });
+    return true;
+  } finally {
+    accountStore.set({ busy: false });
+  }
+}
+
+/**
+ * 「从账号下载」: ask the server for the account's profile; the profile.state handler replaces this device's copy and
+ * reloads the page (every store reads the preferences at load).
+ * @returns {Promise<boolean>}
+ */
+export async function downloadProfile() {
+  if (!isBound()) return false;
+  ensureSession('');
+  applyNext = true;
+  return net.request('profile.pull');
+}
+
+// ---- 战绩（追加） ----------------------------------------------------------------------------------------------
+
+/** Listeners for "the account pulled n matches" (the panel shows a line). */
+const pulledListeners = new Set();
+export function onStatsPulled(fn) {
+  if (typeof fn === 'function') pulledListeners.add(fn);
+  return () => pulledListeners.delete(fn);
+}
+const toastStatsPulled = (n) => { for (const fn of pulledListeners) { try { fn(n); } catch { /* ignore */ } } };
+
+/**
+ * Append one stored match record to the account (`stats.add`). Idempotent on the server (record id); a failure is
+ * silent — the record stays on this device and the next 「补齐」/login sends what the account lacks? No: this is the
+ * only upload path, so a failure is retried by `uploadStats()` (the panel's 「上传本机战绩」).
+ * @param {any} record
+ * @returns {Promise<boolean>}
+ */
+export async function addStatsRecord(record) {
+  if (!isBound() || !record || !record.id) return false;
+  if (net.status !== 'online') return false;
+  try {
+    await net.request('stats.add', { records: [record] });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Send up to `max` of this device's records (oldest first) that the account may not have — the first-login backfill. */
+export async function uploadStats(max = 40) {
+  if (!isBound()) return 0;
+  ensureSession('');
+  const seq = Number(loadPref(STATS_SEQ_KEY, 0)) || 0;
+  const stats = loadStats();
+  const list = Array.isArray(stats.records) ? stats.records : [];
+  if (!list.length) return 0;
+  // the account holds `seq` records; this device sends its oldest `max` (idempotent on the server)
+  const batch = list.slice(-Math.max(1, Math.min(20, max)));
+  let sent = 0;
+  for (let i = 0; i < batch.length; i += 20) {
+    const chunk = batch.slice(i, i + 20).filter((r) => r && r.id);
+    if (!chunk.length) continue;
+    try {
+      await net.request('stats.add', { records: chunk });
+      sent += chunk.length;
+    } catch { break; }
+  }
+  return sent;
+}
+
+/**
+ * Pull the account's records this device has not seen (`stats.since`), and backfill the account with this device's
+ * newer history — the login path and the panel's 「补齐」.
+ * @returns {Promise<number>} how many records this device gained
+ */
+export async function syncStats() {
+  if (!isBound()) return 0;
+  ensureSession('');
+  const before = Number(accountStore.get().statsSeq) || 0;
+  accountStore.set({ busy: true });
+  try {
+    await uploadStats(20);
+    await net.request('stats.since', { seq: Number(loadPref(STATS_SEQ_KEY, 0)) || 0 });
+    return Math.max(0, (Number(accountStore.get().statsSeq) || 0) - before);
+  } finally {
+    accountStore.set({ busy: false });
+  }
+}
+
+/** Install the per-match uploader: every record this device stores goes to the bound account. Call once at boot. */
+export function installStatsUpload() {
+  const listener = (rec) => { addStatsRecord(rec).catch(() => {}); };
+  recordListeners.add(listener);
+  return () => recordListeners.delete(listener);
+}
+
+// ---- requests -------------------------------------------------------------------------------------------------
+
+/** Bind (register) an account for this connection: the passphrase is the login credential and must be unique. */
 export async function bindAccount(pass, name) {
   ensureSession(name);
   accountStore.set({ conflict: null });
-  // name 可省略：服务端用这条连接当前的代号
   const res = name ? await net.request('auth.bind', { pass, name }) : await net.request('auth.bind', { pass });
-  // 绑定后立刻把本机资料推成账号的初始资料，不等 60 秒定时同步
-  pushProfile().catch(() => {});
+  // 绑定后把本机资料整体上传一次，作为账号的初始资料
+  uploadProfile().catch(() => {});
   return res;
 }
 
-/** Log in (bind an existing account) — the server pushes its profile, which is merged into this device. */
+/** Log in (bind an existing account). The caller then pulls the stats (`syncStats`) and offers 「从账号下载」. */
 export async function loginAccount(pass) {
   ensureSession('');
   accountStore.set({ conflict: null });
-  reloadAfterApply = true; // the server pushes this account's profile right after the login
-  forceApplyNext = true;   // the account's values win over this device's own copies
   return net.request('auth.login', { pass });
 }
 
 /** Unbind: the profile stays on this device and play continues as a guest. */
 export async function logoutAccount() {
   ensureSession('');
-  resetSyncMirror();
   return net.request('auth.logout');
 }
 
@@ -225,74 +264,9 @@ export async function renameAccount(name) {
   return net.request('auth.rename', { name });
 }
 
-/**
- * Push this device's changed keys and its stats. The server merges and answers with `profile.state`, so one push is a
- * full two-way sync.
- * @returns {Promise<boolean>} whether anything was sent
- */
-export async function pushProfile() {
-  ensureSession('');
-  if (!isBound()) return false;
-  const payload = { keys: {} };
-  const collected = collectPush();
-  if (collected) {
-    payload.keys = collected.keys;
-    // remember the pushed values only once the server accepted them
-    accountStore.set({ syncing: true });
-    try {
-      await net.request('profile.push', payload);
-      savePref(SYNC_MIRROR_KEY, collected.mirror);
-      accountStore.set({ lastSync: Date.now() });
-      return true;
-    } catch { return false; } finally { accountStore.set({ syncing: false }); }
-  }
-  // nothing changed locally: send nothing (a stats-only push happens on the periodic sync below)
-  return false;
-}
-
-/**
- * Read the account's profile back (the server pushes it).
- * @param {{ reload?: boolean }} [opts] `reload`: this is a user-initiated pull — when it changes the preferences the
- *   page reloads so the in-memory stores read them (docs/ACCOUNTS.md §3)
- */
-export async function pullProfile({ reload = false } = {}) {
-  ensureSession('');
+/** Read the account's profile (the informational push; the download uses `downloadProfile`). */
+export async function pullProfile() {
   if (!isBound()) return null;
-  if (reload) { reloadAfterApply = true; forceApplyNext = true; }
+  ensureSession('');
   return net.request('profile.pull');
-}
-
-/** The last-synced stats signature (a new match changes it: record count and the newest record's id/time). */
-export const STATS_SIG_KEY = 'syncStatsSig';
-
-const statsSignature = (stats) => {
-  const recs = stats && Array.isArray(stats.records) ? stats.records : [];
-  const first = recs[0] || {};
-  return `${recs.length}:${first.id || ''}:${Number(first.t) || 0}`;
-};
-
-/**
- * The periodic sync: push local edits and, when they changed since the last push, the stats envelope — only while
- * the account is bound and the socket is online. Called by the app's timer (main.js); a no-op otherwise.
- */
-export async function syncProfile() {
-  if (!isBound() || net.status !== 'online') return false; // net has no `connected` flag: status is 'online' | 'connecting' | …
-  const stats = loadStats();
-  const collected = collectPush();
-  const sig = statsSignature(stats);
-  const statsChanged = !!stats && sig !== loadPref(STATS_SIG_KEY, '');
-  const payload = { keys: collected ? collected.keys : {} };
-  if (statsChanged) payload.stats = stats;
-  if (!collected && !statsChanged) return false;
-  accountStore.set({ syncing: true });
-  try {
-    await net.request('profile.push', payload);
-    if (collected) savePref(SYNC_MIRROR_KEY, collected.mirror);
-    if (statsChanged) savePref(STATS_SIG_KEY, sig);
-    accountStore.set({ lastSync: Date.now(), syncing: false });
-    return true;
-  } catch {
-    accountStore.set({ syncing: false });
-    return false;
-  }
 }

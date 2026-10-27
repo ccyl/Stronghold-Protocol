@@ -75,15 +75,16 @@ export function jsonBytes(v) {
 }
 
 /**
- * One profile entry as the server accepts it: `{ value, at }` with `at` a stamp and the JSON size inside the caps.
+ * One profile entry as the server accepts it: `{ value }` (the manual upload model — the account carries one `at` for
+ * the whole set, docs/ACCOUNTS.md §3) with the JSON size inside the caps. A legacy `at` field is ignored.
  * @param {unknown} raw
- * @returns {{ value: unknown, at: number } | null} null when the entry is unusable (the caller drops it)
+ * @returns {{ value: unknown } | null} null when the entry is unusable (the caller drops it)
  */
 export function sanitizeProfileEntry(raw) {
-  if (!isObj(raw) || !isStamp(raw.at)) return null;
+  if (!isObj(raw) || !Object.hasOwn(raw, 'value')) return null;
   const bytes = jsonBytes(raw.value);
   if (!(bytes <= PROFILE_LIMITS.entryBytes)) return null;
-  return { value: raw.value, at: raw.at };
+  return { value: raw.value };
 }
 
 /**

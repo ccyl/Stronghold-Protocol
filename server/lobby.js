@@ -733,6 +733,8 @@ export class Lobby {
       case 'auth.rename': return this.renameAccount(session, msg);
       case 'profile.push': return this.pushProfile(session, msg);
       case 'profile.pull': return this.pullProfile(session);
+      case 'stats.add': return this.addStats(session, msg);
+      case 'stats.since': return this.statsSince(session, msg);
       case 'room.spectate': { this.matchmaker.removePlayer(session.playerId); return this.spectate(session, msg); }
       case 'room.removeSpectator': return this.removeSpectator(session, msg);
       case 'match.queue': session.wantsLobbyStats = true; return this.matchmaker.enqueue(session, msg);
@@ -1127,10 +1129,10 @@ export class Lobby {
     sendSession(session, st.bound ? { t: 'auth.state', bound: true, uid: st.uid, name: st.name } : { t: 'auth.state', bound: false });
   }
 
-  /** Push an account's profile to the client (`profile.state`): the merged result of a login / pull / push. */
+  /** Push an account's profile to the client (`profile.state`): the account's keys after a login / pull / push. */
   pushProfileState(session, snap) {
     if (!session.ws || !snap) return;
-    sendSession(session, { t: 'profile.state', rev: Number(snap.rev) || 0, keys: snap.keys || {}, stats: snap.stats || null });
+    sendSession(session, { t: 'profile.state', rev: Number(snap.rev) || 0, keys: snap.keys || {}, at: Number(snap.at) || 0 });
   }
 
   /** One passphrase operation's rate-limit gate (per connection). */
@@ -1223,16 +1225,41 @@ export class Lobby {
     return OK;
   }
 
-  /** profile.push {keys, stats}: 按键后写胜出合并、战绩按记录 id 合并，答复合并后的整份资料。 */
+  /** profile.push {keys}: 「上传到账号」—— 用本机的整套偏好替换账号里的（不合并）。 */
   pushProfile(session, msg) {
     const s = this.accountsStore();
     if (!s) return fail(ERR.INTERNAL, 'accounts disabled');
     const uid = this.accountUid(session);
     if (uid == null) return fail(ERR.NOT_BOUND);
-    const res = s.push(uid, { keys: msg.keys, stats: msg.stats });
+    const res = s.push(uid, { keys: msg.keys });
     if (res.error === 'TOO_BIG') return fail(ERR.TOO_BIG);
     if (!res.ok) return fail(ERR.INTERNAL, 'push failed');
     this.pushProfileState(session, res);
+    return OK;
+  }
+
+  /** stats.add {records}: 每局结束把这一局追加到账号（按记录 id 幂等），回 stats.state 带新的 seq。 */
+  addStats(session, msg) {
+    const s = this.accountsStore();
+    if (!s) return fail(ERR.INTERNAL, 'accounts disabled');
+    const uid = this.accountUid(session);
+    if (uid == null) return fail(ERR.NOT_BOUND);
+    const res = s.addStats(uid, msg.records);
+    if (res.error === 'TOO_BIG') return fail(ERR.TOO_BIG);
+    if (!res.ok) return fail(ERR.INTERNAL, 'stats add failed');
+    sendSession(session, { t: 'stats.state', seq: res.seq, entries: [] });
+    return OK;
+  }
+
+  /** stats.since {seq}: 登录/换设备时补齐 seq 之后的战绩。 */
+  statsSince(session, msg) {
+    const s = this.accountsStore();
+    if (!s) return fail(ERR.INTERNAL, 'accounts disabled');
+    const uid = this.accountUid(session);
+    if (uid == null) return fail(ERR.NOT_BOUND);
+    const res = s.statsSince(uid, msg.seq);
+    if (!res.ok) return fail(ERR.INTERNAL, 'stats pull failed');
+    sendSession(session, { t: 'stats.state', seq: res.seq, entries: res.entries });
     return OK;
   }
 

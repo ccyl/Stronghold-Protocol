@@ -9,7 +9,7 @@ import { diySlotIds, validateDiyPicks } from './diy.js';
 import { cultivatedStats, isPotential, isCultivate, POTENTIAL_DEFAULT, CULTIVATE_DEFAULT, hasPotentialData } from './potential.js';
 import { isContentHash } from './plugins/identity.js';
 import { isPluginId } from './plugins/manifest.js';
-import { isPass, isAccountName, isStamp, isStatsEnvelope, PROFILE_KEYS, PROFILE_LIMITS } from './accounts.js';
+import { isPass, isAccountName, isStamp, PROFILE_KEYS, PROFILE_LIMITS } from './accounts.js';
 
 // ---- tiny validators -------------------------------------------------------
 const isInt = (v, lo = -Infinity, hi = Infinity) => Number.isInteger(v) && v >= lo && v <= hi;
@@ -27,8 +27,15 @@ const nullable = (check) => (v) => v === null || v === undefined || check(v);
  * values themselves are size-checked and sanitised by shared/accounts.js on the server (a push is never refused for
  * one bad entry — it is dropped).
  */
+/** One match record as the account store takes it: an `id` (dedupe key) and a numeric stamp `t`. */
+const isRecord = (v) => isPlain(v) && typeof v.id === 'string' && v.id.length > 0 && v.id.length <= 64
+  && typeof v.t === 'number' && Number.isFinite(v.t) && v.t >= 0;
+
+/** A batch of match records (one match per entry; at most 20 per request so one frame stays small). */
+const isRecordList = (v) => Array.isArray(v) && v.length > 0 && v.length <= 20 && v.every(isRecord);
+
 const isProfileKeys = (v) => isPlain(v) && Object.keys(v).length <= PROFILE_LIMITS.keys
-  && Object.entries(v).every(([k, e]) => PROFILE_KEYS.includes(k) && isPlain(e) && isStamp(e.at) && Object.hasOwn(e, 'value'));
+  && Object.entries(v).every(([k, e]) => PROFILE_KEYS.includes(k) && isPlain(e) && Object.hasOwn(e, 'value'));
 /** A plain object with at most `max` own keys, every key passing `key` and every value passing `val`. */
 const isMap = (v, max, key, val) => {
   if (!isPlain(v)) return false;
@@ -497,8 +504,13 @@ export const C2S = {
   'auth.logout': {},
   'auth.pass': { oldPass: isPass, newPass: isPass },
   'auth.rename': { name: isAccountName },
-  'profile.push': { keys: isProfileKeys, stats: optional(isStatsEnvelope) },
+  'profile.push': { keys: isProfileKeys },
   'profile.pull': {},
+  // 战绩（this branch: docs/ACCOUNTS.md §3）: append-only。
+  //   stats.add {records} — 每局结束把这一局追加到账号（按记录的 id 幂等，服务端分配递增 seq，最多 20 条一批）
+  //   stats.since {seq}   — 登录补齐：请求 seq 之后的记录（服务端回 stats.state）
+  'stats.add': { records: isRecordList },
+  'stats.since': { seq: (v) => isInt(v, 0, 2 ** 40) },
   // spectator seats (remake feature, community report #26; MAX_SPECTATORS): take one of a co-op room's spectator seats —
   // in its lobby or while its match runs — never a player seat; the host frees one by playerId (the spectator gets
   // room.closed { reason: 'kicked' }). room.leave / g.leave leave a spectator seat like a player seat.
@@ -611,8 +623,10 @@ export const S2C = [
   // 账号（this branch: 内部账号, docs/ACCOUNTS.md）
   //   auth.state { bound, uid?, name? } — this connection's account (after hello, bind, login, logout, rename)
   //   auth.conflict { operation, uid } — the passphrase is taken by UID `uid` (bind / auth.pass); the client shows it
-  //   profile.state { rev, keys, stats } — the account's profile after login / pull / push (the merged result)
-  'auth.state', 'auth.conflict', 'profile.state',
+  //   profile.state { rev, keys, at } — the account's profile keys (a login, or the answer to profile.pull)
+  //   stats.state { seq, entries: [{ seq, record }] } — after stats.add / stats.since: the account's stats cursor and
+  //   the records the caller had not seen (entries empty for stats.add)
+  'auth.state', 'auth.conflict', 'profile.state', 'stats.state',
   'match.status', 'match.found', 'server.maintenance', 'lobby.stats',
   'm.public', 'm.private', 'm.field', 'm.toast', 'm.ticker', 'm.emote', 'm.result',
   // m.layer { playerId, bondId, add } — own live prep layer gain; ephemeral, never replayed on resync.

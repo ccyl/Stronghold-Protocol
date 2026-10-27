@@ -20,7 +20,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { UID_MIN, UID_MAX, ACCOUNT_NAME_MAX, isUid, isAccountName, normalizePass, sanitizeProfileKeys, mergeProfileKeys, mergeStats, PROFILE_LIMITS, isStatsEnvelope, jsonBytes } from '../../shared/accounts.js';
+import { UID_MIN, UID_MAX, ACCOUNT_NAME_MAX, isUid, isAccountName, normalizePass, sanitizeProfileKeys, PROFILE_LIMITS, jsonBytes } from '../../shared/accounts.js';
 
 /** Store format version (bump when the on-disk shape changes; `migrate` below handles older files). */
 export const ACCOUNTS_VERSION = 1;
@@ -109,7 +109,7 @@ export class AccountStore {
 
   _load() {
     const main = this._read(this.file);
-    if (main) { this.db = { v: ACCOUNTS_VERSION, nextUid: Number(main.nextUid) || UID_MIN, accounts: main.accounts }; return; }
+    if (main) { this.db = { v: ACCOUNTS_VERSION, nextUid: Number(main.nextUid) || UID_MIN, accounts: main.accounts }; this._migrate(); return; }
     let bad = false;
     try { bad = fs.existsSync(this.file); } catch { /* ignore */ }
     if (bad) {
@@ -118,10 +118,31 @@ export class AccountStore {
         this.log?.warn?.('[accounts] accounts.json is unreadable; restored from the backup');
         this.db = { v: ACCOUNTS_VERSION, nextUid: Number(bak.nextUid) || UID_MIN, accounts: bak.accounts };
         try { fs.renameSync(this.file, `${this.file}.corrupt-${this.now()}`); } catch { /* ignore */ }
+        this._migrate();
         return;
       }
       this.log?.warn?.('[accounts] accounts.json is unreadable and there is no backup; starting empty');
       try { fs.renameSync(this.file, `${this.file}.corrupt-${this.now()}`); } catch { /* ignore */ }
+    }
+  }
+
+  /**
+   * Bring older files to the current shape: the stats used to live inside `profile.stats` (one envelope merged from
+   * every device); they are now an append-only list numbered per account (`{ seq, list: [{ seq, id, record }] }`).
+   */
+  _migrate() {
+    for (const acc of Object.values(this.db.accounts)) {
+      const old = acc.profile && acc.profile.stats;
+      if (acc.stats === undefined) acc.stats = { seq: 0, list: [] };
+      if (old && Array.isArray(old.records) && old.records.length && !acc.stats.list.length) {
+        for (const rec of old.records) {
+          const id = typeof rec?.id === 'string' && rec.id ? rec.id : null;
+          if (!id) continue;
+          acc.stats.seq += 1;
+          acc.stats.list.push({ seq: acc.stats.seq, id, record: rec });
+        }
+      }
+      if (acc.profile) delete acc.profile.stats;
     }
   }
 
@@ -200,7 +221,8 @@ export class AccountStore {
       createdAt: now,
       lastSeen: now,
       rev: 0,
-      profile: { keys: {}, stats: null, at: now },
+      profile: { keys: {}, at: now },
+      stats: { seq: 0, list: [] },
     };
     this.db.nextUid = Math.max(UID_MIN, uid + 1);
     this._save();
@@ -222,7 +244,7 @@ export class AccountStore {
     if (!sameHex(hash.toString('hex'), acc.hash)) return { error: 'PASS_UNKNOWN' };
     acc.lastSeen = this.now();
     try { this._save(); } catch { /* a read-only disk must not block a login */ }
-    return { ok: true, uid: acc.uid, name: acc.name, rev: acc.rev, keys: acc.profile?.keys || {}, stats: acc.profile?.stats || null };
+    return { ok: true, uid: acc.uid, name: acc.name, rev: acc.rev, keys: acc.profile?.keys || {}, at: acc.profile?.at || 0, statsSeq: acc.stats?.seq || 0 };
   }
 
   /**
@@ -297,35 +319,75 @@ export class AccountStore {
   // ---- profile sync --------------------------------------------------------------------------------------------
 
   /**
-   * Merge a pushed profile into the account (last write wins per key; stats by record id) and answer the merged
-   * result, so one push is a full sync.
+   * Replace the account's profile keys with the uploaded set (the manual 「上传到账号」 action — no merging: the
+   * uploader decides what the account holds). The stats are not touched here; they are append-only (`addStats`).
    * @param {number} uid
-   * @param {{ keys?: unknown, stats?: unknown }} payload
-   * @returns {{ ok: true, rev: number, keys: Record<string, any>, stats: any } | { error: 'NO_ACCOUNT' | 'TOO_BIG' }}
+   * @param {{ keys?: unknown }} payload
+   * @returns {{ ok: true, rev: number, keys: Record<string, any>, at: number } | { error: 'NO_ACCOUNT' | 'TOO_BIG' }}
    */
   push(uid, payload = {}) {
     const acc = this.account(uid);
     if (!acc) return { error: 'NO_ACCOUNT' };
-    const profile = acc.profile || (acc.profile = { keys: {}, stats: null, at: this.now() });
     const { keys: incoming } = sanitizeProfileKeys(payload.keys || {});
-    const merged = mergeProfileKeys(profile.keys || {}, incoming);
-    const statsIn = isStatsEnvelope(payload.stats) ? payload.stats : null;
-    if (statsIn && jsonBytes(statsIn) > PROFILE_LIMITS.statsBytes) return { error: 'TOO_BIG' };
-    const stats = statsIn ? mergeStats(profile.stats || { v: statsIn.v || 1, records: [] }, statsIn) : profile.stats;
-    profile.keys = merged.keys;
-    profile.stats = stats;
-    profile.at = this.now();
+    const at = this.now();
+    acc.profile = { keys: incoming, at };
     acc.rev = (Number(acc.rev) || 0) + 1;
-    acc.lastSeen = profile.at;
+    acc.lastSeen = at;
     this._save();
-    return { ok: true, rev: acc.rev, keys: merged.keys, stats: stats || null };
+    return { ok: true, rev: acc.rev, keys: incoming, at };
+  }
+
+  /**
+   * Append match records to the account (docs/ACCOUNTS.md §3): idempotent by record `id`, numbered with a per-account
+   * `seq` so a device can ask for exactly what it has not seen yet. The list is bounded (PROFILE_LIMITS.records, the
+   * oldest dropped) — the client compacts what it sends, so an account holds a compact history.
+   * @param {number} uid
+   * @param {Array<any>} records
+   * @returns {{ ok: true, seq: number, added: number } | { error: 'NO_ACCOUNT' | 'TOO_BIG' }}
+   */
+  addStats(uid, records) {
+    const acc = this.account(uid);
+    if (!acc) return { error: 'NO_ACCOUNT' };
+    const list = (acc.stats || (acc.stats = { seq: 0, list: [] })).list;
+    const seen = new Set(list.map((e) => e.id));
+    let added = 0;
+    for (const rec of Array.isArray(records) ? records : []) {
+      if (!rec || typeof rec !== 'object') continue;
+      const id = typeof rec.id === 'string' && rec.id ? rec.id : null;
+      if (!id || seen.has(id)) continue;
+      if (jsonBytes(rec) > PROFILE_LIMITS.entryBytes) return { error: 'TOO_BIG' };
+      acc.stats.seq += 1;
+      list.push({ seq: acc.stats.seq, id, record: rec });
+      seen.add(id);
+      added++;
+    }
+    // oldest first out, so the newest PROFILE_LIMITS.records always stay
+    while (list.length > PROFILE_LIMITS.records) list.shift();
+    acc.lastSeen = this.now();
+    if (added) this._save();
+    return { ok: true, seq: acc.stats.seq, added };
+  }
+
+  /**
+   * The records a device has not seen yet (`seq > since`), oldest first — what a login pulls in to fill the local
+   * history (docs/ACCOUNTS.md §3).
+   * @param {number} uid @param {number} since
+   * @returns {{ ok: true, seq: number, entries: Array<{ seq: number, record: any }> } | { error: 'NO_ACCOUNT' }}
+   */
+  statsSince(uid, since) {
+    const acc = this.account(uid);
+    if (!acc) return { error: 'NO_ACCOUNT' };
+    const from = Number.isInteger(since) && since > 0 ? since : 0;
+    const list = (acc.stats && Array.isArray(acc.stats.list)) ? acc.stats.list : [];
+    const entries = list.filter((e) => e.seq > from).map((e) => ({ seq: e.seq, record: e.record }));
+    return { ok: true, seq: acc.stats?.seq || 0, entries };
   }
 
   /** A read-only snapshot of the account (login / pull). @param {number} uid */
   snapshot(uid) {
     const acc = this.account(uid);
     if (!acc) return { error: 'NO_ACCOUNT' };
-    return { ok: true, uid: acc.uid, name: acc.name, rev: acc.rev, keys: acc.profile?.keys || {}, stats: acc.profile?.stats || null };
+    return { ok: true, uid: acc.uid, name: acc.name, rev: acc.rev, keys: acc.profile?.keys || {}, at: acc.profile?.at || 0, statsSeq: acc.stats?.seq || 0 };
   }
 
   // ---- sessions ------------------------------------------------------------------------------------------------
