@@ -312,7 +312,7 @@ export class AccountStore {
   /** Every account without secrets (admin listing). */
   list() {
     return Object.values(this.db.accounts)
-      .map((a) => ({ uid: a.uid, name: a.name, createdAt: a.createdAt, lastSeen: a.lastSeen, rev: a.rev, keys: Object.keys(a.profile?.keys || {}), records: a.profile?.stats?.records?.length || 0 }))
+      .map((a) => ({ uid: a.uid, name: a.name, createdAt: a.createdAt, lastSeen: a.lastSeen, rev: a.rev, keys: Object.keys(a.profile?.keys || {}), records: a.stats?.list?.length || 0 }))
       .sort((x, y) => x.uid - y.uid);
   }
 
