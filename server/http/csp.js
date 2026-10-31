@@ -18,5 +18,7 @@ export function siteCsp(publicDir) {
       hashes.add(`'sha256-${createHash('sha256').update(m[1]).digest('base64')}'`);
     }
   }
-  return `default-src 'self'; script-src 'self'${hashes.size ? ' ' + [...hashes].join(' ') : ''}; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; frame-src 'self'; object-src 'none'; base-uri 'none'`;
+  // connect-src 也放行任意 ws:/wss:：设置里的「联机服务器」让这一页去连玩家自己填的地址（局域网、隧道），
+  // 只列 'self' 会把那类连接直接挡在 CSP 层（浏览器表现为"连不上"）。页面脚本仍只有 'self'，没有第三方代码。
+  return `default-src 'self'; script-src 'self'${hashes.size ? ' ' + [...hashes].join(' ') : ''}; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' ws: wss:; worker-src 'self' blob:; frame-src 'self'; object-src 'none'; base-uri 'none'`;
 }
