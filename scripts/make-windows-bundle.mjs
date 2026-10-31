@@ -588,7 +588,13 @@ async function main() {
   // 一键更新：默认走发布方的隧道地址（自签证书由 tools/update.mjs 自动降级校验，签名仍验），也可传入别的服务器地址
   await fsp.writeFile(path.join(out, '检查更新.bat'), bat([
     'if "%~1"=="" (set "SRC=https://frp-say.com:17763") else (set "SRC=%~1")',
-    '"%NODE%" "%HERE%app\\tools\\update.mjs" apply --root "%HERE%app" --source "%SRC%"',
+    'echo Checking %SRC% ...',
+    'echo (If the game is open, the update still applies to disk; close and',
+    'echo  restart the game afterwards so the new files are used.)',
+    'echo.',
+    '"%NODE%" "%HERE%app\\tools\\update.mjs" apply --root "%HERE%app" --source "%SRC%" --force',
+    'echo.',
+    'echo Done. If the game was running, close it and start it again.',
     'pause',
   ].join('\r\n')), 'latin1');
   await fsp.writeFile(path.join(out, '启动游戏.bat'), bat('"%NODE%" "%HERE%app\\scripts\\launch.mjs" --no-setup %*'), 'latin1');
