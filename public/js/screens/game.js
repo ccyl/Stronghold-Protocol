@@ -76,6 +76,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from '../../vendor/hooks.module.js';
 import { PHASE, GEO } from '../../../shared/constants.js';
 import { html, Spinner, PhaseBanner, ResultDialog, Icon, Button, confirmDialog, closeAllDialogs, useTicker } from '../ui/components.js';
+import { computeBubbles } from '../ui/bubbles.js';
 import { useGameData, GIcon } from '../ui/gameComponents.js';
 import { useFieldView, lastMountError } from '../ui/fieldHost.js';
 import { TopBar, liveLp, ownLeaks, uniteRemaining, tempInfo, tempReadyReason } from '../ui/hud.js';
@@ -108,7 +109,7 @@ import { FOLD_CAMERA_MS } from '../render/app/tune.js';
 import {
   phaseMode, phaseBanner, isCombatPhase, showDeadPill, isBossPhase, placementContext, canPlace, boardTargets, dropIntent,
   battleOverSfx, uniteResultBox, battleResultBox,
-  snapHud, activeBubbles, shortcutFor, shortcutBlocked, prepShortcutsSuspended, closesOnFieldPress, phaseTotalSeconds, homeFieldId, ownFieldId, normalizeSp, normalizePersonalChoice, sortedPlayers,
+  snapHud, shortcutFor, shortcutBlocked, prepShortcutsSuspended, closesOnFieldPress, phaseTotalSeconds, homeFieldId, ownFieldId, normalizeSp, normalizePersonalChoice, sortedPlayers,
   terrainInfo, deviceInfo, deviceTipAt, noteDeviceUnits, deviceUnitsForEntry,
   countdownState, shopBlockReason, stageOverrides, effectiveStage, watchTarget, dropFailureReason,
   previewEnemyKey, prepCamera, prepCameraFor, foldCamera, deployFoldsShop, deployFieldOf, fieldTile, panelSide, panelSlots, bondPopupPlace, unitLoadout, deployedRecord,
@@ -850,16 +851,9 @@ const [chatOpen, setChatOpen] = useState(false);
   // emote & text bubbles (and a sound for teammates' emotes)
   const chatMessages = useStore((s) => s.chatMessages) || [];
   const bubbleMs = (gd.config?.timers?.chatBubble ?? 3) * 1000;
-  const bubbles = useMemo(() => {
-    const map = activeBubbles(emotes, Date.now(), bubbleMs);
-    const now = Date.now();
-    for (const cm of chatMessages) {
-      if (cm?.playerId && (now - (cm.at || now) < 4000)) {
-        map.set(cm.playerId, { text: cm.text, seq: cm.at || now, at: cm.at || now });
-      }
-    }
-    return map;
-  }, [emotes, chatMessages, bubbleMs]);
+  // Recomputed on every render with an explicit clock: a memo without a time dependency never expired the text
+  // bubble, which is what left the last message stuck beside the avatar (and let it overwrite an emote).
+  const bubbles = computeBubbles({ emotes, chatMessages, now: Date.now(), emoteTtl: bubbleMs, chatTtl: bubbleMs });
   const emoteNow = Date.now();
   useTicker(bubbles.size ? 500 : 0); // re-render only while a bubble is showing (to expire it)
   const lastEmote = useRef(emotes.length ? emotes[emotes.length - 1].seq : 0);
