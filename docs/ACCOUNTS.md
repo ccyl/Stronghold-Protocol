@@ -1,7 +1,8 @@
 # 账号（本分支：内部使用）
 
 本分支在官方仓库之上补了一套**内部使用**的账号系统：目的只有两个 —— **资料跨设备同步**与**战绩跨设备**。
-不登录照常玩（游客的一切仍在浏览器里），登录只是增强。规则来自维护者的决定 [D014](development/DECISIONS.md#d014)；
+不登录照常玩（游客的一切仍在浏览器里），登录只是增强。
+下一步改造（邀请码、恢复码、资料版本历史、会话落盘）见 [ACCOUNTS-V2-PLAN.md](ACCOUNTS-V2-PLAN.md)。规则来自维护者的决定 [D014](development/DECISIONS.md#d014)；
 协议与实现见 `shared/accounts.js`、`shared/protocol.js`（`auth.*` / `profile.*`）、`server/accounts/store.js`、
 `public/js/ui/account.js`、`public/js/ui/accountPanel.js`。
 
