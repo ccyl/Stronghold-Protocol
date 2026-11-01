@@ -1192,3 +1192,52 @@
 /* 系统公告（server/admin.js 广播）：无席位着色，整体弱化、前置 📢 图标。 */
 .chat-item--system { border-left-color: var(--mint-400); font-style: italic; }
 .chat-item--system .chat-text { color: var(--mint-400); }
+
+/* ---- 弹幕 (ui/danmakuOverlay.js + ui/danmaku.js) ----------------------------------------------------------------
+   聊天与表情在对局棋盘上方沿泳道飞过。容器盖全场但 pointer-events:none（不挡点击、不挡手牌），且 aria-hidden
+   （聊天日志已可读，弹幕纯装饰）。三条泳道贴棋盘上缘，各自横向飞过；6s 时长与引擎的 DANMAKU_LANE_MS=6000 一致，
+   引擎在 until 到达时把条目撤下，动画 forwards 停住后条目随即卸载。减动（<html> 的 .sp-reduced-motion，见
+   ui/device.js）时条目静止在泳道左端，引擎仍按时撤下，绝无飞行动画。 */
+.danmaku { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
+.danmaku__lane { position: absolute; left: 0; right: 0; height: .56rem; display: flex; align-items: center; }
+.danmaku__lane--0 { top: 1.05rem; }
+.danmaku__lane--1 { top: 1.65rem; }
+.danmaku__lane--2 { top: 2.25rem; }
+.danmaku__item {
+  position: relative; display: inline-flex; align-items: center; gap: .1rem; white-space: nowrap;
+  padding: .06rem .14rem; border-radius: .16rem; font-size: calc(.18 * var(--t)); line-height: 1.1;
+  color: var(--text-hi); background: rgba(6, 9, 8, .78); box-shadow: 0 .02rem .08rem rgba(0, 0, 0, .55);
+  animation: danmaku-fly 6s linear forwards;
+}
+.danmaku__name { font-weight: 700; }
+.danmaku__text { color: var(--text-md); }
+.danmaku__emote .eart { width: .44rem; height: .44rem; object-fit: contain; filter: drop-shadow(0 0 .05rem rgba(23, 249, 183, .22)); }
+.danmaku__count { font-weight: 700; color: var(--mint-400); }
+/* 席位色只给名，正文保持统一浅色，方便在快速滚动里认出谁发言。色板与 chat-item 一致。 */
+.danmaku__chat.seat-0 .danmaku__name { color: #7fd8ff; }
+.danmaku__chat.seat-1 .danmaku__name { color: #ffd479; }
+.danmaku__chat.seat-2 .danmaku__name { color: #a0f0b0; }
+.danmaku__chat.seat-3 .danmaku__name { color: #ff9fb5; }
+.danmaku__chat.seat-4 .danmaku__name { color: #c9a0ff; }
+.danmaku__chat.seat-5 .danmaku__name { color: #ff9f6e; }
+.danmaku__chat.seat-6 .danmaku__name { color: #7fffcf; }
+.danmaku__chat.seat-7 .danmaku__name { color: #ff8a8a; }
+.danmaku__chat.seat-8 .danmaku__name { color: #8ad0ff; }
+.danmaku__chat.seat-9 .danmaku__name { color: #ffe17f; }
+.danmaku__chat.seat-10 .danmaku__name { color: #b6e58a; }
+.danmaku__chat.seat-11 .danmaku__name { color: #f59bd3; }
+.danmaku__chat.seat-12 .danmaku__name { color: #a8a0ff; }
+.danmaku__chat.seat-13 .danmaku__name { color: #ffc58a; }
+.danmaku__chat.seat-14 .danmaku__name { color: #8affcc; }
+.danmaku__chat.seat-15 .danmaku__name { color: #ffa3a3; }
+.danmaku__chat.seat-16 .danmaku__name { color: #9ad8ff; }
+.danmaku__chat.seat-17 .danmaku__name { color: #f7e08e; }
+.danmaku__chat.seat-18 .danmaku__name { color: #b0f0d0; }
+.danmaku__chat.seat-19 .danmaku__name { color: #e0b3ff; }
+.danmaku__chat.seat-spec .danmaku__name { color: var(--text-lo); }
+/* 减动：静止在泳道左端，不飞、不挡。 */
+.sp-reduced-motion .danmaku__item { animation: none; transform: none; left: .16rem; }
+@keyframes danmaku-fly {
+  from { transform: translateX(100vw); }
+  to { transform: translateX(-100%); }
+}

@@ -28,7 +28,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from '../../vendor/hooks
 import { html, Modal, Button, Icon, MicroLabel, confirmDialog } from './components.js';
 import { GIcon } from './gameComponents.js';
 import { createStore, useStore, loadPref, savePref, store } from '../store.js';
-import { sanitizeSettings, HOTKEY_ACTIONS, DEFAULT_HOTKEYS, hotkeyLabel, rebindHotkey, isDefaultHotkeys, captureHotkey, VOICE_LANGS, TEXT_SIZES } from './gameLogic.js';
+import { sanitizeSettings, HOTKEY_ACTIONS, DEFAULT_HOTKEYS, hotkeyLabel, rebindHotkey, isDefaultHotkeys, captureHotkey, VOICE_LANGS, TEXT_SIZES, DANMAKU_MODES } from './gameLogic.js';
 import { audio } from '../audio.js';
 import { openGuide } from './guide.js';
 import { detectFeatures } from './device.js';
@@ -160,6 +160,8 @@ const VOICE_LANG_NAMES = { cn: '中文', jp: '日本語', en: 'English', kr: '�
 const VOICE_LANG_TAGS = { cn: 'zh', jp: 'ja', en: 'en', kr: 'ko' };
 /** 棋盘视角 (our Android + DOM fallback board view): 'auto' follows the 3D capability probe. */
 const BOARDS = [['auto', N_('自动')], ['3d', N_('3D 全景')], ['2d', N_('2D 俯视')]];
+/** 弹幕 (ui/danmaku.js): 开启 every chat/emote flies across, 仅队友 drops spectators, 关 no bullets (关 与官方特效一致). */
+const DANMAKU = DANMAKU_MODES.map((id) => [id, id === 'all' ? N_('开启') : id === 'team' ? N_('仅队友') : N_('关')]);
 /** The rebindable shortcuts' names (msgids), by action. */
 const HOTKEY_NAMES = { buy: N_('购买鼠标指向的商品'), refresh: N_('刷新商店'), freeze: N_('冻结 / 解冻商店'), levelUp: N_('升级调度中心'), retreat: N_('撤退鼠标指向的干员'),
   sell: N_('出售鼠标指向的干员'), ready: N_('准备就绪 / 暂停（独立模拟）') };
@@ -566,6 +568,13 @@ export function SettingsModal({ open, onClose }) {
       <p class="set-hint">${t('打开后，对局左下角可以查看自己干员的伤害、治疗和 DPS / HPS。官方界面没有这个窗口。改变玩法的插件对局在 Worker 里演算，统计不到，按钮不显示。')}</p>
       <${Toggle} label=${t('部署时收起商店')} micro="DEPLOY FOLD" value=${s.prepDeployFold} onChange=${(v) => updateSettings({ prepDeployFold: v })} />
       <p class="set-hint">${t('拖起干员、装备或召唤物，以及放下后选择朝向时，临时收起商店并放大棋盘。关闭后，拿起时既不改变商店的收起状态，也不缩放镜头。')}</p>
+      <div class="set-row">
+        <span class="set-row__label">${t('弹幕')}<${MicroLabel}>DANMAKU<//></span>
+        <div class="set-seg" role="radiogroup" aria-label=${t('弹幕')}>
+          ${DANMAKU.map(([id, label]) => html`<button key=${id} type="button" role="radio" aria-checked=${s.danmaku === id ? 'true' : 'false'}
+            class=${s.danmaku === id ? 'is-on' : ''} onClick=${() => updateSettings({ danmaku: id })}>${t(label)}</button>`)}
+        </div>
+      </div>
       <div class="set-row">
         <span class="set-row__label">${t('画面质量')}<${MicroLabel}>QUALITY<//></span>
         <div class="set-seg" role="radiogroup">
