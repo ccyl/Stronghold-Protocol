@@ -1112,6 +1112,23 @@
 .chat-seat.seat-1 { color: #ffd479; }
 .chat-seat.seat-2 { color: #a0f0b0; }
 .chat-seat.seat-3 { color: #ff9fb5; }
+/* 20 席配色（M2）：seat-0..3 沿用原有色，seat-4..19 用同风格的可分辨浅色，适配深色背景。 */
+.chat-seat.seat-4 { color: #c9a0ff; }
+.chat-seat.seat-5 { color: #ff9f6e; }
+.chat-seat.seat-6 { color: #7fffcf; }
+.chat-seat.seat-7 { color: #ff8a8a; }
+.chat-seat.seat-8 { color: #8ad0ff; }
+.chat-seat.seat-9 { color: #ffe17f; }
+.chat-seat.seat-10 { color: #b6e58a; }
+.chat-seat.seat-11 { color: #f59bd3; }
+.chat-seat.seat-12 { color: #a8a0ff; }
+.chat-seat.seat-13 { color: #ffc58a; }
+.chat-seat.seat-14 { color: #8affcc; }
+.chat-seat.seat-15 { color: #ffa3a3; }
+.chat-seat.seat-16 { color: #9ad8ff; }
+.chat-seat.seat-17 { color: #f7e08e; }
+.chat-seat.seat-18 { color: #b0f0d0; }
+.chat-seat.seat-19 { color: #e0b3ff; }
 .chat-seat.seat-spec { color: var(--text-lo); }
 .chat-text { min-width: 0; color: var(--text-md); overflow-wrap: anywhere; }
 .chat-form { display: flex; gap: .06rem; pointer-events: auto; }
@@ -1166,7 +1183,12 @@
   background: rgba(8, 11, 10, .82); border: 1px solid var(--line); border-radius: 2px;
 }
 .chat-toggle:hover { color: var(--text-md); border-color: var(--line-3); }
+.chat-team-toggle { margin-left: .04rem; }
+.chat-team-toggle[aria-pressed="true"] { color: var(--mint-400); border-color: var(--mint-400); }
 .chat-toggle__n {
   min-width: .16rem; padding: 0 .03rem; text-align: center; color: #0b1520; background: var(--mint-400);
   border-radius: .08rem; font-size: max(.11rem, 9px); font-weight: 700;
 }
+/* 系统公告（server/admin.js 广播）：无席位着色，整体弱化、前置 📢 图标。 */
+.chat-item--system { border-left-color: var(--mint-400); font-style: italic; }
+.chat-item--system .chat-text { color: var(--mint-400); }

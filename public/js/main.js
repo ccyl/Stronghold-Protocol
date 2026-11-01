@@ -40,7 +40,7 @@ import { html, UiHosts, Button, Icon, MicroLabel, closeAllDialogs, confirmDialog
 import { ConnectionBanner } from './ui/connBanner.js';
 import { ToastHost, toast, toastError, describeError } from './ui/toasts.js';
 import { net, identity, NetError } from './net.js';
-import { store, useStore, emptyMatch, selectRoute, sessionResetNotice, isSpectating, pushChatMessage } from './store.js';
+import { store, useStore, emptyMatch, selectRoute, sessionResetNotice, isSpectating, pushChatMessage, replaceChatMessages } from './store.js';
 import { data } from './data.js';
 import { GAME_FILES } from './ui/gameComponents.js';
 import { TitleScreen, sanitizeName } from './screens/title.js';
@@ -317,14 +317,10 @@ function wireNet() {
     }
   });
   net.on('room.chat', (msg) => {
-    pushChatMessage({
-      playerId: msg.playerId,
-      name: msg.name,
-      seat: msg.seat,
-      isSpectator: !!msg.isSpectator,
-      text: msg.text,
-      at: msg.at || Date.now(),
-    });
+    pushChatMessage(msg);
+  });
+  net.on('room.chatState', (msg) => {
+    replaceChatMessages(msg && msg.messages);
   });
   net.on('lobby.stats', (msg) => {
     store.patch('connection', { onlineCount: typeof msg.online === 'number' ? msg.online : 1 });

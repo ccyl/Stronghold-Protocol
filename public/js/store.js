@@ -23,6 +23,7 @@
 import { useLayoutEffect, useReducer, useRef } from '../vendor/hooks.module.js';
 import { PHASE } from '../../shared/constants.js';
 import { t } from '../../shared/i18n.js';
+import { mergeChat } from './ui/chatLog.js';
 
 /**
  * Create an observable store.
@@ -102,10 +103,21 @@ export const initialState = Object.freeze({
 /** The app-wide store singleton. */
 export const store = createStore(initialState);
 
-/** Add a message to chat message ring buffer (keeps last 40). */
+/**
+ * Add one S2C `room.chat` message to the stream: dedupe by server `seq`, sort, keep the last CHAT_HISTORY_LIMIT
+ * (ui/chatLog.js mergeChat). A message without a seq (the admin announcement) is appended after the seq'd list.
+ */
 export function pushChatMessage(msg) {
   const cur = store.get().chatMessages || [];
-  store.set({ chatMessages: [...cur.slice(-39), msg] });
+  store.set({ chatMessages: mergeChat(cur, msg) });
+}
+
+/**
+ * Replace the whole stream with the server's `room.chatState` replay (the join / reconnect history). The server's
+ * snapshot is authoritative: it holds the last CHAT_HISTORY_LIMIT messages in seq order.
+ */
+export function replaceChatMessages(msgs) {
+  store.set({ chatMessages: mergeChat([], Array.isArray(msgs) ? msgs : (msgs ? [msgs] : [])) });
 }
 
 /**
