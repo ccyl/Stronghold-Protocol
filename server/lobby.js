@@ -177,6 +177,8 @@ import { isContentHash } from '../shared/plugins/identity.js';
 import { ruleOption } from '../shared/plugins/rules.js';
 import { msg, wireMessage } from '../shared/i18n.js';
 import { parseTestModeEnv, testModeGate, unrecognizedTestMode } from './testMode.js';
+import { RoomChat } from './roomChat.js';
+import { normalizeChatText } from '../shared/chat.js';
 
 /** Room code alphabet: uppercase letters without I and O (and no digits, so no 0/1). */
 export const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -320,6 +322,8 @@ export class Room {
     this.test = false;
     /** the room's queue (header "Gameplay plugins": Lobby.serial): what is still waiting or running, and its tail */
     this.queue = { pending: 0, tail: Promise.resolve() };
+    /** 房间聊天状态（this branch: 聊天重做 M1）：惰性创建于第一条消息，见 Lobby.chatFor。 */
+    this.chat = null;
   }
 
   /** Does the room play a content set with gameplay plugins (its own cs; header "Gameplay plugins")? */
@@ -626,6 +630,7 @@ export class Lobby {
     if (!room.hostId) { this.migrateHost(room); changed = true; }
     if (changed) this.broadcastState(room);
     else this.sendState(room, session);
+    this.sendChatState(room, session);
     this.resync(session, !resumed);
   }
 
@@ -957,6 +962,7 @@ export class Lobby {
     session.pendingResult = null;
     if (!room.hostId) room.hostId = session.playerId;
     this.broadcastState(room);
+    this.sendChatState(room, session);
     this.broadcastLobbyStats();
     return OK;
   }
@@ -1073,6 +1079,7 @@ export class Lobby {
     session.notice = null;
     session.pendingResult = null;
     this.broadcastState(room);
+    this.sendChatState(room, session);
     if (room.match) this.callMatch(room, 'addSpectator', session.playerId);
     return OK;
   }
@@ -1288,32 +1295,41 @@ export class Lobby {
     return OK;
   }
 
+  /** 惰性创建（或复用）房间聊天状态。 */
+  chatFor(room) {
+    if (!room.chat) room.chat = new RoomChat({ now: this.now });
+    return room.chat;
+  }
+
+  /** 单发 room.chatState 历史回放给一位成员（无历史则不发送）。 */
+  sendChatState(room, session) {
+    if (!room.chat || room.chat.seq === 0) return;
+    sendSession(session, { t: 'room.chatState', ...room.chat.snapshot() });
+  }
+
   chat(session, msg) {
     const room = this.roomOf(session);
     if (!room) return fail(ERR.NOT_IN_ROOM, 'not in a room');
-    const now = this.now();
-    if (now - (session.lastChatAt || 0) < 1000) {
-      return fail(ERR.RATE, 'chat too fast');
-    }
-    session.lastChatAt = now;
-    const raw = typeof msg?.text === 'string' ? msg.text : '';
-    const text = raw.trim().replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').slice(0, 80);
-    if (!text) return fail(ERR.BAD_PARAM, 'empty message');
+    const text = normalizeChatText(msg?.text);
+    if (text == null) return fail(ERR.BAD_MSG, 'empty or invalid chat text');
+
+    const chat = this.chatFor(room);
+    if (!chat.tryConsume(session.playerId)) return fail(ERR.RATE, 'chat too fast');
 
     const seat = room.seatOf(session.playerId);
     const spectator = room.spectatorOf(session.playerId);
     const senderName = seat?.name || spectator?.name || session.name || ''; // the client shows t('博士') for an empty name
     const seatIdx = seat ? seat.seat : -1;
 
-    this.broadcastRoom(room, {
-      t: 'room.chat',
+    const message = chat.append({
       playerId: session.playerId,
       name: senderName,
       seat: seatIdx,
       isSpectator: !seat && !!spectator,
       text,
-      at: now,
     });
+
+    this.broadcastRoom(room, { t: 'room.chat', ...message });
     return OK;
   }
 

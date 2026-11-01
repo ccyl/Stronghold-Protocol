@@ -10,6 +10,7 @@ import { cultivatedStats, isPotential, isCultivate, POTENTIAL_DEFAULT, CULTIVATE
 import { isContentHash } from './plugins/identity.js';
 import { isPluginId } from './plugins/manifest.js';
 import { isPass, isAccountName, isStamp, PROFILE_KEYS, PROFILE_LIMITS } from './accounts.js';
+import { isChatText } from './chat.js';
 
 // ---- tiny validators -------------------------------------------------------
 const isInt = (v, lo = -Infinity, hi = Infinity) => Number.isInteger(v) && v >= lo && v <= hi;
@@ -492,8 +493,8 @@ export const C2S = {
   'room.diy': { picks: isDiyPicks },
   // 干员皮肤 (docs/SKINS.md): public, accepted in any room phase
   'room.skins': { skins: isSkinSelection },
-  // 房间与局内文字聊天
-  'room.chat': { text: (v) => typeof v === 'string' && v.trim().length > 0 && v.length <= 120 },
+  // 房间与局内文字聊天（文本规范 shared/chat.js：NFC、去控制符、上限 CHAT_MAX_LEN，拒绝而非截断）
+  'room.chat': { text: isChatText },
   // 账号（this branch: 内部账号, docs/ACCOUNTS.md）: the passphrase is unique, so login needs only the passphrase.
   // A guest keeps playing with everything in localStorage; binding adds cross-device profile sync and the match
   // history. auth.bind registers the account of this connection (guest → account), auth.login binds an existing one,
@@ -625,6 +626,9 @@ export const C2S = {
 export const S2C = [
   'welcome', 'ok', 'error', 'pong',
   'room.state', 'room.closed', 'room.list', 'room.chat',
+  // room.chatState { seq, messages: [{ seq, playerId, name, seat, isSpectator, text, at }] } — 房间聊天历史回放
+  // （加入房间 / 入观战席 / 重连时单发给该玩家；旧客户端忽略，M2 接入）
+  'room.chatState',
   // 账号（this branch: 内部账号, docs/ACCOUNTS.md）
   //   auth.state { bound, uid?, name? } — this connection's account (after hello, bind, login, logout, rename)
   //   auth.conflict { operation, uid } — the passphrase is taken by UID `uid` (bind / auth.pass); the client shows it
