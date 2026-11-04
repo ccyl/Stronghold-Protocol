@@ -232,6 +232,9 @@ export class MatchPhases {
    * assignments — a turn that runs out and a departing seat — obey the same rule: see timeoutBand / defaultBand.
    */
   bandTaken(bandId, playerId) {
+    // 「策略无限制」deployment switch (SP_BAND_DUPLICATES=1): a teammate's strategy may be picked again. Covers the manual
+    // pick, the timeout assignment, the departing-seat assignment and the bots, so every path agrees.
+    if (this.gd.bandDuplicates) return false;
     const picks = this.draftGroup(playerId)?.picks || {};
     for (const [pid, id] of Object.entries(picks)) if (pid !== playerId && id === bandId) return true;
     return false;

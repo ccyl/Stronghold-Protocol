@@ -153,6 +153,7 @@ npm start          # 启动服务器：http://localhost:3000
 | `HOST` | `::` | 监听地址。默认 `::` 是双栈：同一个端口同时接受 IPv6 和 IPv4；`0.0.0.0` = 只 IPv4；`127.0.0.1` = 只允许本机，放在反向代理后面时使用 |
 | `SP_COMBAT` | `client` | `client`：各玩家浏览器模拟自己的战斗（服务器负载极低）；`server`：由服务器模拟并推流 |
 | `SP_VERIFY` | `off` | 服务器复算客户端上报的战斗结果：`off` / `sample`（约 1/8 抽查）/ `all`（全部复算，更耗 CPU） |
+| `SP_BAND_DUPLICATES` | 不设（官方规则） | 设为 `1` 时「策略无限制」：同一固定卡池分组的队友可以选择同一个策略（官方是「队友已选」不能重复）。只影响策略轮选，规则与 golden 不变；房间 UI 会随之下发 `m.public.draft.duplicatesAllowed` |
 | `SP_BOT_REHEARSAL` | 不设（服务器试算） | 仅 `host` 让房主浏览器帮 AI 队友试算布阵（同源 Worker，只回候选序号）；不设或 `server` 仍由服务器试算。房主无法完成时服务器用同一批候选接手。玩法插件房间始终由服务器试算。真人「AI 托管」和正式战斗不受影响 |
 | `TRUST_PROXY` | `auto` | 是否信任 `X-Forwarded-For` 等转发头：`auto` 只信任来自本机 / 内网的代理；`1` 总是；`0` 从不 |
 | `DEBUG` | 空 | 设为任意值输出详细日志 |

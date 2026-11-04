@@ -156,6 +156,7 @@ export class MatchViews {
         })),
         order: d.order.slice(), turn: this.draftTurn(), picks: { ...d.picks }, skipsLeft: { ...d.skipsLeft }, turnDeadline: d.turnDeadline || 0,
         turnSeconds: d.untimed ? 0 : this.bandTurnMs() / 1000, untimed: !!d.untimed,
+        duplicatesAllowed: !!this.gd.bandDuplicates,
       };
     }
     if (this.phase === PHASE.SP_DRAFT && this.sp) {

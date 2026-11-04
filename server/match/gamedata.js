@@ -513,6 +513,14 @@ export class GameData {
     if (!b || typeof b !== 'object') return { ...d };
     return { core: Number.isInteger(b.core) && b.core >= 0 ? b.core : d.core, addon: Number.isInteger(b.addon) && b.addon >= 0 ? b.addon : d.addon };
   }
+  /**
+   * 「策略无限制」—— 部署开关 `SP_BAND_DUPLICATES=1`：同组的队友可以选择同一个策略（官方规则是「队友已选」不能重复）。
+   * 默认关闭，规则与 golden 都不变；私服用启动环境变量打开，房内 UI 通过 `m.public.draft.duplicatesAllowed` 得知。
+   */
+  get bandDuplicates() {
+    return process.env.SP_BAND_DUPLICATES === '1';
+  }
+
   get bandDraft() {
     const b = this.config.bandDraft && typeof this.config.bandDraft === 'object' ? this.config.bandDraft : {};
     return {

@@ -209,7 +209,10 @@ export function BandDraftScreen() {
   const skipsLeft = draft.skipsLeft.has(myId) ? draft.skipsLeft.get(myId) : (skipped ? 0 : 1);
   const manualTeammateAfter = hasManualTeammateAfter(draft, players, myId);
   const canSkip = !solo && myTurn && skipsLeft > 0 && manualTeammateAfter;
-  const taken = solo ? new Map() : teammateBands(draft.picks, myId);
+  // 「策略无限制」(server deployment switch): the server marks the draft with duplicatesAllowed — then a teammate's
+  // strategy is a legal choice, so nothing is treated as taken (no 队友已选 badge, no forced move off it).
+  const duplicatesAllowed = pub?.draft?.duplicatesAllowed === true;
+  const taken = solo || duplicatesAllowed ? new Map() : teammateBands(draft.picks, myId);
   const pickers = new Map(); // bandId → players
   for (const [pid, bid] of draft.picks) {
     const p = players.find((x) => x.playerId === pid);
